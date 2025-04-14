@@ -12,9 +12,17 @@ function render(element, container) {
     // 返回 html 标记
     let markUp = component.getHtmlString(React.rootIndex);
     $(container).html(markUp);
+    // $(container).trrige('click');
 }
 
 class Component {
+    constructor(props) {
+        // 私有属性
+        this.props = props;
+    }
+}
+
+class UnitComponent {
     constructor(element) {
         // 私有属性
         this._currentElement = element;
@@ -29,17 +37,17 @@ function createComponent(element) {
     if(typeof element === 'string' || typeof element === 'number') {
         // 如果是字符串或者数字，直接渲染
         return new textComponent(element);
-    } else if(element instanceof Element || typeof element.type === 'string') {
+    } else if(element instanceof Element && typeof element.type === 'string') {
         // 有可能是 Counter 组件的名称， string 就一定是 标签类型
         // 如果是 Element 实例，创建对应的组件
         return new NativeComponent(element);
-        // const componentClass = type;
-        // const component = new componentClass(props);
-        // 处理其他类型的元素
+    } else if(element instanceof Element && typeof element.type === 'function') {
+        // 如果是函数，创建对应的组件
+        return new compositeComponent(element);
     }
 }
 
-class textComponent extends Component {
+class textComponent extends UnitComponent {
     constructor(element) {
         super(element);
     }
@@ -50,7 +58,7 @@ class textComponent extends Component {
     }
 }
 
-class NativeComponent extends Component {
+class NativeComponent extends UnitComponent {
     constructor(element) {
         super(element);
     }
@@ -97,6 +105,44 @@ class NativeComponent extends Component {
     }
 }
 
+class compositeComponent extends UnitComponent {
+    constructor(element) {
+        super(element);
+    }
+
+    getHtmlString(reactid) {
+        this._reacteid = reactid;
+        const { type: Component, props } = this._currentElement;
+        const componentInstance = new Component(props);
+        const renderElement = componentInstance.render();
+        const renderedComponent = createComponent(renderElement);
+        const renderedHtml = renderedComponent.getHtmlString(this._reacteid);
+        return renderedHtml;
+        // const componentInstance = this._componentInstance = new Component(props);
+        // this._componentInstance.currentComponent = this;
+        // 处理组件的生命周期
+        // if (componentInstance.componentWillMount) {
+        //     componentInstance.componentWillMount();
+        // }
+        // 处理组件的属性
+        // if (componentInstance.componentWillReceiveProps) {
+        //     componentInstance.componentWillReceiveProps(props);
+        // }
+        // 处理组件的状态
+        // if (componentInstance.componentWillUpdate) {
+        //     componentInstance.componentWillUpdate(props);
+        // }
+        // const renderElement = componentInstance.render();
+        // const renderedComponentInstance = this._renderedComponentInstance = createComponent(renderElement);
+        // const renderedHtml = renderedComponentInstance.getHtmlString(this._reacteid);
+
+        // if (componentInstance.componentWillUnmount) {
+        //     componentInstance.componentWillUnmount();
+        // }
+        // return renderedHtml;
+    }
+}
+
 // React.createElement('button', 
 //     {
 //         id: 'sayhello', 
@@ -125,5 +171,6 @@ function createElement(type, props={}, ...children) {
 
 export default { 
     render,
-    createElement
+    createElement,
+    Component
 };

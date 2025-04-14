@@ -17,6 +17,10 @@ class Counter extends React.Component {
         console.log('Counter 组件已挂载');
     }
 
+    componentWillMount() {
+        console.log('Counter 组件将要挂载');
+    }
+
     increment = () => {
         this.setState({
             count: this.state.count + 1

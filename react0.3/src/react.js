@@ -12,7 +12,7 @@ function render(element, container) {
     // 返回 html 标记
     let markUp = component.getHtmlString(React.rootIndex);
     $(container).html(markUp);
-    // $(container).trrige('click');
+    $(document).trigger('mounted');
 }
 
 class Component {
@@ -113,13 +113,30 @@ class compositeComponent extends UnitComponent {
     getHtmlString(reactid) {
         this._reacteid = reactid;
         const { type: Component, props } = this._currentElement;
-        const componentInstance = new Component(props);
+        const componentInstance = this._componentInstance = new Component(props);
+
+        // 组件更新， 拿元素，做diff用
+        this._componentInstance.currentComponent = this;
+
+        // 如果组件将要渲染的函数让她执行
+        componentInstance.componentWillMount && componentInstance.componentWillMount()
+        // 获取组件要渲染的元素
         const renderElement = componentInstance.render();
-        const renderedComponent = createComponent(renderElement);
-        const renderedHtml = renderedComponent.getHtmlString(this._reacteid);
+
+        // 得到对应的实例
+        const renderedComponentInstance = this._renderedComponentInstance =createComponent(renderElement);
+
+        // 得到对应的渲染html
+        const renderedHtml = renderedComponentInstance.getHtmlString(this._reacteid);
+        
+
+        // 将要渲染的时候绑定事件
+        $(document).on('mounted', (e) => {
+            componentInstance.componentDidMount && componentInstance.componentDidMount();
+        })
+
         return renderedHtml;
-        // const componentInstance = this._componentInstance = new Component(props);
-        // this._componentInstance.currentComponent = this;
+        
         // 处理组件的生命周期
         // if (componentInstance.componentWillMount) {
         //     componentInstance.componentWillMount();

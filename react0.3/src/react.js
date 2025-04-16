@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import Component from './Component.jsx';
 
 const React = {
     render,
@@ -13,13 +14,6 @@ function render(element, container) {
     let markUp = component.getHtmlString(React.rootIndex);
     $(container).html(markUp);
     $(document).trigger('mounted');
-}
-
-class Component {
-    constructor(props) {
-        // 私有属性
-        this.props = props;
-    }
 }
 
 class UnitComponent {
@@ -110,10 +104,25 @@ class compositeComponent extends UnitComponent {
         super(element);
     }
 
+    /**
+     * _componentInstance 当前组件实例
+     * _renderedComponentInstance render方法返回的react元素对应的Coponent, 
+     * _renderedComponentInstance._currentElement 对应的 render方法返回的react元素「在 UnitComponent 的 constructor中保存的」
+     */
     getHtmlString(reactid) {
         this._reacteid = reactid;
         const { type: Component, props } = this._currentElement;
         const componentInstance = this._componentInstance = new Component(props);
+
+        this._componentInstance.setState = (newState) => {
+            // // 1. 更新状态 接收两个参数 新元素、新状态
+            // this._currentElement.updateState(null, newState);
+            // // 2. 重新渲染
+            // const renderedHtml = this.getHtmlString(this._reacteid);
+            // $(document).trigger('mounted');
+            // return renderedHtml;
+            console.log(111)
+        }
 
         // 组件更新， 拿元素，做diff用
         this._componentInstance.currentComponent = this;
@@ -189,5 +198,5 @@ function createElement(type, props={}, ...children) {
 export default { 
     render,
     createElement,
-    Component
+    Component,
 };

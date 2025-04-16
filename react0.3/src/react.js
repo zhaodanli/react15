@@ -70,8 +70,8 @@ class NativeComponent extends UnitComponent {
             if(/^on[A-Z]/.test(propName)) {
                 // 处理事件
                 const eventName = propName.slice(2).toLowerCase();
-                // 事件命名空间 `${eventName}.${this._reacteid}`
-                $(document).delegate(`[data-reactid=${this._reacteid}]`, `${eventName}.${this._reacteid}`, props[propName]);
+                // 事件命名空间 `${eventName}.${this._reacteid}
+                $(document).delegate(`[data-reactid="${this._reacteid}"]`, `${eventName}.${this._reacteid}`, props[propName]);
             } else if (propName === 'style') {
                 // 处理样式
                 let styleObj = props[propName];
@@ -133,7 +133,7 @@ class compositeComponent extends UnitComponent {
         const renderElement = componentInstance.render();
 
         // 得到对应的实例
-        const renderedComponentInstance = this._renderedComponentInstance =createComponent(renderElement);
+        const renderedComponentInstance = this._renderedComponentInstance = createComponent(renderElement);
 
         // 得到对应的渲染html
         const renderedHtml = renderedComponentInstance.getHtmlString(this._reacteid);

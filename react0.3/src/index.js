@@ -15,6 +15,12 @@ class Counter extends React.Component {
 
     componentDidMount() { 
         console.log('Counter 组件已挂载');
+        // setInterval(() => {
+        //     this.setState({
+        //         count: this.state.count + 1
+        //     });
+        // }
+        // , 1000);
     }
 
     componentWillMount() {
@@ -28,21 +34,22 @@ class Counter extends React.Component {
     }
 
     render() {
+        // return this.state.count;
         const p = React.createElement('p', {style: {color: 'red'}}, this.props.name, this.state.count);
-        const button = React.createElement('button', {onClick: this.increment}, '+')
+        const button = React.createElement('button', { onClick: this.increment }, '+')
         return React.createElement(
             'div',
             { id: 'counter' },
             p,
-            // button
+            button
         );
         // return React.createElement(
         //     'div',
         //     { id: 'counter' },
-        //     React.createElement('h1', null, `计数: ${count}`),
+        //     React.createElement('h1', {}, `计数: ${this.state.count}`),
         //     React.createElement(
         //         'button',
-        //         { id: 'increment', style: { color: 'white', backgroundColor: 'blue' }, onClick: increment },
+        //         { id: 'increment', style: { color: 'white', backgroundColor: 'blue' }, onClick: this.increment },
         //         '增加'
         //     )
         // );

@@ -78,14 +78,62 @@ class NativeComponent extends UnitComponent {
         this.updateDOMProperties(oldProps, newProps);
         // 更新子元素
         this.updateDOMChildren(nextElement.props.children);
-        
     }
 
     // diff 儿子
     updateDOMChildren(newChildrenElement) {
+        updateDepth++;
         // 处理子元素
         this.diff(diffQueue, newChildrenElement);
+        updateDepth--;
+        if(updateDepth === 0){
+            // 如果是最外层的 diffQueue 处理
+            // 处理 diffQueue
+            this.patch(diffQueue);
+            diffQueue = [];
+        }
         console.log('diffQueue', diffQueue);
+    }
+
+    patch(diffQueue) {
+        // 处理 diffQueue
+        let deleteChildren = []; // 删除的元素
+        let deleteMap = {}; // 能服用的节点
+        for(let i=0; i<diffQueue.length; i++) {
+            const difference = diffQueue[i];
+            if(difference.type === types.REMOVE || difference.type === types.MOVE) {
+                let fromIndex = difference.fromIndex;
+                let oldChild = difference.parentNode.children().get(fromIndex);
+                deleteMap[fromIndex] = oldChild;
+                deleteChildren.push(oldChild);
+            }
+        }
+        $.each(deleteChildren, (idx, item) => {
+            // 删除元素
+            $(item).remove();
+        });
+
+        for(let i=0; i<diffQueue.length; i++) {
+            const difference = diffQueue[i];
+            if(difference.type === types.MOVE || difference.type === types.INSERT) {
+                switch (difference.type) {
+                    case types.MOVE:
+                        this.insertChildAt(difference.parentNode, difference.toIndex, $(deleteMap[difference.fromIndex]));
+                        break;
+                    case types.INSERT:
+                        // 插入元素
+                        this.insertChildAt(difference.parentNode, difference.toIndex, $(difference.markUp));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    insertChildAt(parentNode, index, newNode) {
+        let oldChild = parentNode.children().get(index);
+        oldChild? newNode.insertBefore(oldChild): newNode.appendTo(parentNode);
     }
 
     diff(diffQueue, newChildrenElement) {
@@ -104,7 +152,7 @@ class NativeComponent extends UnitComponent {
                     // 如果上一个元素的索引大于当前元素的索引，说明需要移动
                     diffQueue.push({
                         parentId: this._reacteid,
-                        parentNode: $(`[data-reactid="${this._reacteid}"]`)[0],
+                        parentNode: $(`[data-reactid="${this._reacteid}"]`),
                         type: types.MOVE,
                         fromIndex: oldChildComponent._moutIndex,
                         toIndex: i,

@@ -4,8 +4,8 @@ export default class Component {
         this.props = props;
     }
 
-    setState(newState) {
+    setState(partialState) {
         // 1. 更新状态 接收两个参数 新元素、新状态
-        this._currentElement.updateState(null, newState);
+        this._currentComponent.update(null, partialState);
     }
 }

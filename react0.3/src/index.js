@@ -7,14 +7,18 @@ class Counter extends React.Component {
         super(props);
         // 初始化状态
         this.state = { count: 0 };
+        console.log('Counter 构造函数')
     }
 
     componentWillUnmount() {
-        console.log('Counter 组件卸载');
+        console.log('Counter componentWillUnmount');
     }
 
     componentDidMount() { 
-        console.log('Counter 组件已挂载');
+        console.log('Counter componentDidMount');
+        // this.setState({
+        //     count: this.state.count + 1
+        // });
         // setInterval(() => {
         //     this.setState({
         //         count: this.state.count + 1
@@ -23,8 +27,17 @@ class Counter extends React.Component {
         // , 1000);
     }
 
+    componentShouldUpdate() {
+        console.log('Counter componentShouldUpdate');
+        return true;
+    }
+
     componentWillMount() {
-        console.log('Counter 组件将要挂载');
+        console.log('Counter componentWillMount');
+    }
+
+    componentDidUpdate() {
+        console.log('Counter componentDidUpdate');
     }
 
     increment = () => {
@@ -34,12 +47,14 @@ class Counter extends React.Component {
     }
 
     render() {
+        console.log('Counter render')
         // return this.state.count;
-        const p = React.createElement('p', {style: {color: 'red'}}, this.props.name, this.state.count);
+        const style = { color: this.state.count % 2 === 0 ? 'red' : 'blue' };   
+        const p = React.createElement('p', { style }, this.state.count);
         const button = React.createElement('button', { onClick: this.increment }, '+')
         return React.createElement(
             'div',
-            { id: 'counter' },
+            { id: 'counter', style: { backgroundColor: this.state.count % 2 === 0 ? 'blue' : 'red' }},
             p,
             button
         );

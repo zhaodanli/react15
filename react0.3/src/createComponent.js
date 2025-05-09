@@ -1,4 +1,5 @@
-import $ from 'jquery';
+import $, { type } from 'jquery';
+import types from './types';
 
 let diffQueue = []; // diff 队列
 let updateDepth = 0; // 更新深度
@@ -52,7 +53,7 @@ class textComponent extends UnitComponent {
     }
 
     update(nextElement) {
-        console.log('textComponent update');
+        // console.log('textComponent update');
         if(this._currentElement !== nextElement) {
             this._currentElement = nextElement;
             $(`[data-reactid="${this._reacteid}"]`).html(this._currentElement);
@@ -69,7 +70,7 @@ class NativeComponent extends UnitComponent {
     }
 
     update(nextElement) {
-        console.log('NativeComponent update ============== ', nextElement);
+        // console.log('NativeComponent update ============== ', nextElement);
         let oldProps = this._currentElement.props;
         let newProps = nextElement.props;
 
@@ -84,16 +85,63 @@ class NativeComponent extends UnitComponent {
     updateDOMChildren(newChildrenElement) {
         // 处理子元素
         this.diff(diffQueue, newChildrenElement);
+        console.log('diffQueue', diffQueue);
     }
 
     diff(diffQueue, newChildrenElement) {
         // 已经渲染的 儿子节点的单元
         let oldChildrenComponentMap = this.getOldChildren(this._renderedChildrenComponent);
-        let newChildren = this.getNewChildren(oldChildrenComponentMap, newChildrenElement);
+        let { newChildrenComponent, newChildrenComponentMap } = this.getNewChildren(oldChildrenComponentMap, newChildrenElement);
+
+        let lastIndex = 0; // 上一个元素的索引 最后一个不需要动的索引
+        for (let i = 0; i < newChildrenComponent.length; i++) {
+            const newComponent = newChildrenComponent[i];
+            let newKey = newComponent._currentElement.props && newComponent._currentElement.props.key || i.toString();
+            let oldChildComponent = oldChildrenComponentMap[newKey];
+            if(oldChildComponent === newComponent) { // 新老一致则复用
+                // 如果是同一个元素，更新即可
+                if(oldChildComponent._moutIndex < lastIndex) {
+                    // 如果上一个元素的索引大于当前元素的索引，说明需要移动
+                    diffQueue.push({
+                        parentId: this._reacteid,
+                        parentNode: $(`[data-reactid="${this._reacteid}"]`)[0],
+                        type: types.MOVE,
+                        fromIndex: oldChildComponent._moutIndex,
+                        toIndex: i,
+                    });
+                }
+                lastIndex = Math.max(lastIndex, oldChildComponent._moutIndex);
+            } else {
+                // 没老的就是新的
+                diffQueue.push({
+                    parentId: this._reacteid,
+                    parentNode: $(`[data-reactid="${this._reacteid}"]`),
+                    type: types.INSERT,
+                    toIndex: i,
+                    markUp: newComponent.getHtmlString(`${this._reacteid}.${i}`),
+                });
+            }
+            newComponent._moutIndex = i; // 记录当前元素的索引
+        }
+
+        for(let oldKey in oldChildrenComponentMap) {
+            const oldChild = oldChildrenComponentMap[oldKey];
+            if(!newChildrenComponentMap.hasOwnProperty(oldKey)) {
+                // 如果老的有，新的没有，说明需要删除
+                diffQueue.push({
+                    parentId: this._reacteid,
+                    parentNode: $(`[data-reactid="${this._reacteid}"]`),
+                    type: types.REMOVE,
+                    fromIndex: oldChild._moutIndex,
+                });
+            }
+        }
+
     }
 
     getNewChildren(oldChildrenComponentMap, newChildrenElement) {
-        let newChildren = [];
+        let newChildrenComponent = [];
+        let newChildrenComponentMap = {};
         newChildrenElement.forEach((newElement, index)=> {
             let newKey = newElement.props && newElement.props.key || index.toString();
             // 找到老的 UnitComponent
@@ -103,13 +151,18 @@ class NativeComponent extends UnitComponent {
                 // 如果元素类型一样，则深度比较，否则直接 replace
                 // 6.如果可以深比较， 把更新工作交给上次渲染出的 element 元素对应的 component 来处理
                 oldComponent.update(newElement);
-                newChildren.push(oldComponent);
+                newChildrenComponent.push(oldComponent);
+                newChildrenComponentMap[newKey] = oldComponent;
             } else {
                 const nextComponent = createComponent(newElement);
-                newChildren.push(nextComponent);
+                newChildrenComponent.push(nextComponent);
+                newChildrenComponentMap[newKey] = oldComponent;
             }
         });
-        return newChildren;
+        return {
+            newChildrenComponent,
+            newChildrenComponentMap
+        };
     }
 
     getOldChildren(childrenComponent) {
@@ -203,6 +256,7 @@ class NativeComponent extends UnitComponent {
                 let children = props[propName];
                 children.map((child, index) => {
                     const childComponent = createComponent(child);
+                    childComponent._moutIndex = index; // 记录当前元素的索引
                     this._renderedChildrenComponent.push(childComponent);
                     const childrenMarkUp = childComponent.getHtmlString(`${this._reacteid}.${index}`);
                     childString += childrenMarkUp;
@@ -223,7 +277,7 @@ class compositeComponent extends UnitComponent {
 
     // updateState(nextProps, nextState) {
     update(nextElement, partialState) {
-        console.log('compositeComponent update', nextElement, partialState);
+        // console.log('compositeComponent update', nextElement, partialState);
         // 1. 更新状态 接收两个参数 新元素、新状态
         // 先获取到新元素
         this._currentElement = nextElement || this._currentElement;

@@ -6,16 +6,16 @@ class Counter extends React.Component {
     constructor(props) {
         super(props);
         // 初始化状态
-        this.state = { count: 0 };
+        this.state = { count: 0, odd: true };
         console.log('Counter 构造函数')
     }
 
     componentWillUnmount() {
-        console.log('Counter componentWillUnmount');
+        // console.log('Counter componentWillUnmount');
     }
 
     componentDidMount() { 
-        console.log('Counter componentDidMount');
+        // console.log('Counter componentDidMount');
         // this.setState({
         //     count: this.state.count + 1
         // });
@@ -25,39 +25,43 @@ class Counter extends React.Component {
         //     });
         // }
         // , 1000);
+        this.increment()
     }
 
     componentShouldUpdate() {
-        console.log('Counter componentShouldUpdate');
+        // console.log('Counter componentShouldUpdate');
         return true;
     }
 
     componentWillMount() {
-        console.log('Counter componentWillMount');
+        // console.log('Counter componentWillMount');
     }
 
     componentDidUpdate() {
-        console.log('Counter componentDidUpdate');
+        // console.log('Counter componentDidUpdate');
     }
 
     increment = () => {
+        // this.setState({
+        //     count: this.state.count + 1
+        // });
         this.setState({
-            count: this.state.count + 1
+            odd: !this.state.odd
         });
     }
 
     render() {
         console.log('Counter render')
         // return this.state.count;
-        const style = { color: this.state.count % 2 === 0 ? 'red' : 'blue' };   
-        const p = React.createElement('p', { style }, this.state.count);
+        // const style = { color: this.state.count % 2 === 0 ? 'red' : 'blue' };   
+        // const p = React.createElement('p', { style }, this.state.count);
         const button = React.createElement('button', { onClick: this.increment }, '+')
-        return React.createElement(
-            'div',
-            { id: 'counter', style: { backgroundColor: this.state.count % 2 === 0 ? 'blue' : 'red' }},
-            p,
-            button
-        );
+        // return React.createElement(
+        //     'div',
+        //     { id: 'counter', style: { backgroundColor: this.state.count % 2 === 0 ? 'blue' : 'red' }},
+        //     p,
+        //     button
+        // );
         // return React.createElement(
         //     'div',
         //     { id: 'counter' },
@@ -68,6 +72,29 @@ class Counter extends React.Component {
         //         '增加'
         //     )
         // );
+        if(this.state.odd) {
+            return React.createElement(
+                'ul',
+                { key: 'wrapper' },
+                React.createElement('li', { key: "A"}, `A`),
+                React.createElement('li', { key: "B"}, `B`),
+                React.createElement('li', { key: "C"}, `C`),
+                React.createElement('li', { key: "D"}, `D`),
+                // button
+            );
+        }
+
+
+        return React.createElement(
+            'ul',
+            { key: 'wrapper' },
+            React.createElement('li', { key: "A"}, `A1`),
+            React.createElement('li', { key: "C"}, `C1`),
+            React.createElement('li', { key: "B"}, `B1`),
+            React.createElement('li', { key: "E"}, `E1`),
+            React.createElement('li', { key: "F"}, `F1`),
+            // button
+        );
     }
 }
 

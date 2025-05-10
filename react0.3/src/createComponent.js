@@ -87,12 +87,12 @@ class NativeComponent extends UnitComponent {
         this.diff(diffQueue, newChildrenElement);
         updateDepth--;
         if(updateDepth === 0){
+            console.log('diffQueue', diffQueue);
             // 如果是最外层的 diffQueue 处理
             // 处理 diffQueue
             this.patch(diffQueue);
             diffQueue = [];
         }
-        console.log('diffQueue', diffQueue);
     }
 
     patch(diffQueue) {
@@ -160,6 +160,17 @@ class NativeComponent extends UnitComponent {
                 }
                 lastIndex = Math.max(lastIndex, oldChildComponent._moutIndex);
             } else {
+                // 老的存在，但是和新的不相等
+                if(oldChildComponent) {
+                    // key 一样，但是不是同一个元素，说明需要
+                    diffQueue.push({
+                        parentId: this._reacteid,
+                        parentNode: $(`[data-reactid="${this._reacteid}"]`),
+                        type: types.REMOVE,
+                        fromIndex: oldChildComponent._moutIndex,
+                    });
+                    $(document).undelegate(`.${this._reacteid}`);
+                }
                 // 没老的就是新的
                 diffQueue.push({
                     parentId: this._reacteid,
@@ -354,10 +365,6 @@ class compositeComponent extends UnitComponent {
             let nextHtml = this._renderedComponentInstance.getHtmlString(this._reacteid);
             $(`[data-reactid="${this._reacteid}"]`).replaceWith(nextHtml);
         }
-
-        // const renderedHtml = this.getHtmlString(this._reacteid);
-        // $(document).trigger('mounted');
-        // return renderedHtml;
     }
 
     /**
@@ -402,11 +409,12 @@ function shouldDeepCompare (oldElement, newElement) {
         // 如果是字符串或者数字，直接渲染
         if((oldType === 'string' || oldType === 'number') && (newType === 'string' || newType === 'number')) {
             // 如果是字符串或者数字，直接渲染
+            // return oldType === newType;
             return true;
         }
         // 如果是对象，判断类型
         if(oldElement instanceof Element && newElement instanceof Element) {
-            return true;
+            return oldElement.type === newElement.type;
         }
     }
 

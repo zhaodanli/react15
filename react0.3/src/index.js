@@ -73,9 +73,7 @@ class Counter extends React.Component {
         //     )
         // );
         if(this.state.odd) {
-            return React.createElement(
-                'ul',
-                { key: 'wrapper' },
+            return React.createElement( 'ul', { id: 'oldCounter' },
                 React.createElement('li', { key: "A"}, `A`),
                 React.createElement('li', { key: "B"}, `B`),
                 React.createElement('li', { key: "C"}, `C`),
@@ -85,24 +83,69 @@ class Counter extends React.Component {
         }
 
 
-        return React.createElement(
-            'ul',
-            { key: 'wrapper' },
-            React.createElement('li', { key: "A"}, `A1`),
+        return React.createElement('ul', { id: 'newCounter' },
+            React.createElement('span', { key: "A"}, `A1`),
             React.createElement('li', { key: "C"}, `C1`),
             React.createElement('li', { key: "B"}, `B1`),
-            React.createElement('li', { key: "E"}, `E1`),
-            React.createElement('li', { key: "F"}, `F1`),
+            React.createElement('li', { key: "E"}, `E`),
+            React.createElement('li', { key: "F"}, `F`),
             // button
         );
     }
 }
 
 
+class Todos extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { list: [], text: '' };
+    }
+    
+    onChange = (e) => {
+        this.setState({ text: e.target.value });
+    }
+
+    addTodo = () => {
+        this.setState({
+            list: [...this.state.list, this.state.text],
+            text: ''
+        });
+    }
+
+    onDelete = (index) => {
+        this.setState({
+            list: this.state.list.filter((_, i) => i !== index)
+        });
+    }
+
+    render() {
+
+        let input = React.createElement('input', {onKeyup: this.onChange, placeholder: '请输入待办事项', value: this.state.text});
+
+        let button = React.createElement('button', { onClick: this.addTodo }, '添加');
+
+        let lists = this.state.list.map((todo, index) => {
+            return React.createElement('div', { key: index }, 
+                todo, 
+                React.createElement('button', { 
+                    onClick: this.onDelete.bind(this, index)
+                },
+                '删除')
+            );
+        });
+        return React.createElement('div', { id: 'todos' },
+            input,
+            button,
+            ...lists
+        );
+    }
+}
+
 
 // element 场景三： Class组件
 // <Counter name='计数器‘ />
 let element3 = React.createElement(Counter, { name: '计数器' });
+let todosElement = React.createElement(Todos);
 
 /**
  * <Counter name='计数器‘ />
@@ -149,6 +192,7 @@ const element2 = React.createElement('button',
 // createElement 转换结果如下： 下面就是 语法树、虚拟dom、 dom diff
 // element = { type: 'button', props: { id: 'sayhello', style: { color: 'red', backgroundColor: 'blue' }, onClick: [Function: sayhello] }, children: [ 'hello', { type: 'span', props: null, children: [Array] }, { type: 'span', props: null, children: [Array] } ] }
 React.render(element3, document.getElementById('root'))
+// React.render(todosElement, document.getElementById('root'))
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(
 //   <React.StrictMode>

@@ -125,6 +125,7 @@ class NativeComponent extends UnitComponent {
             if(difference.type === types.MOVE || difference.type === types.INSERT) {
                 switch (difference.type) {
                     case types.MOVE:
+                        // this.insertChildAt(difference.parentNode, difference.toIndex, $(deleteMap[difference.fromIndex]));
                         this.insertChildAt(difference.parentNode, difference.toIndex, $(deleteMap[difference.parentId][difference.fromIndex]));
                         break;
                     case types.INSERT:
@@ -204,7 +205,9 @@ class NativeComponent extends UnitComponent {
                 // 对应的 Component 也要删除
                 this._renderedChildComponent = this._renderedChildComponent.filter(item => item !== oldChild);
                 // 删除事件
-                $(document).undelegate(`.${oldChild._reacteid}`);
+                // console.log('undelegate', `.${oldChild._reacteid}`);
+                // $(document).undelegate(`.${oldChild._reacteid}`);
+                $(document).undelegate(`[data-reactid="${oldChild._reacteid}"]`, `.${oldChild._reacteid}`);
             }
         }
 

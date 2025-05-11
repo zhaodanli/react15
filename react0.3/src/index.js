@@ -1,5 +1,7 @@
 import React from './react';
 
+import $ from 'jquery';
+
 
 // Counter 定义计数器组件
 class Counter extends React.Component {
@@ -118,6 +120,10 @@ class Todos extends React.Component {
         });
     }
 
+    componentDidUpdate() {
+        console.log($._data(document, 'events').click);
+    }
+
     render() {
 
         let input = React.createElement('input', {onKeyup: this.onChange, placeholder: '请输入待办事项', value: this.state.text});
@@ -133,12 +139,15 @@ class Todos extends React.Component {
                 '删除')
             );
         });
-        return React.createElement('div', { id: 'todos' },
+        const virtualDOM = React.createElement('div', { id: 'todos' },
             input,
             button,
             // ...lists,
             React.createElement('ul', {}, ...lists),
         );
+
+        console.log('Todos render', virtualDOM);
+        return virtualDOM;
     }
 }
 

@@ -95,10 +95,11 @@ class NativeComponent extends UnitComponent {
         }
     }
 
+    // 打补丁
     patch(diffQueue) {
         // 处理 diffQueue
         let deleteChildren = []; // 删除的元素
-        let deleteMap = {}; // 能服用的节点
+        let deleteMap = {}; // 能复用的节点
         for(let i=0; i<diffQueue.length; i++) {
             const difference = diffQueue[i];
             if(difference.type === types.REMOVE || difference.type === types.MOVE) {
@@ -138,7 +139,7 @@ class NativeComponent extends UnitComponent {
 
     diff(diffQueue, newChildrenElement) {
         // 已经渲染的 儿子节点的单元
-        let oldChildrenComponentMap = this.getOldChildren(this._renderedChildrenComponent);
+        let oldChildrenComponentMap = this.getOldChildren(this._renderedChildComponent);
         let { newChildrenComponent, newChildrenComponentMap } = this.getNewChildren(oldChildrenComponentMap, newChildrenElement);
 
         let lastIndex = 0; // 上一个元素的索引 最后一个不需要动的索引
@@ -183,16 +184,20 @@ class NativeComponent extends UnitComponent {
             newComponent._moutIndex = i; // 记录当前元素的索引
         }
 
+        // 如果 key 老的有，新的没有，说明需要删除
         for(let oldKey in oldChildrenComponentMap) {
             const oldChild = oldChildrenComponentMap[oldKey];
             if(!newChildrenComponentMap.hasOwnProperty(oldKey)) {
-                // 如果老的有，新的没有，说明需要删除
                 diffQueue.push({
                     parentId: this._reacteid,
                     parentNode: $(`[data-reactid="${this._reacteid}"]`),
                     type: types.REMOVE,
                     fromIndex: oldChild._moutIndex,
                 });
+                // 对应的 Component 也要删除
+                this._renderedChildComponent = this._renderedChildComponent.filter(item => item !== oldChild);
+                // 删除事件
+                $(document).undelegate(`.${oldChild._reacteid}`);
             }
         }
 
@@ -216,6 +221,7 @@ class NativeComponent extends UnitComponent {
                 const nextComponent = createComponent(newElement);
                 newChildrenComponent.push(nextComponent);
                 newChildrenComponentMap[newKey] = oldComponent;
+                this._renderedChildComponent[index] = nextComponent;
             }
         });
         return {
@@ -293,7 +299,7 @@ class NativeComponent extends UnitComponent {
         let childString = '';
         this.props = props;
 
-        this._renderedChildrenComponent = []; // 渲染的子组件
+        this._renderedChildComponent = []; // 渲染的子组件
         for(let propName in props) {
             if(/^on[A-Z]/.test(propName)) {
                 // 处理事件
@@ -313,10 +319,10 @@ class NativeComponent extends UnitComponent {
             }else if (propName === 'children') {
                 // 第一次 children 一定是数组
                 let children = props[propName];
-                children.map((child, index) => {
+                children.forEach((child, index) => {
                     const childComponent = createComponent(child);
                     childComponent._moutIndex = index; // 记录当前元素的索引
-                    this._renderedChildrenComponent.push(childComponent);
+                    this._renderedChildComponent.push(childComponent);
                     const childrenMarkUp = childComponent.getHtmlString(`${this._reacteid}.${index}`);
                     childString += childrenMarkUp;
                 });

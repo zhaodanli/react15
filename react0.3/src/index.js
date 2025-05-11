@@ -125,7 +125,7 @@ class Todos extends React.Component {
         let button = React.createElement('button', { onClick: this.addTodo }, '添加');
 
         let lists = this.state.list.map((todo, index) => {
-            return React.createElement('div', { key: index }, 
+            return React.createElement('li', { key: `list_${index}` }, 
                 todo, 
                 React.createElement('button', { 
                     onClick: this.onDelete.bind(this, index)
@@ -136,7 +136,7 @@ class Todos extends React.Component {
         return React.createElement('div', { id: 'todos' },
             input,
             button,
-            ...lists
+            React.createElement('ul', {}, ...lists),
         );
     }
 }
@@ -191,8 +191,8 @@ const element2 = React.createElement('button',
 )
 // createElement 转换结果如下： 下面就是 语法树、虚拟dom、 dom diff
 // element = { type: 'button', props: { id: 'sayhello', style: { color: 'red', backgroundColor: 'blue' }, onClick: [Function: sayhello] }, children: [ 'hello', { type: 'span', props: null, children: [Array] }, { type: 'span', props: null, children: [Array] } ] }
-React.render(element3, document.getElementById('root'))
-// React.render(todosElement, document.getElementById('root'))
+// React.render(element3, document.getElementById('root'))
+React.render(todosElement, document.getElementById('root'))
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(
 //   <React.StrictMode>

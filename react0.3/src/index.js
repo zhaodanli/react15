@@ -125,10 +125,10 @@ class Todos extends React.Component {
         let button = React.createElement('button', { onClick: this.addTodo }, '添加');
 
         let lists = this.state.list.map((todo, index) => {
-            return React.createElement('li', { key: `list_${index}` }, 
+            return React.createElement('li', { key: `todo_${index}` }, 
                 todo, 
                 React.createElement('button', { 
-                    onClick: this.onDelete.bind(this, index)
+                    onClick: () => this.onDelete(index)
                 },
                 '删除')
             );
@@ -136,6 +136,7 @@ class Todos extends React.Component {
         return React.createElement('div', { id: 'todos' },
             input,
             button,
+            // ...lists,
             React.createElement('ul', {}, ...lists),
         );
     }

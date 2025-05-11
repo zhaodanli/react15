@@ -105,7 +105,13 @@ class NativeComponent extends UnitComponent {
             if(difference.type === types.REMOVE || difference.type === types.MOVE) {
                 let fromIndex = difference.fromIndex;
                 let oldChild = difference.parentNode.children().get(fromIndex);
-                deleteMap[fromIndex] = oldChild;
+                // 同 key 会冲突
+                // deleteMap[fromIndex] = oldChild;
+                // 删除节点
+                if(!deleteMap[difference.parentId]) {
+                    deleteMap[difference.parentId] = {};
+                }
+                deleteMap[difference.parentId][fromIndex] = oldChild;
                 deleteChildren.push(oldChild);
             }
         }
@@ -119,7 +125,7 @@ class NativeComponent extends UnitComponent {
             if(difference.type === types.MOVE || difference.type === types.INSERT) {
                 switch (difference.type) {
                     case types.MOVE:
-                        this.insertChildAt(difference.parentNode, difference.toIndex, $(deleteMap[difference.fromIndex]));
+                        this.insertChildAt(difference.parentNode, difference.toIndex, $(deleteMap[difference.parentId][difference.fromIndex]));
                         break;
                     case types.INSERT:
                         // 插入元素
@@ -170,7 +176,8 @@ class NativeComponent extends UnitComponent {
                         type: types.REMOVE,
                         fromIndex: oldChildComponent._moutIndex,
                     });
-                    $(document).undelegate(`.${this._reacteid}`);
+                    this._renderedChildComponent = this._renderedChildComponent.filter(item => item !== oldChildComponent);
+                    $(document).undelegate(`.${oldChildComponent._reacteid}`);
                 }
                 // 没老的就是新的
                 diffQueue.push({

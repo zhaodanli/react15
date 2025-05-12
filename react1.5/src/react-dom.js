@@ -17,12 +17,16 @@ export function createDOM(vdom) {
 
     if(type === REACT_TEXT) {
         dom = document.createTextNode(props);
-    }else {
+    }else if(typeof type === 'function') {
+        // 处理函数组件
+        return mountFunctionComponent(vdom);
+    }else{
         dom = document.createElement(type);
     }
 
     // 处理属性
     if(props) {
+        console.log(dom, props);
         updateProps(dom, {}, props);
         if(props.children && typeof props.children === 'object' && props.children.$$typeof) {
             // 递归处理子元素
@@ -36,6 +40,13 @@ export function createDOM(vdom) {
     }
     vdom.dom = dom;
     return dom;
+}
+
+function mountFunctionComponent(vdom) {
+    const { type, props } = vdom;
+    // 1. 创建一个函数组件
+    const renderVdom = type(props);
+    return createDOM(renderVdom);
 }
 
 function updateProps(dom, oldProps, newProps) {
@@ -56,6 +67,7 @@ function updateProps(dom, oldProps, newProps) {
             dom.addEventListener(eventName, newProps[key]);
         }else {
             // 处理其他属性
+            console.log(dom[key], newProps[key]);
             dom[key] = newProps[key];
         }
     }

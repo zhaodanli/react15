@@ -1,4 +1,5 @@
 import { REACT_ELEMENT } from "./constants";
+import { toVdom } from "./utils";
 
 function createElement(type, config, children) {
     let ref;
@@ -13,9 +14,9 @@ function createElement(type, config, children) {
     }
     let props = { ...config };
     if (arguments.length > 3) {
-        props.children = Array.prototype.slice.call(arguments, 2);
+        props.children = Array.prototype.slice.call(arguments, 2).map(toVdom);
     }else {
-        props.children = children;
+        props.children = toVdom(children);
     }
     return {
         $$typeof: REACT_ELEMENT,

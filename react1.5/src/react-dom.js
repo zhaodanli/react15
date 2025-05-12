@@ -18,6 +18,10 @@ export function createDOM(vdom) {
     if(type === REACT_TEXT) {
         dom = document.createTextNode(props);
     }else if(typeof type === 'function') {
+        // 处理类组件
+        if(type.isReactComponent){
+            return mountClassComponent(vdom);
+        }
         // 处理函数组件
         return mountFunctionComponent(vdom);
     }else{
@@ -42,6 +46,17 @@ export function createDOM(vdom) {
     return dom;
 }
 
+function mountClassComponent(vdom) {
+    const { type, props } = vdom;
+    // 1. 创建一个类组件
+    const classInstance = new type(props);
+    // 2. 调用类组件的render方法
+    const renderVdom = classInstance.render();
+    // 4. 将类组件的实例挂载到虚拟DOM上
+    vdom.classInstance = classInstance;
+    // 3. 创建DOM元素
+    return createDOM(renderVdom);
+}
 function mountFunctionComponent(vdom) {
     const { type, props } = vdom;
     // 1. 创建一个函数组件

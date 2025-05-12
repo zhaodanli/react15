@@ -1,5 +1,6 @@
 import { REACT_ELEMENT } from "./constants";
 import { toVdom } from "./utils";
+import { Component } from './Component';
 
 function createElement(type, config, children) {
     let ref;
@@ -28,6 +29,7 @@ function createElement(type, config, children) {
 }
 
 const React = {
-    createElement
+    createElement,
+    Component
 }
 export default React

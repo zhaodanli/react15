@@ -12,11 +12,20 @@ import ReactDOM from './react-dom';
 // console.log(element1);
 // ReactDOM.render(element1, document.getElementById("root"));
 
-// 组件
-function FunctionComponent(props){
-    return <div className="title" style={{ color: "red" }}> <span>{props.name}</span>{props.children}</div>
+// // 函数组件
+// function FunctionComponent(props){
+//     return <div className="title" style={{ color: "red" }}> <span>{props.name}</span>{props.children}</div>
+// }
+// let element = <FunctionComponent name="hello">world</FunctionComponent>;
+
+// 类组件
+class ClassComponent extends React.Component {
+    render() {
+        return <div className="title" style={{ color: "blue" }}>{this.props.name}{this.props.children}</div>;
+    }
 }
-let element = <FunctionComponent name="hello">world</FunctionComponent>;
+let element = <ClassComponent name="hello">world</ClassComponent>;
+
 ReactDOM.render(element, document.getElementById("root"));
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(

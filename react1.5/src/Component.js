@@ -17,7 +17,7 @@ class Updater {
     }
 
     emitUpdate() {
-       this. updateComponent();
+       this.updateComponent();
     }
 
     updateComponent() {

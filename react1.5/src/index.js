@@ -19,14 +19,36 @@ import ReactDOM from './react-dom';
 // let element = <FunctionComponent name="hello">world</FunctionComponent>;
 
 // 类组件
-class ClassComponent extends React.Component {
+// class ClassComponent extends React.Component {
+//     render() {
+//         return <div className="title" style={{ color: "blue" }}>{this.props.name}{this.props.children}</div>;
+//     }
+// }
+// let element = <ClassComponent name="hello">world</ClassComponent>;
+
+// ReactDOM.render(element, document.getElementById("root"));
+
+class Counter extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { number: 0 };
+    }
+    handleClick = () => {
+        this.setState({ number: this.state.number + 1 });
+        console.log(this.state);
+
+    }
     render() {
-        return <div className="title" style={{ color: "blue" }}>{this.props.name}{this.props.children}</div>;
+        return (
+            <div>
+                <p>{this.props.title}</p>
+                <p>number:{this.state.number}</p>
+                <button onClick={this.handleClick}>+</button>
+            </div>
+        )
     }
 }
-let element = <ClassComponent name="hello">world</ClassComponent>;
-
-ReactDOM.render(element, document.getElementById("root"));
+ReactDOM.render(<Counter title="计数器" />, document.getElementById("root"));
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(
 //   element1

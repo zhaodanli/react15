@@ -30,7 +30,6 @@ export function createDOM(vdom) {
 
     // 处理属性
     if(props) {
-        console.log(dom, props);
         updateProps(dom, {}, props);
         if(props.children && typeof props.children === 'object' && props.children.$$typeof) {
             // 递归处理子元素
@@ -54,6 +53,7 @@ function mountClassComponent(vdom) {
     const renderVdom = classInstance.render();
     // 4. 将类组件的实例挂载到虚拟DOM上
     vdom.classInstance = classInstance;
+    classInstance.oldRenderVdom = vdom.oldRenderVdom = renderVdom;
     // 3. 创建DOM元素
     return createDOM(renderVdom);
 }
@@ -61,6 +61,7 @@ function mountFunctionComponent(vdom) {
     const { type, props } = vdom;
     // 1. 创建一个函数组件
     const renderVdom = type(props);
+    vdom.oldRenderVdom = renderVdom;
     return createDOM(renderVdom);
 }
 
@@ -99,8 +100,23 @@ function reconcileChildren(childrenVdom, parentDOM) {
         render(childrenVdom[i], parentDOM);
     }
 }
+
+export function findDOM(vdom) {
+    if(!vdom) return null;
+    if(vdom.dom) {
+        return vdom.dom;
+    }else {
+        let renderVdom = vdom.oldRenderVdom;
+        return findDOM(renderVdom);
+    }
+}
+
+export function compareTwoVdom(parentDOM, oldVdom, newVdom) {
+    let oldDOM = findDOM(oldVdom);
+    let newDOM = createDOM(newVdom);
+    parentDOM.replaceChild(newDOM, oldDOM);
+}
 const ReactDOM = {
     render,
-    createDOM
 }
 export default ReactDOM

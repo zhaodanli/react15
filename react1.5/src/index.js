@@ -44,10 +44,18 @@ class Counter extends React.Component {
     handleClick = (event) => {
         // updateQueue.isBatchingUpdate = true;
         this.setState({ number: this.state.number + 1 });
+        console.log(this.state.number);
         this.setState({ number: this.state.number + 1 });
         // updateQueue.batchUpdater();
-        console.log(this.state);
+        console.log(this.state.number);
         // 阻止冒泡
+        setTimeout(() => {
+            console.log(this.state.number);
+            this.setState({ number: this.state.number + 1 });
+            console.log(this.state.number);
+            this.setState({ number: this.state.number + 1 });
+            console.log(this.state.number);
+        }, 0);
         event.stopPropagation();
     }
     handleDivClick = () => {

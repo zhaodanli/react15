@@ -25,12 +25,18 @@ function dispatchEvent(event) {
     let { target, type } = event;
     const eventType = `on${type}`;
 
-    const { _store_ } = target;
-
     // 方法结束前设置标识
     updateQueue.isBatchingUpdate = true;
-    let handler = _store_ && _store_[eventType];
-    handler && handler(event)
+    
+    let currentTarget = target;
+
+    // 模拟事件冒泡，向上查找
+    while (currentTarget) {
+        let { _store_ } = currentTarget;
+        let handler = _store_ && _store_[eventType];
+        handler && handler(event);
+        currentTarget = currentTarget.parentNode;
+    }
 
     // 方法结束后批量更新
     updateQueue.batchUpdater();

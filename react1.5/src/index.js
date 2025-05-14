@@ -42,13 +42,12 @@ class Counter extends React.Component {
         // updateQueue.batchUpdater();
         console.log(this.state);
     }
-    // handleDivClick = () => {
-    //     console.log('div click');
-    // }
+    handleDivClick = () => {
+        console.log('handleDivClick');
+    }
     render() {
         return (
-            <div>
-            {/* <div onClick={this.handleDivClick}> */}
+            <div onClick={this.handleDivClick}>
                 <p>{this.props.title}</p>
                 <p>number:{this.state.number}</p>
                 <button onClick={this.handleClick}>+</button>

@@ -13,7 +13,7 @@ function render(vdom, container) {
 }
 
 export function createDOM(vdom) {
-    let { type, props } = vdom;
+    let { type, props, ref, key } = vdom;
     let dom;
 
     if(type === REACT_TEXT) {
@@ -43,6 +43,10 @@ export function createDOM(vdom) {
         }
     }
     vdom.dom = dom;
+    if(ref) {
+        // 将DOM元素挂载到ref上
+        ref.current = dom;
+    }
     return dom;
 }
 

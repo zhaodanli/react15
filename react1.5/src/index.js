@@ -71,8 +71,36 @@ class Counter extends React.Component {
         )
     }
 }
-ReactDOM.render(<Counter title="计数器" />, document.getElementById("root"));
+// ReactDOM.render(<Counter title="计数器" />, document.getElementById("root"));
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(
 //   element1
 // );
+
+class Sum extends React.Component {
+    a
+    b
+    result
+    constructor(props) {
+        super(props);
+        this.a = React.createRef();
+        this.b = React.createRef();
+        this.result = React.createRef();
+    }
+    handleAdd = () => {
+        let a = this.a.current.value;
+        let b = this.b.current.value;
+        this.result.current.value = a + b;
+    }
+    render() {
+        return (
+            <>
+                <input ref={this.a} />+<input ref={this.b} /><button onClick={this.handleAdd}>=</button><input ref={this.result} />
+            </>
+        );
+    }
+}
+ReactDOM.render(
+    <Sum />,
+    document.getElementById('root')
+);

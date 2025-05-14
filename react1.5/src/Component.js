@@ -1,5 +1,19 @@
 import { findDOM, compareTwoVdom } from './react-dom';
 
+export const updateQueue = {
+    isBatchingUpdate: false, // 当前是否处于批量更新模式
+    updaters: new Set(), // 存储所有的 updater 实例，对应抑遏组件
+    batchUpdater() {
+        // 批量更新
+        updateQueue.isBatchingUpdate = false;
+        this.updaters.forEach((updater) => {
+            updater.updateComponent();
+        });
+        this.isBatchingUpdate = false;
+        this.updaters.clear();
+    }
+}
+
 class Updater {
     constructor(classInstance) {
         this.classInstance = classInstance;
@@ -17,7 +31,13 @@ class Updater {
     }
 
     emitUpdate() {
-       this.updateComponent();
+        if(updateQueue.isBatchingUpdate) {
+            // 如果处于批量更新模式，直接添加到 updater 中
+            updateQueue.updaters.add(this);
+        } else {
+            // 如果不处于批量更新模式，直接更新
+            this.updateComponent();
+        } 
     }
 
     updateComponent() {
@@ -69,6 +89,7 @@ export class Component {
     }
 
     forceUpdate() {
+        console.log('forceUpdate');
         let oldRenderVdom = this.oldRenderVdom;
         let oldDOM = findDOM(oldRenderVdom);
         let newRenderVdom = this.render();

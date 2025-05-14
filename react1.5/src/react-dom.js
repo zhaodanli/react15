@@ -83,7 +83,6 @@ function updateProps(dom, oldProps, newProps) {
             dom.addEventListener(eventName, newProps[key]);
         }else {
             // 处理其他属性
-            console.log(dom[key], newProps[key]);
             dom[key] = newProps[key];
         }
     }

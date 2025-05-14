@@ -1,6 +1,8 @@
 import React from './react';
 import ReactDOM from './react-dom';
 
+import { updateQueue } from './Component';
+
 // let jsx = <h1 className="title" style={{color:'red'}}>hello</h1>
 // console.log(jsx)
 
@@ -34,9 +36,11 @@ class Counter extends React.Component {
         this.state = { number: 0 };
     }
     handleClick = () => {
+        updateQueue.isBatchingUpdate = true;
         this.setState({ number: this.state.number + 1 });
+        this.setState({ number: this.state.number + 1 });
+        updateQueue.batchUpdater();
         console.log(this.state);
-
     }
     render() {
         return (

@@ -10,6 +10,11 @@ function render(vdom, container) {
     const newDOM = createDOM(vdom);
     // 2. 将根节点添加到容器中
     container.appendChild(newDOM);
+    // 真实 dom 操作
+    if(newDOM.componentDidMount) {
+        // 3. 调用组件的componentDidMount方法
+        newDOM.componentDidMount();
+    }
 }
 
 export function createDOM(vdom) {
@@ -63,16 +68,26 @@ function mountClassComponent(vdom) {
     const { type: ClassComponent, props, ref } = vdom;
     // 1. 创建一个类组件
     const classInstance = new ClassComponent(props);
+    if(classInstance.componentWillMount) {
+        classInstance.componentWillMount();
+    }
     if(ref) {
         ref.current = classInstance;
     }
     // 2. 调用类组件的render方法
     const renderVdom = classInstance.render();
+    // if(classInstance.componentDidMount) {
+    //     classInstance.componentDidMount();
+    // }
     // 4. 将类组件的实例挂载到虚拟DOM上
     vdom.classInstance = classInstance;
     classInstance.oldRenderVdom = vdom.oldRenderVdom = renderVdom;
-    // 3. 创建DOM元素
-    return createDOM(renderVdom);
+    // 3. 创建DOM元素 生成虚拟 DOM
+    let dom = createDOM(renderVdom);
+    if(classInstance.componentDidMount) {
+        dom.componentDidMount = classInstance.componentDidMount.bind(classInstance);
+    }
+    return dom;
 }
 function mountFunctionComponent(vdom) {
     const { type, props } = vdom;

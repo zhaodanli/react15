@@ -1,4 +1,4 @@
-import { REACT_TEXT } from "./constants";
+import { REACT_TEXT, REACT_FORWARD_REF_TYPE } from "./constants";
 import { addEvent } from "./event";
 
 /**
@@ -13,11 +13,13 @@ function render(vdom, container) {
 }
 
 export function createDOM(vdom) {
-    let { type, props, ref, key } = vdom;
+    let { type, props, ref } = vdom;
     let dom;
 
     if(type === REACT_TEXT) {
         dom = document.createTextNode(props);
+    }else if(type && type.$$typeof === REACT_FORWARD_REF_TYPE) {
+        return mountForwardComponent(vdom);
     }else if(typeof type === 'function') {
         // 处理类组件
         if(type.isReactComponent){
@@ -48,6 +50,13 @@ export function createDOM(vdom) {
         ref.current = dom;
     }
     return dom;
+}
+
+function mountForwardComponent(vdom) {
+    let { type, props, ref } = vdom;
+    let renderVdom = type.render(props, ref);
+    vdom.oldRenderVdom = renderVdom;
+    return createDOM(renderVdom);
 }
 
 function mountClassComponent(vdom) {

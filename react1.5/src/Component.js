@@ -17,14 +17,14 @@ class Updater {
     constructor(classInstance) {
         this.classInstance = classInstance;
         this.pendingStates = [];
-        this.callBacks = [];
+        this.callbacks = [];
     }
     
     addState(newState, callback) {
         this.pendingStates.push(newState);
         if (typeof callback === 'function') {
             // 如果有回调函数，添加到回调函数数组中
-            this.callBacks.push(callback);
+            this.callbacks.push(callback);
         }
         this.emitUpdate();
     }
@@ -42,15 +42,20 @@ class Updater {
     }
 
     updateComponent() {
-        const { classInstance, pendingStates } = this;
+        const { classInstance, pendingStates, callbacks } = this;
         // 1. 获取当前的状态
         if (pendingStates.length > 0) {
             this.shouldUpdate(classInstance, this.getState());
         }
-        // 6. 执行回调函数
-        this.callBacks.forEach((callback) => {
-            callback();
+
+        queueMicrotask(() => {
+            // 6. 执行回调函数
+            callbacks.forEach((callback) => {
+                callback.call(this);
+            });
+            callbacks.length = 0;
         });
+        
     }
 
     getState() {

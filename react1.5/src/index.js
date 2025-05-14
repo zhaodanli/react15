@@ -43,9 +43,11 @@ class Counter extends React.Component {
      *  */ 
     handleClick = (event) => {
         // updateQueue.isBatchingUpdate = true;
-        this.setState((state) => ({ number: state.number + 1 }));
-        console.log(this.state.number);
-        this.setState((state) => ({ number: state.number + 1 }));
+        // this.setState((state) => ({ number: state.number + 1 }));
+        // console.log(this.state.number);
+        this.setState((state) => ({ number: state.number + 1 }), () => {
+            console.log(this.state.number, 111111111);
+        });
         // updateQueue.batchUpdater();
         console.log(this.state.number);
         // 阻止冒泡
@@ -104,3 +106,39 @@ ReactDOM.render(
     <Sum />,
     document.getElementById('root')
 );
+
+// class Form extends React.Component {
+//     input
+//     constructor(props) {
+//         super(props);
+//         this.input = React.createRef();
+//     }
+//     getFocus = () => {
+//         this.input.current.getFocus();
+//     }
+//     render() {
+//         return (
+//             <>
+//                 <TextInput ref={this.input} />
+//                 <button onClick={this.getFocus}>获得焦点</button>
+//             </>
+//         );
+//     }
+// }
+// class TextInput extends React.Component {
+//     input
+//     constructor(props) {
+//         super(props);
+//         this.input = React.createRef();
+//     }
+//     getFocus = () => {
+//         this.input.current.focus();
+//     }
+//     render() {
+//         return <input ref={this.input} />
+//     }
+// }
+// ReactDOM.render(
+//     <Form />,
+//     document.getElementById('root')
+// );

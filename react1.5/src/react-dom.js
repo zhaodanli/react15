@@ -51,9 +51,12 @@ export function createDOM(vdom) {
 }
 
 function mountClassComponent(vdom) {
-    const { type, props } = vdom;
+    const { type: ClassComponent, props, ref } = vdom;
     // 1. 创建一个类组件
-    const classInstance = new type(props);
+    const classInstance = new ClassComponent(props);
+    if(ref) {
+        ref.current = classInstance;
+    }
     // 2. 调用类组件的render方法
     const renderVdom = classInstance.render();
     // 4. 将类组件的实例挂载到虚拟DOM上

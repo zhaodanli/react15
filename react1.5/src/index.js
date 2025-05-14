@@ -45,9 +45,7 @@ class Counter extends React.Component {
         // updateQueue.isBatchingUpdate = true;
         // this.setState((state) => ({ number: state.number + 1 }));
         // console.log(this.state.number);
-        this.setState((state) => ({ number: state.number + 1 }), () => {
-            console.log(this.state.number, 111111111);
-        });
+        this.setState((state) => ({ number: state.number + 1 }));
         // updateQueue.batchUpdater();
         console.log(this.state.number);
         // 阻止冒泡
@@ -79,24 +77,33 @@ class Counter extends React.Component {
 //   element1
 // );
 
+let lastCounter = null;
 class Sum extends React.Component {
-    a
-    b
-    result
     constructor(props) {
         super(props);
         this.a = React.createRef();
         this.b = React.createRef();
         this.result = React.createRef();
+        this.counter = React.createRef();
+        this.state= { number: 0 };
     }
     handleAdd = () => {
         let a = this.a.current.value;
         let b = this.b.current.value;
         this.result.current.value = a + b;
+        console.log(this.counter.current);
+    }
+    onClick = () => {
+        lastCounter = this.counter.current;
+        this.setState( (state) => ({ number: state.number + 1 }), () => {
+            console.log(this.counter.current, lastCounter, this.counter.current === lastCounter);
+        });
     }
     render() {
         return (
             <>
+                <button onClick={this.onClick}>点击触发 {this.state.number }</button>
+                <Counter ref={this.counter} />
                 <input ref={this.a} />+<input ref={this.b} /><button onClick={this.handleAdd}>=</button><input ref={this.result} />
             </>
         );

@@ -1,4 +1,4 @@
-// import { updateQueue } from './Component';
+import { updateQueue } from './Component';
 
 /**
  * 事件委托，
@@ -27,7 +27,7 @@ function dispatchEvent(event) {
 
     let syntheticEvent = createSyntheticEvent(event);
     // 方法结束前设置标识
-    // updateQueue.isBatchingUpdate = true;
+    updateQueue.isBatchingUpdate = true;
     
     let currentTarget = target;
 
@@ -45,7 +45,7 @@ function dispatchEvent(event) {
     }
 
     // 方法结束后批量更新
-    // updateQueue.batchUpdater();
+    updateQueue.batchUpdater();
 }
 
 function createSyntheticEvent(nativeEvent) {

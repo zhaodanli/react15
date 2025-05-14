@@ -30,15 +30,15 @@ class Updater {
     }
 
     emitUpdate() {
-        updateQueue.updaters.add(this);
-        queueMicrotask(updateQueue.batchUpdater)
-        // if(updateQueue.isBatchingUpdate) {
-        //     // 如果处于批量更新模式，直接添加到 updater 中
-        //     updateQueue.updaters.add(this);
-        // } else {
-        //     // 如果不处于批量更新模式，直接更新
-        //     this.updateComponent();
-        // } 
+        // updateQueue.updaters.add(this);
+        // queueMicrotask(updateQueue.batchUpdater)
+        if(updateQueue.isBatchingUpdate) {
+            // 如果处于批量更新模式，直接添加到 updater 中
+            updateQueue.updaters.add(this);
+        } else {
+            // 如果不处于批量更新模式，直接更新
+            this.updateComponent();
+        } 
     }
 
     updateComponent() {

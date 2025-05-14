@@ -1,4 +1,5 @@
 import { REACT_TEXT } from "./constants";
+import { addEvent } from "./event";
 
 /**
  * 1. 虚拟DOM 编程 真实DOM
@@ -77,10 +78,12 @@ function updateProps(dom, oldProps, newProps) {
             for (let attr in styleObj) {
                 dom.style[attr] = styleObj[attr];
             }
-        }else if(key.startsWith('on')) {
+        }else if(/^on[A-Z]/.test(key)) {
             // 处理事件
-            const eventName = key.toLowerCase().substring(2);
-            dom.addEventListener(eventName, newProps[key]);
+            // const eventName = key.toLowerCase().substring(2);
+            // dom.addEventListener(eventName, newProps[key]);
+            // dom[key.toLowerCase()] = newProps[key];
+            addEvent(dom, key.toLowerCase(), newProps[key]);
         }else {
             // 处理其他属性
             dom[key] = newProps[key];

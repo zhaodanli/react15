@@ -1,7 +1,7 @@
 import React from './react';
 import ReactDOM from './react-dom';
 
-import { updateQueue } from './Component';
+// import { updateQueue } from './Component';
 
 // let jsx = <h1 className="title" style={{color:'red'}}>hello</h1>
 // console.log(jsx)
@@ -36,15 +36,19 @@ class Counter extends React.Component {
         this.state = { number: 0 };
     }
     handleClick = () => {
-        updateQueue.isBatchingUpdate = true;
+        // updateQueue.isBatchingUpdate = true;
         this.setState({ number: this.state.number + 1 });
         this.setState({ number: this.state.number + 1 });
-        updateQueue.batchUpdater();
+        // updateQueue.batchUpdater();
         console.log(this.state);
     }
+    // handleDivClick = () => {
+    //     console.log('div click');
+    // }
     render() {
         return (
             <div>
+            {/* <div onClick={this.handleDivClick}> */}
                 <p>{this.props.title}</p>
                 <p>number:{this.state.number}</p>
                 <button onClick={this.handleClick}>+</button>

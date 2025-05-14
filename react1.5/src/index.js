@@ -35,12 +35,20 @@ class Counter extends React.Component {
         super(props);
         this.state = { number: 0 };
     }
-    handleClick = () => {
+    /**
+     * event 是合成事件对象
+     * 作用：
+     * 1. 作为 prefill
+     * 2. 处理兼容性
+     *  */ 
+    handleClick = (event) => {
         // updateQueue.isBatchingUpdate = true;
         this.setState({ number: this.state.number + 1 });
         this.setState({ number: this.state.number + 1 });
         // updateQueue.batchUpdater();
         console.log(this.state);
+        // 阻止冒泡
+        event.stopPropagation();
     }
     handleDivClick = () => {
         console.log('handleDivClick');

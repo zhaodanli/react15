@@ -29,7 +29,8 @@ class Updater {
         this.emitUpdate();
     }
 
-    emitUpdate() {
+    emitUpdate(nextProps) {
+        this.nextProps = nextProps;
         // updateQueue.updaters.add(this);
         // queueMicrotask(updateQueue.batchUpdater)
         if(updateQueue.isBatchingUpdate) {
@@ -42,10 +43,10 @@ class Updater {
     }
 
     updateComponent() {
-        const { classInstance, pendingStates, callbacks } = this;
+        const { classInstance, pendingStates, callbacks, nextProps } = this;
         // 1. 获取当前的状态
-        if (pendingStates.length > 0) {
-            this.shouldUpdate(classInstance, this.getState());
+        if (nextProps || pendingStates.length > 0) {
+            this.shouldUpdate(classInstance, nextProps, this.getState());
         }
 
         queueMicrotask(() => {
@@ -75,10 +76,11 @@ class Updater {
     }
 
     // 7. 判断是否需要更新
-    shouldUpdate(classInstance, newState) {
+    shouldUpdate(classInstance, nextProps={}, newState) {
         let willUpdate = true;
         // 还没实现属性更新，先用老属性
-        const nextProps = classInstance.props;
+        // const nextProps = classInstance.props;
+
         if(classInstance.shouldComponentUpdate && !classInstance.shouldComponentUpdate(nextProps, newState)) {
             // 1. 如果有 shouldComponentUpdate 方法，调用它 如果结果为false 则不需要更新
             willUpdate = false;
@@ -88,12 +90,13 @@ class Updater {
             classInstance.componentWillUpdate();
         }
 
+        if(nextProps){
+            classInstance.props = nextProps;
+        }
+
         // 不管要不要更新， 组件状态肯定会改
         classInstance.state = newState;
 
-        // if(classInstance.props){
-        //     classInstance.props = nextProps;
-        // }
         // 3. 更新状态
         classInstance.state = newState;
         if(willUpdate) {

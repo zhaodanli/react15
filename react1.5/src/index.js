@@ -55,7 +55,7 @@ class Counter extends React.Component {
         // console.log(this.state.number);
         this.setState((state) => ({ number: state.number + 1 }));
         // updateQueue.batchUpdater();
-        console.log(this.state.number);
+        // console.log(this.state.number);
         // 阻止冒泡
         // setTimeout(() => {
         //     console.log(this.state.number);
@@ -64,10 +64,10 @@ class Counter extends React.Component {
         //     this.setState((state) => ({ number: state.number + 1 }))    ;
         //     console.log(this.state.number);
         // }, 0);
-        event.stopPropagation();
+        // event.stopPropagation();
     }
     handleDivClick = () => {
-        console.log('handleDivClick');
+        // console.log('handleDivClick');
     }
     // react可以shouldComponentUpdate方法中优化 PureComponent 可以帮我们做这件事
     shouldComponentUpdate(nextProps, nextState) { // 代表的是下一次的属性 和 下一次的状态
@@ -86,7 +86,7 @@ class Counter extends React.Component {
         return (
             <div onClick={this.handleDivClick}>
                 {/* <p>{this.props.title}</p> */}
-                <p>number:{this.state.number}</p>
+                <p>{this.state.number}</p>
                 {this .state.number === 4 ? null : <ChildCounter count={this.state.number} />}
                 <button onClick={this.handleClick}>+</button>
             </div>
@@ -118,7 +118,7 @@ class ChildCounter extends React.Component {
         return nextProps.count % 3 === 0; //子组件判断接收的属性 是否满足更新条件 为true则更新
     }
 }
-ReactDOM.render(<Counter title="计数器" />, document.getElementById("root"));
+ReactDOM.render(<Counter />, document.getElementById("root"));
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(
 //   element1

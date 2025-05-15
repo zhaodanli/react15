@@ -1,4 +1,4 @@
-import { REACT_TEXT, REACT_FORWARD_REF_TYPE, REACT_FRAGMENT } from "./constants";
+import { REACT_TEXT, REACT_FORWARD_REF_TYPE, REACT_FRAGMENT, PLACEMENT, MOVE } from "./constants";
 import { addEvent } from "./event";
 
 /**
@@ -132,6 +132,7 @@ function updateProps(dom, oldProps, newProps) {
 
 function reconcileChildren(childrenVdom, parentDOM) {
     for (let i = 0; i < childrenVdom.length; i++) {
+        childrenVdom[i].mountIndex = i;
         render(childrenVdom[i], parentDOM);
     }
 }
@@ -190,9 +191,12 @@ function updateElement(oldVdom, newVdom) {
             // 如果文本节点的内容不一样，直接替换
             currentDOM.textContent = newVdom.props;
         }
+    }else if(oldVdom.type === REACT_FRAGMENT) {
+        updateFragment(oldVdom, newVdom);
+        let currentDOM = newVdom.dom = findDOM(oldVdom);
+        updateChildren(currentDOM, oldVdom.props.children, newVdom.props.children);
     } else if (typeof oldVdom.type === 'string') {
         let currentDOM = newVdom.dom = findDOM(oldVdom);
-        updateProps(currentDOM, oldVdom.props, newVdom.props);
         updateChildren(currentDOM, oldVdom.props.children, newVdom.props.children);
     } else if (typeof oldVdom.type === 'function') {
         if (oldVdom.type.isReactComponent) {
@@ -206,14 +210,84 @@ function updateElement(oldVdom, newVdom) {
     
 }
 
+function updateFragment(oldVdom, newVdom) {
+    
+}
+
 function updateChildren(parentDOM, oldVChildren, newVChildren) {
+
+    //   oldVChildren = (Array.isArray(oldVChildren) ? oldVChildren : oldVChildren ? [oldVChildren]).filter(item => item) : [];
+    //   newVChildren = (Array.isArray(newVChildren) ? newVChildren : newVChildren ? [newVChildren]).filter(item => item) : [];
     oldVChildren = (Array.isArray(oldVChildren)) ? oldVChildren : [oldVChildren];
     newVChildren = (Array.isArray(newVChildren)) ? newVChildren : [newVChildren];
-    let maxLength = Math.max(oldVChildren.length, newVChildren.length);
-    for(let i=0; i<maxLength; i++) {
-        let nextVDOM = oldVChildren.find((item, index)=> index>i && item && findDOM(item))
-        compareTwoVdom(parentDOM, oldVChildren[i],newVChildren[i], findDOM(nextVDOM))
-    }
+    
+    let keyedOldMap = {};
+    let lastPlacedIndex = 0;
+    oldVChildren.forEach((oldVChild, index) => {
+        let oldKey = oldVChild.key ? oldVChild.key : index;
+        keyedOldMap[oldKey] = oldVChild;
+    });
+    let patch = [];
+    newVChildren.forEach((newVChild, index) => {
+        newVChild.mountIndex = index;
+        let newKey = newVChild.key ? newVChild.key : index;
+        let oldVChild = keyedOldMap[newKey];
+        if (oldVChild) {
+            // 更新节点
+            updateElement(oldVChild, newVChild);
+            if (oldVChild.mountIndex < lastPlacedIndex) {
+                patch.push({
+                    type: MOVE,
+                    oldVChild,
+                    newVChild,
+                    mountIndex: index
+                });
+            }
+
+            delete keyedOldMap[newKey];
+            lastPlacedIndex = Math.max(lastPlacedIndex, oldVChild.mountIndex);
+        } else {
+            patch.push({
+                type: PLACEMENT,
+                newVChild,
+                mountIndex: index
+            });
+        }
+    });
+    let moveVChild = patch.filter(action => action.type === MOVE).map(action => action.oldVChild);
+    // 把要移动的 和 要删除的 全部删除
+    Object.values(keyedOldMap).concat(moveVChild).forEach((oldVChild) => {
+        let currentDOM = findDOM(oldVChild);
+        parentDOM.removeChild(currentDOM);
+    });
+    // 处理新增和移动
+    patch.forEach(action => {
+        let { type, oldVChild, newVChild, mountIndex } = action;
+        // 老的真实DOM节点集合
+        let childNodes = parentDOM.childNodes;
+        if (type === PLACEMENT) {
+            let newDOM = createDOM(newVChild);
+            let childNode = childNodes[mountIndex];
+            if (childNode) {
+                parentDOM.insertBefore(newDOM, childNode);
+            } else {
+                parentDOM.appendChild(newDOM);
+            }
+        } else if (type === MOVE) {
+            let oldDOM = findDOM(oldVChild);
+            let childNode = childNodes[mountIndex];
+            if (childNode) {
+                parentDOM.insertBefore(oldDOM, childNode);
+            } else {
+                parentDOM.appendChild(oldDOM);
+            }
+        }
+    });
+    //     let maxLength = Math.max(oldVChildren.length, newVChildren.length);
+    //     for(let i=0; i<maxLength; i++) {
+    //         let nextVDOM = oldVChildren.find((item, index)=> index>i && item && findDOM(item))
+    //         compareTwoVdom(parentDOM, oldVChildren[i],newVChildren[i], findDOM(nextVDOM))
+    //     }
 }
 
 function updateClassComponent(oldVdom, newVdom) {

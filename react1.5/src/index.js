@@ -30,94 +30,94 @@ import ReactDOM from './react-dom';
 
 // ReactDOM.render(element, document.getElementById("root"));
 
-class Counter extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { number: 0 };
-        console.log('Counter 1.constructor')
-    }
+// class Counter extends React.Component {
+//     constructor(props) {
+//         super(props);
+//         this.state = { number: 0 };
+//         console.log('Counter 1.constructor')
+//     }
 
-    componentWillMount() { // 取本地的数据 同步的方式：采用渲染之前获取数据，只渲染一次
-        console.log('Counter 2.componentWillMount');
-    }
-    componentDidMount() {
-        console.log('Counter 4.componentDidMount');
-    }
-    /**
-     * event 是合成事件对象
-     * 作用：
-     * 1. 作为 prefill
-     * 2. 处理兼容性
-     *  */ 
-    handleClick = (event) => {
-        // updateQueue.isBatchingUpdate = true;
-        // this.setState((state) => ({ number: state.number + 1 }));
-        // console.log(this.state.number);
-        this.setState((state) => ({ number: state.number + 1 }));
-        // updateQueue.batchUpdater();
-        // console.log(this.state.number);
-        // 阻止冒泡
-        // setTimeout(() => {
-        //     console.log(this.state.number);
-        //     this.setState((state) => ({ number: state.number + 1 }));
-        //     console.log(this.state.number);
-        //     this.setState((state) => ({ number: state.number + 1 }))    ;
-        //     console.log(this.state.number);
-        // }, 0);
-        // event.stopPropagation();
-    }
-    handleDivClick = () => {
-        // console.log('handleDivClick');
-    }
-    // react可以shouldComponentUpdate方法中优化 PureComponent 可以帮我们做这件事
-    shouldComponentUpdate(nextProps, nextState) { // 代表的是下一次的属性 和 下一次的状态
-        console.log('Counter 5.shouldComponentUpdate');
-        return nextState.number % 2 === 0;
-        // return nextState.number!==this.state.number; //如果此函数种返回了false 就不会调用render方法了
-    } //不要随便用setState 可能会死循环
-    componentWillUpdate() {
-        console.log('Counter 6.componentWillUpdate');
-    }
-    componentDidUpdate(nextProps, nextState) {
-        console.log('Counter 7.componentDidUpdate');
-    }
-    render() {
-        console.log('Counter 3.render');
-        return (
-            <div onClick={this.handleDivClick}>
-                {/* <p>{this.props.title}</p> */}
-                <p>{this.state.number}</p>
-                {this .state.number === 4 ? null : <ChildCounter count={this.state.number} />}
-                <button onClick={this.handleClick}>+</button>
-            </div>
-        )
-    }
-}
+//     componentWillMount() { // 取本地的数据 同步的方式：采用渲染之前获取数据，只渲染一次
+//         console.log('Counter 2.componentWillMount');
+//     }
+//     componentDidMount() {
+//         console.log('Counter 4.componentDidMount');
+//     }
+//     /**
+//      * event 是合成事件对象
+//      * 作用：
+//      * 1. 作为 prefill
+//      * 2. 处理兼容性
+//      *  */ 
+//     handleClick = (event) => {
+//         // updateQueue.isBatchingUpdate = true;
+//         // this.setState((state) => ({ number: state.number + 1 }));
+//         // console.log(this.state.number);
+//         this.setState((state) => ({ number: state.number + 1 }));
+//         // updateQueue.batchUpdater();
+//         // console.log(this.state.number);
+//         // 阻止冒泡
+//         // setTimeout(() => {
+//         //     console.log(this.state.number);
+//         //     this.setState((state) => ({ number: state.number + 1 }));
+//         //     console.log(this.state.number);
+//         //     this.setState((state) => ({ number: state.number + 1 }))    ;
+//         //     console.log(this.state.number);
+//         // }, 0);
+//         // event.stopPropagation();
+//     }
+//     handleDivClick = () => {
+//         // console.log('handleDivClick');
+//     }
+//     // react可以shouldComponentUpdate方法中优化 PureComponent 可以帮我们做这件事
+//     shouldComponentUpdate(nextProps, nextState) { // 代表的是下一次的属性 和 下一次的状态
+//         console.log('Counter 5.shouldComponentUpdate');
+//         return nextState.number % 2 === 0;
+//         // return nextState.number!==this.state.number; //如果此函数种返回了false 就不会调用render方法了
+//     } //不要随便用setState 可能会死循环
+//     componentWillUpdate() {
+//         console.log('Counter 6.componentWillUpdate');
+//     }
+//     componentDidUpdate(nextProps, nextState) {
+//         console.log('Counter 7.componentDidUpdate');
+//     }
+//     render() {
+//         console.log('Counter 3.render');
+//         return (
+//             <div onClick={this.handleDivClick}>
+//                 {/* <p>{this.props.title}</p> */}
+//                 <p>{this.state.number}</p>
+//                 {this .state.number === 4 ? null : <ChildCounter count={this.state.number} />}
+//                 <button onClick={this.handleClick}>+</button>
+//             </div>
+//         )
+//     }
+// }
 
-class ChildCounter extends React.Component {
-    componentWillUnmount() {
-        console.log(' ChildCounter 6.componentWillUnmount')
-    }
-    componentWillMount() {
-        console.log('ChildCounter 1.componentWillMount')
-    }
-    render() {
-        console.log('ChildCounter 2.render')
-        return (<div>
-            {this.props.count}
-        </div>)
-    }
-    componentDidMount() {
-        console.log('ChildCounter 3.componentDidMount')
-    }
-    componentWillReceiveProps(newProps) { // 第一次不会执行，之后属性更新时才会执行
-        console.log('ChildCounter 4.componentWillReceiveProps')
-    }
-    shouldComponentUpdate(nextProps, nextState) {
-        console.log('ChildCounter 5.shouldComponentUpdate')
-        return nextProps.count % 3 === 0; //子组件判断接收的属性 是否满足更新条件 为true则更新
-    }
-}
+// class ChildCounter extends React.Component {
+//     componentWillUnmount() {
+//         console.log(' ChildCounter 6.componentWillUnmount')
+//     }
+//     componentWillMount() {
+//         console.log('ChildCounter 1.componentWillMount')
+//     }
+//     render() {
+//         console.log('ChildCounter 2.render')
+//         return (<div>
+//             {this.props.count}
+//         </div>)
+//     }
+//     componentDidMount() {
+//         console.log('ChildCounter 3.componentDidMount')
+//     }
+//     componentWillReceiveProps(newProps) { // 第一次不会执行，之后属性更新时才会执行
+//         console.log('ChildCounter 4.componentWillReceiveProps')
+//     }
+//     shouldComponentUpdate(nextProps, nextState) {
+//         console.log('ChildCounter 5.shouldComponentUpdate')
+//         return nextProps.count % 3 === 0; //子组件判断接收的属性 是否满足更新条件 为true则更新
+//     }
+// }
 // ReactDOM.render(<Counter />, document.getElementById("root"));
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(
@@ -161,76 +161,136 @@ class Sum extends React.Component {
 //     document.getElementById('root')
 // );
 
-class TextInput extends React.Component {
-    constructor(props) {
-        super(props);
-        this.input = React.createRef();
-    }
-    getFocus = () => {
-        // this.input.current.focus();
-    }
-    getInputValue = () => {
-        console.log(this.input.current.value);
-        return this.input.current.value;
-    }
-    render() {
-        return <input ref={this.input} />
-    }
-}
+// class TextInput extends React.Component {
+//     constructor(props) {
+//         super(props);
+//         this.input = React.createRef();
+//     }
+//     getFocus = () => {
+//         // this.input.current.focus();
+//     }
+//     getInputValue = () => {
+//         console.log(this.input.current.value);
+//         return this.input.current.value;
+//     }
+//     render() {
+//         return <input ref={this.input} />
+//     }
+// }
 
-function TextInput2(props, ref) {
-    return <input ref={ref} />
-}
-const ForwardTextInput = React.forwardRef(TextInput2);
+// function TextInput2(props, ref) {
+//     return <input ref={ref} />
+// }
+// const ForwardTextInput = React.forwardRef(TextInput2);
 
-class Form extends React.Component {
-    constructor(props) {
-        super(props);
-        this.input = React.createRef();
-        this.input2 = React.createRef();
-    }
-    getFocus = () => {
-        console.log(this.input.current.getInputValue(), this.input2.current.value);
-    }
-    render() {
-        return (
-            <>
-                <TextInput ref={this.input} /> + 
-                <ForwardTextInput ref={this.input2} />
-                <button onClick={this.getFocus}>获得input框的值</button>
-            </>
-        );
-    }
-}
-// ReactDOM.render(
-//     <Form />,
-//     document.getElementById('root')
-// );
+// class Form extends React.Component {
+//     constructor(props) {
+//         super(props);
+//         this.input = React.createRef();
+//         this.input2 = React.createRef();
+//     }
+//     getFocus = () => {
+//         console.log(this.input.current.getInputValue(), this.input2.current.value);
+//     }
+//     render() {
+//         return (
+//             <>
+//                 <TextInput ref={this.input} /> + 
+//                 <ForwardTextInput ref={this.input2} />
+//                 <button onClick={this.getFocus}>获得input框的值</button>
+//             </>
+//         );
+//     }
+// }
+// // ReactDOM.render(
+// //     <Form />,
+// //     document.getElementById('root')
+// // );
 
-class CounterList extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            list: ['A', 'B', 'C', 'D', 'E', 'F']
-        }
-    }
-    handleClick = () => {
-        this.setState({
-            list: ['A', 'C', 'E', 'B', 'G']
-        });
+//  =========== dom diff =========
+// class CounterList extends React.Component {
+//     constructor(props) {
+//         super(props);
+//         this.state = {
+//             list: ['A', 'B', 'C', 'D', 'E', 'F']
+//         }
+//     }
+//     handleClick = () => {
+//         this.setState({
+//             list: ['A', 'C', 'E', 'B', 'G']
+//         });
+//     };
+//     render() {
+//         return (
+//             <React.Fragment>
+//                 <ul>
+//                     {
+//                         this.state.list.map(item => <li key={item}>{item}</li>)
+//                     }
+
+//                 </ul>
+//                 <button onClick={this.handleClick}>+</button>
+//             </React.Fragment>
+//         )
+//     }
+// }
+// ReactDOM.render(<CounterList />, document.getElementById('root'));
+
+/** ======================== 新生命周期 ============================== */
+class Counter extends React.Component{
+    static defaultProps = {
+        name: '珠峰架构'
     };
-    render() {
-        return (
-            <React.Fragment>
-                <ul>
-                    {
-                        this.state.list.map(item => <li key={item}>{item}</li>)
-                    }
+    constructor(props) {
+        super(props);
+        this.state = { number: 0 }
+    }
 
-                </ul>
+    handleClick = () => {
+        this.setState({ number: this.state.number + 1 });
+    };
+
+    render() {
+        console.log('3.render');
+        return (
+            <div>
+                <p>{this.state.number}</p>
+                <ChildCounter number={this.state.number} />
                 <button onClick={this.handleClick}>+</button>
-            </React.Fragment>
+            </div>
         )
     }
 }
-ReactDOM.render(<CounterList />, document.getElementById('root'));
+class ChildCounter extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { number: 0 };
+    }
+
+    /** 
+     * 从属性中获取派生状态
+     * 新属性、新状态、强制更新都会走它
+     *  */
+    static getDerivedStateFromProps(nextProps, prevState) {
+        return { number: nextProps.number * 2 };
+        const { number } = nextProps;
+        // 当传入的type发生变化的时候，更新state
+        if (number % 2 === 0) {
+            return { number: number * 2 };
+        } else {
+            return { number: number * 3 };
+        }
+    }
+    render() {
+        console.log('child-render', this.state)
+        return (<div>
+            {this.state.number}
+        </div>)
+    }
+
+}
+
+ReactDOM.render(
+    <Counter />,
+    document.getElementById('root')
+);

@@ -94,13 +94,11 @@ class Updater {
         // if(classInstance.props){
         //     classInstance.props = nextProps;
         // }
+        // 3. 更新状态
+        classInstance.state = newState;
         if(willUpdate) {
             classInstance.forceUpdate();
         }
-        
-        // 3. 更新状态
-        // classInstance.state = nextState;
-        // classInstance.forceUpdate();
     }
 }
 

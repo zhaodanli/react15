@@ -76,9 +76,31 @@ class Updater {
 
     // 7. 判断是否需要更新
     shouldUpdate(classInstance, newState) {
-        // 3. 更新状态
+        let willUpdate = true;
+        // 还没实现属性更新，先用老属性
+        const nextProps = classInstance.props;
+        if(classInstance.shouldComponentUpdate && !classInstance.shouldComponentUpdate(nextProps, newState)) {
+            // 1. 如果有 shouldComponentUpdate 方法，调用它 如果结果为false 则不需要更新
+            willUpdate = false;
+        }
+
+        if(willUpdate && classInstance.componentWillUpdate){
+            classInstance.componentWillUpdate();
+        }
+
+        // 不管要不要更新， 组件状态肯定会改
         classInstance.state = newState;
-        classInstance.forceUpdate();
+
+        // if(classInstance.props){
+        //     classInstance.props = nextProps;
+        // }
+        if(willUpdate) {
+            classInstance.forceUpdate();
+        }
+        
+        // 3. 更新状态
+        // classInstance.state = nextState;
+        // classInstance.forceUpdate();
     }
 }
 
@@ -101,5 +123,8 @@ export class Component {
         let newRenderVdom = this.render();
         compareTwoVdom(oldDOM.parentNode, oldRenderVdom, newRenderVdom);
         this.oldRenderVdom = newRenderVdom;
+        if(this.componentDidUpdate){
+            this.componentDidUpdate(this.props,this.state);
+        }
     }
 }

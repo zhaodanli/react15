@@ -12,6 +12,10 @@ function render(vdom, container) {
     container.appendChild(newDOM);
     // 真实 dom 操作
     if(newDOM.componentDidMount) {
+        console.log('================', newDOM.componentDidMount) ;
+    }
+    
+    if(newDOM.componentDidMount) {
         // 3. 调用组件的componentDidMount方法
         newDOM.componentDidMount();
     }
@@ -37,7 +41,7 @@ export function createDOM(vdom) {
     }
 
     // 处理属性
-    if(props) {
+    if(typeof props === 'object') {
         updateProps(dom, {}, props);
         if(props.children && typeof props.children === 'object' && props.children.$$typeof) {
             // 递归处理子元素
@@ -84,6 +88,7 @@ function mountClassComponent(vdom) {
     classInstance.oldRenderVdom = vdom.oldRenderVdom = renderVdom;
     // 3. 创建DOM元素 生成虚拟 DOM
     let dom = createDOM(renderVdom);
+    console.log('newDOM', classInstance.componentDidMount) ;
     if(classInstance.componentDidMount) {
         dom.componentDidMount = classInstance.componentDidMount.bind(classInstance);
     }

@@ -1,4 +1,4 @@
-import { REACT_TEXT, REACT_FORWARD_REF_TYPE } from "./constants";
+import { REACT_TEXT, REACT_FORWARD_REF_TYPE, REACT_FRAGMENT } from "./constants";
 import { addEvent } from "./event";
 
 /**
@@ -23,6 +23,8 @@ export function createDOM(vdom) {
 
     if(type === REACT_TEXT) {
         dom = document.createTextNode(props);
+    }else if(type === REACT_FRAGMENT) {
+        dom = document.createDocumentFragment();
     }else if(type && type.$$typeof === REACT_FORWARD_REF_TYPE) {
         return mountForwardComponent(vdom);
     }else if(typeof type === 'function') {

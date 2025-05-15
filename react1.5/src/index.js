@@ -118,7 +118,7 @@ class ChildCounter extends React.Component {
         return nextProps.count % 3 === 0; //子组件判断接收的属性 是否满足更新条件 为true则更新
     }
 }
-ReactDOM.render(<Counter />, document.getElementById("root"));
+// ReactDOM.render(<Counter />, document.getElementById("root"));
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(
 //   element1
@@ -206,3 +206,31 @@ class Form extends React.Component {
 //     <Form />,
 //     document.getElementById('root')
 // );
+
+class CounterList extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            list: ['A', 'B', 'C', 'D', 'E', 'F']
+        }
+    }
+    handleClick = () => {
+        this.setState({
+            list: ['A', 'C', 'E', 'B', 'G']
+        });
+    };
+    render() {
+        return (
+            <React.Fragment>
+                <ul>
+                    {
+                        this.state.list.map(item => <li key={item}>{item}</li>)
+                    }
+
+                </ul>
+                <button onClick={this.handleClick}>+</button>
+            </React.Fragment>
+        )
+    }
+}
+ReactDOM.render(<CounterList />, document.getElementById('root'));

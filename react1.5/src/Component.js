@@ -127,11 +127,13 @@ export class Component {
                 this.state = {...this.state, ...newState}
             }
         }
+
+        let snapshot = this.getSnapshotBeforeUpdate && this.getSnapshotBeforeUpdate();
         let newRenderVdom = this.render();
         compareTwoVdom(oldDOM.parentNode, oldRenderVdom, newRenderVdom);
         this.oldRenderVdom = newRenderVdom;
         if(this.componentDidUpdate){
-            this.componentDidUpdate(this.props,this.state);
+            this.componentDidUpdate(this.props,this.state, snapshot);
         }
     }
 }

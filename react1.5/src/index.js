@@ -1,20 +1,22 @@
-import React from './react';
-import ReactDOM from './react-dom';
-// import ReactDOM from 'react-dom/client';
+// import React from './react';
+// import ReactDOM from 'react-dom';
 
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+// 基础组件
 import ReactBase from './IndeBaseComponent';
 
 // 高阶组件
-// import ReactHightComponent from './ReactHightComponent'
+import ReactHightComponent from './ReactHightComponent'
 // 反向继承
-// import ReverseInstans from './ReverseInstans'
+import ReverseInstansComponent from './ReverseInstansComponent'
 
-/** react 基础功能实现 */
-ReactDOM.render(
-  <ReactBase />,
-  document.getElementById('root')
-);
+// ReactDOM.render(
+//   <ReactBase />,
+//   document.getElementById('root')
+// );
 
-// const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(<ReactHightComponent />);
-// root.render(<ReverseInstans title="标题" />);
+root.render(<ReverseInstansComponent title="标题" />);

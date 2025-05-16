@@ -58,6 +58,20 @@ function createContext() {
         _currentValue: undefined 
     };
     return context; 
+    // {
+    //     $$typeof: REACT_CONTEXT, 
+    //     _currentValue: undefined 
+    //     Provider: {
+    //         $$typeof: REACT_PROVIDER,
+    //         _context: context,
+    //         _currentValue: undefined 
+    //     },
+    //     Consumer: {
+    //         $$typeof: REACT_CONTEXT,
+    //         _context: context,
+    //         _currentValue: undefined 
+    //     };
+    // }
 }
 
 const React = {

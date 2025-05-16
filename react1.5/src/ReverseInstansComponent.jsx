@@ -51,4 +51,93 @@ const wrapper = OldComponent =>{
 }
 let WrappedButton = wrapper(Button);
 
-export default WrappedButton
+
+
+/** ============ render props ============ */ 
+class MouseTracker extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { x: 0, y: 0 };
+    }
+  
+    handleMouseMove = (event) => {
+        this.setState({
+            x: event.clientX,
+            y: event.clientY,
+        });
+    }
+  
+    render() {
+        return (
+            <div onMouseMove={this.handleMouseMove}>
+                <h1>移动鼠标!</h1>
+                <p>当前的鼠标位置是 ({this.state.x}, {this.state.y})</p>
+            </div>
+        );
+    }
+}
+  
+// ReactDOM.render(
+//   <MouseTracker />,
+//   document.getElementById('root')
+// );
+
+/**  ======== children 传递 =========== */
+// ReactDOM.render(<MouseTracker >
+//   {
+//       (props) => (
+//           <div>
+//               <h1>移动鼠标!</h1>
+//               <p>当前的鼠标位置是 ({props.x}, {props.y})</p>
+//           </div>
+//       )
+//   }
+// </MouseTracker >, document.getElementById('root'));
+
+/** =============== render 属性传递 ============ */
+// ReactDOM.render(<MouseTracker render=
+//   {
+//       (props) => (
+//           <div>
+//               <h1>移动鼠标!</h1>
+//               <p>当前的鼠标位置是 ({props.x}, {props.y})</p>
+//           </div>
+//       )
+//   }>
+// </MouseTracker >, document.getElementById('root'));
+
+/** =============== HOC ============ */
+function withTracker(OldComponent){
+    return class MouseTracker extends React.Component{
+        constructor(props){
+            super(props);
+            this.state = {x:0,y:0};
+        }
+        handleMouseMove = (event)=>{
+            this.setState({
+                x: event.clientX,
+                y: event.clientY,
+            });
+        }
+        render(){
+            return (
+                <div onMouseMove = {this.handleMouseMove}>
+                    <OldComponent {...this.state}/>
+                </div>
+            )
+        }
+    }
+}
+
+function Show(props){
+    return (
+        <React.Fragment>
+            <h1>请移动鼠标</h1>
+            <p>当前鼠标的位置是: x:{props.x} y:{props.y}</p>
+        </React.Fragment>
+    )
+}
+
+let HighShow = withTracker(Show);
+
+export default HighShow

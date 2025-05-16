@@ -56,8 +56,8 @@ function createSyntheticEvent(nativeEvent) {
         let value = nativeEvent[key];
         if(typeof value === 'function') {
             value = value.bind(nativeEvent); // 确保方法的 this 指向原生事件
-            syntheticEvent[key] = value;
         }
+        syntheticEvent[key] = value;
     }
 
     // 添加自定义属性和方法

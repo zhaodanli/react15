@@ -17,10 +17,12 @@ import ReverseInstansComponent from './ReverseInstansComponent'
 //   document.getElementById('root')
 // );
 
+/** ============ 高阶组件 ============*/ 
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(<ReactHightComponent />);
 // root.render(<ReverseInstansComponent title="标题" />);
 
+/** ============ 反向继承 ============ */ 
 ReactDOM.render(
   <ReverseInstansComponent />,
   document.getElementById('root')

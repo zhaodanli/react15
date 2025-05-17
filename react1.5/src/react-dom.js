@@ -1,4 +1,4 @@
-import { REACT_TEXT, REACT_FORWARD_REF_TYPE, REACT_FRAGMENT, PLACEMENT, MOVE, REACT_PROVIDER, REACT_CONTEXT } from "./constants";
+import { REACT_TEXT, REACT_FORWARD_REF_TYPE, REACT_FRAGMENT, PLACEMENT, MOVE, REACT_PROVIDER, REACT_CONTEXT, REACT_MEMO } from "./constants";
 import { addEvent } from "./event";
 
 /**
@@ -21,7 +21,9 @@ export function createDOM(vdom) {
     let { type, props, ref } = vdom;
     let dom;
 
-    if (type && type.$$typeof === REACT_PROVIDER) {
+    if (type && type.$$typeof === REACT_MEMO) {
+        return mountMemoComponent(vdom);
+    }else if (type && type.$$typeof === REACT_PROVIDER) {
         return mountProviderComponent(vdom)
     } else if (type && type.$$typeof === REACT_CONTEXT) {
         return mountContextComponent(vdom)
@@ -61,6 +63,13 @@ export function createDOM(vdom) {
         ref.current = dom;
     }
     return dom;
+}
+
+function mountMemoComponent(vdom) {
+    let { type: { type: functionComponent}, props } = vdom;
+    let renderVdom = functionComponent(props);
+    vdom.oldRenderVdom = renderVdom;
+    return createDOM(renderVdom)
 }
 
 /** 
@@ -213,7 +222,9 @@ export function compareTwoVdom(parentDOM, oldVdom, newVdom, nextDOM) {
  * @returns 
  */
 function updateElement(oldVdom, newVdom) {
-    if (oldVdom.type.$$typeof === REACT_CONTEXT) {
+    if (oldVdom.type && oldVdom.type.$$typeof === REACT_MEMO) {
+        updateMemoComponent(oldVdom, newVdom);
+    } else if (oldVdom.type.$$typeof === REACT_CONTEXT) {
         updateContextComponent(oldVdom, newVdom);
     } else if (oldVdom.type.$$typeof === REACT_PROVIDER) {
         updateProviderComponent(oldVdom, newVdom);
@@ -242,6 +253,19 @@ function updateElement(oldVdom, newVdom) {
     
 }
 
+function updateMemoComponent(oldVdom, newVdom) {
+    let { type: { type: functionComponent, compare} } = oldVdom;
+    if (!compare(oldVdom.props, newVdom.props)) {
+        const oldDOM = findDOM(oldVdom);
+        const parentDOM = oldDOM.parentNode;
+        let renderVdom = functionComponent(newVdom.props);
+        compareTwoVdom(parentDOM, oldVdom.oldRenderVdom, renderVdom);
+        newVdom.oldRenderVdom = renderVdom;
+    } else {
+        newVdom.oldRenderVdom = oldVdom.oldRenderVdom;
+    }
+}
+
 function updateProviderComponent(oldVdom, newVdom) {
     let parentDOM = findDOM(oldVdom).parentNode;
     let { type, props } = newVdom;
@@ -261,11 +285,8 @@ function updateContextComponent(oldVdom, newVdom) {
 }
 
 function updateChildren(parentDOM, oldVChildren, newVChildren) {
-
-    //   oldVChildren = (Array.isArray(oldVChildren) ? oldVChildren : oldVChildren ? [oldVChildren]).filter(item => item) : [];
-    //   newVChildren = (Array.isArray(newVChildren) ? newVChildren : newVChildren ? [newVChildren]).filter(item => item) : [];
-    oldVChildren = (Array.isArray(oldVChildren)) ? oldVChildren : [oldVChildren];
-    newVChildren = (Array.isArray(newVChildren)) ? newVChildren : [newVChildren];
+    oldVChildren = ((Array.isArray(oldVChildren)) ? oldVChildren : [oldVChildren]).filter(item => typeof item !== 'undefined' && item !== null);
+    newVChildren = ((Array.isArray(newVChildren)) ? newVChildren : [newVChildren]).filter(item => typeof item !== 'undefined' && item !== null);
     
     let keyedOldMap = {};
     let lastPlacedIndex = 0;

@@ -1,6 +1,7 @@
 import { REACT_ELEMENT, REACT_FORWARD_REF_TYPE, REACT_FRAGMENT, REACT_PROVIDER, REACT_CONTEXT, REACT_MEMO } from "./constants";
 import { toVdom, shallowEqual } from "./utils";
 import { Component } from './Component';
+import { useState } from "./react-dom";
 
 function createElement(type, config, children) {
     let ref;
@@ -106,6 +107,7 @@ const React = {
     createContext,
     cloneElement,
     PureComponent,
-    memo
+    memo,
+    useState
 }
 export default React

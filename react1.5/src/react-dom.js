@@ -1,11 +1,35 @@
 import { REACT_TEXT, REACT_FORWARD_REF_TYPE, REACT_FRAGMENT, PLACEMENT, MOVE, REACT_PROVIDER, REACT_CONTEXT, REACT_MEMO } from "./constants";
 import { addEvent } from "./event";
 
+/** 多次渲染状态不变 */
+/** 
+ * hookIndex 的作用：
+    用于跟踪当前 Hook 的调用顺序，确保状态值按照正确的顺序存储和读取。
+    scheduleUpdate 重置 hookIndex 为 0 的原因：
+
+    每次重新渲染时，需要从头开始执行所有 Hook，确保状态值正确读取。
+    scheduleUpdate 传两个相同 vdom 的更新机制：
+
+    即使 vdom 是同一个对象，compareTwoVdom 会递归检查虚拟 DOM 树的子节点，找到需要更新的部分并更新真实 DOM。
+*/
+let hookStates = []; // 状态
+let hookIndex = 0; // 当前索引
+let scheduleUpdate;
+
 /**
  * 1. 虚拟DOM 编程 真实DOM
  * 2. 插入到父节点容器中
  */
+
 function render(vdom, container) {
+    mount(vdom, container);
+    scheduleUpdate = () => {
+      hookIndex = 0;
+      compareTwoVdom(container,vdom,vdom);
+    }
+}
+
+function mount(vdom, container) {
     // 1. 创建一个根节点
     const newDOM = createDOM(vdom);
     if (newDOM) {
@@ -17,7 +41,17 @@ function render(vdom, container) {
             newDOM.componentDidMount();
         }
     }
-    
+}
+
+export function useState(initialState){
+    hookStates[hookIndex] = hookStates[hookIndex] || initialState;
+    let currentIndex = hookIndex; 
+    function setState(action){
+        let newState = typeof action === 'function' ? action() : action;
+        hookStates[currentIndex] = newState;
+        scheduleUpdate(); // 触发重新渲染
+    }
+    return [hookStates[hookIndex++], setState];
 }
 
 export function createDOM(vdom) {
@@ -52,7 +86,7 @@ export function createDOM(vdom) {
         updateProps(dom, {}, props);
         if(props.children && typeof props.children === 'object' && props.children.$$typeof) {
             // 递归处理子元素
-            render(props.children, dom);
+            mount(props.children, dom);
         }else if(Array.isArray(props.children)) {
             // 处理数组节点
             reconcileChildren(props.children, dom);
@@ -101,7 +135,7 @@ function mountContextComponent(vdom) {
 
 function mountForwardComponent(vdom) {
     let { type, props, ref } = vdom;
-    let renderVdom = type.render(props, ref);
+    let renderVdom = type.mount(props, ref);
     vdom.oldRenderVdom = renderVdom;
     if (!renderVdom) return null;  
     return createDOM(renderVdom);
@@ -121,7 +155,7 @@ function mountClassComponent(vdom) {
         ref.current = classInstance;
     }
     // 2. 调用类组件的render方法
-    const renderVdom = classInstance.render();
+    const renderVdom = classInstance.mount();
     // if(classInstance.componentDidMount) {
     //     classInstance.componentDidMount();
     // }
@@ -180,7 +214,7 @@ function updateProps(dom, oldProps, newProps) {
 function reconcileChildren(childrenVdom, parentDOM) {
     for (let i = 0; i < childrenVdom.length; i++) {
         childrenVdom[i].mountIndex = i;
-        render(childrenVdom[i], parentDOM);
+        mount(childrenVdom[i], parentDOM);
     }
 }
 
@@ -411,6 +445,7 @@ function unMountVdom(vdom) {
 
 const ReactDOM = {
     render,
-    createPortal: render
+    createPortal: render,
+    useState
 }
 export default ReactDOM

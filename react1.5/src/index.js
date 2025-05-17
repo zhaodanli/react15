@@ -39,7 +39,24 @@ import ReverseInstansComponent from './ReverseInstansComponent'
  * React v16增加了对Portal的直接支持
  * 它可以把JSX渲染到一个单独的DOM节点中 
   */
-import PortalComponent from './PortalComponent';
+// import PortalComponent from './PortalComponent';
+
+// ReactDOM.render(
+//   <PortalComponent />, document.getElementById('root'));
+
+/** react Hooks 实现 */
+function App(){
+  const [ number, setNumber ]= React.useState(0);
+  let handleClick = () => setNumber(number+1)
+  return (
+    <div>
+      <p>{number}</p>
+      <button onClick={handleClick}>+</button>
+    </div>
+  )
+}
 
 ReactDOM.render(
-  <PortalComponent />, document.getElementById('root'));
+  <App />,
+  document.getElementById('root')
+);

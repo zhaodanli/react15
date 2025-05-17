@@ -30,6 +30,16 @@ import ReverseInstansComponent from './ReverseInstansComponent'
 
 /** =========== pureComponent ============== */
 
-import PureAndMemoComponent from './PureAndMemoComponent'
+// import PureAndMemoComponent from './PureAndMemoComponent'
+// ReactDOM.render(
+//   <PureAndMemoComponent />, document.getElementById('root'));
+
+/** 
+ * potal 
+ * React v16增加了对Portal的直接支持
+ * 它可以把JSX渲染到一个单独的DOM节点中 
+  */
+import PortalComponent from './PortalComponent';
+
 ReactDOM.render(
-  <PureAndMemoComponent />, document.getElementById('root'));
+  <PortalComponent />, document.getElementById('root'));

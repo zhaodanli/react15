@@ -8,13 +8,16 @@ import { addEvent } from "./event";
 function render(vdom, container) {
     // 1. 创建一个根节点
     const newDOM = createDOM(vdom);
-    // 2. 将根节点添加到容器中
-    container.appendChild(newDOM);
-    // 真实 dom 操作
-    if(newDOM.componentDidMount) {
-        // 3. 调用组件的componentDidMount方法
-        newDOM.componentDidMount();
+    if (newDOM) {
+        // 2. 将根节点添加到容器中
+        container.appendChild(newDOM);
+        // 真实 dom 操作
+        if(newDOM.componentDidMount) {
+            // 3. 调用组件的componentDidMount方法
+            newDOM.componentDidMount();
+        }
     }
+    
 }
 
 export function createDOM(vdom) {
@@ -69,6 +72,7 @@ function mountMemoComponent(vdom) {
     let { type: { type: functionComponent}, props } = vdom;
     let renderVdom = functionComponent(props);
     vdom.oldRenderVdom = renderVdom;
+    if (!renderVdom) return null;  
     return createDOM(renderVdom)
 }
 
@@ -82,6 +86,7 @@ function mountProviderComponent(vdom) {
     context._currentValue = props.value;
     let renderVdom = props.children;
     vdom.oldRenderVdom = renderVdom;
+    if (!renderVdom) return null;  
     return createDOM(renderVdom);
 }
 
@@ -90,6 +95,7 @@ function mountContextComponent(vdom) {
     let context = type._context;
     let renderVdom = props.children(context._currentValue);
     vdom.oldRenderVdom = renderVdom;
+    if (!renderVdom) return null;  
     return createDOM(renderVdom);
 }
 
@@ -97,6 +103,7 @@ function mountForwardComponent(vdom) {
     let { type, props, ref } = vdom;
     let renderVdom = type.render(props, ref);
     vdom.oldRenderVdom = renderVdom;
+    if (!renderVdom) return null;  
     return createDOM(renderVdom);
 }
 
@@ -122,6 +129,8 @@ function mountClassComponent(vdom) {
     vdom.classInstance = classInstance;
     classInstance.oldRenderVdom = vdom.oldRenderVdom = renderVdom;
     // 3. 创建DOM元素 生成虚拟 DOM
+
+    if (!renderVdom) return null;  
     let dom = createDOM(renderVdom);
     if(classInstance.componentDidMount) {
         dom.componentDidMount = classInstance.componentDidMount.bind(classInstance);
@@ -133,6 +142,7 @@ function mountFunctionComponent(vdom) {
     // 1. 创建一个函数组件
     const renderVdom = type(props);
     vdom.oldRenderVdom = renderVdom;
+    if (!renderVdom) return null;  
     return createDOM(renderVdom);
 }
 
@@ -398,7 +408,9 @@ function unMountVdom(vdom) {
     // 把自己这个虚拟DOM对应的真实DOM从界面删除
     if (currentDOM) currentDOM.remove();
 }
+
 const ReactDOM = {
     render,
+    createPortal: render
 }
 export default ReactDOM

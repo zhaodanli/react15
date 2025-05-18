@@ -44,14 +44,15 @@ function mount(vdom, container) {
 }
 
 export function useState(initialState){
-    hookStates[hookIndex] = hookStates[hookIndex] || initialState;
-    let currentIndex = hookIndex; 
-    function setState(action){
-        let newState = typeof action === 'function' ? action() : action;
-        hookStates[currentIndex] = newState;
-        scheduleUpdate(); // 触发重新渲染
-    }
-    return [hookStates[hookIndex++], setState];
+    return useReducer(null, initialState)
+    // hookStates[hookIndex] = hookStates[hookIndex] || initialState;
+    // let currentIndex = hookIndex; 
+    // function setState(action){
+    //     let newState = typeof action === 'function' ? action() : action;
+    //     hookStates[currentIndex] = newState;
+    //     scheduleUpdate(); // 触发重新渲染
+    // }
+    // return [hookStates[hookIndex++], setState];
 }
 
 export function createDOM(vdom) {
@@ -314,7 +315,7 @@ function updateProviderComponent(oldVdom, newVdom) {
     let parentDOM = findDOM(oldVdom).parentNode;
     let { type, props } = newVdom;
     let context = type._context;
-    context._currentValue = props.value;
+    context._currentValue = props.value
     let renderVdom = props.children;
     compareTwoVdom(parentDOM, oldVdom.oldRenderVdom, renderVdom);
     newVdom.oldRenderVdom = renderVdom;
@@ -446,7 +447,7 @@ function unMountVdom(vdom) {
 export  function useMemo(factory,deps){
     if(hookStates[hookIndex]){
         let [ lastMemo,lastDeps ] = hookStates[hookIndex]; // 获取上一次的 memo 和依赖数组
-        let same = deps.every((item,index)=>item === lastDeps[index]); // 比较当前依赖数组 deps 和上一次的依赖数组 lastDeps 是否完全相同。
+        let same = deps.every((item,index)=> (item === lastDeps[index])); // 比较当前依赖数组 deps 和上一次的依赖数组 lastDeps 是否完全相同。
         if(same){
             hookIndex++; 
             return lastMemo; // 如果依赖数组相同，直接返回上一次的 memo
@@ -497,7 +498,7 @@ export function useReducer(reducer, initialState){
         }
         scheduleUpdate();
     }
-    return [ hookStates[hookIndex], dispatch];
+    return [ hookStates[hookIndex++], dispatch];
 }
 
 const ReactDOM = {

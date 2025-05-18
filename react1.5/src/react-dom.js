@@ -443,6 +443,42 @@ function unMountVdom(vdom) {
     if (currentDOM) currentDOM.remove();
 }
 
+export  function useMemo(factory,deps){
+    if(hookStates[hookIndex]){
+        let [ lastMemo,lastDeps ] = hookStates[hookIndex]; // 获取上一次的 memo 和依赖数组
+        let same = deps.every((item,index)=>item === lastDeps[index]); // 比较当前依赖数组 deps 和上一次的依赖数组 lastDeps 是否完全相同。
+        if(same){
+            hookIndex++; 
+            return lastMemo; // 如果依赖数组相同，直接返回上一次的 memo
+        }else{
+            let newMemo = factory(); // 如果依赖数组不同，重新计算 memo
+            hookStates[hookIndex++]=[newMemo,deps]; // 更新 memo 和依赖数组
+            return newMemo;
+        }
+    }else{
+        let newMemo = factory(); // 第一次调用时，计算 memo
+        hookStates[hookIndex++]=[newMemo,deps]; // 存储 memo 和依赖数组
+        return newMemo;
+    }
+}
+
+export function useCallback(callback,deps){
+    if(hookStates[hookIndex]){
+        let [lastCallback,lastDeps] = hookStates[hookIndex]; // 获取上一次的回调函数和依赖数组
+        let same = deps.every((item,index)=>item === lastDeps[index]); // 比较当前依赖数组和上一次的依赖数组是否完全相同
+        if(same){
+            hookIndex++; // 如果依赖数组相同，直接返回上一次的回调函数
+            return lastCallback;
+        }else{
+            hookStates[hookIndex++]=[callback,deps]; // 如果依赖数组不同，更新回调函数和依赖数组
+            return callback;
+        }
+    }else{
+        hookStates[hookIndex++]=[callback,deps]; // 第一次调用时，存储回调函数和依赖数组
+        return callback;
+    }
+}
+
 const ReactDOM = {
     render,
     createPortal: render,

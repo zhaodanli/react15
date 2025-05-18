@@ -45,13 +45,38 @@ import ReverseInstansComponent from './ReverseInstansComponent'
 //   <PortalComponent />, document.getElementById('root'));
 
 /** react Hooks 实现 */
+
+let  Child = ({data,handleClick})=>{
+  console.log('Child render');
+  return (
+     <button onClick={handleClick}>{data.number}</button>
+  )
+}
+Child = React.memo(Child);
+
 function App(){
+  console.log('App render');
+
+  const [ name, setName ] = React.useState('1');
   const [ number, setNumber ]= React.useState(0);
-  let handleClick = () => setNumber(number+1)
+
+
+  // let data = { number };
+  let data = React.useMemo(()=>({number}),[number]);
+
+  // let handleClick = ()=> setNumber(number+1);
+  let handleClick = React.useCallback(()=> setNumber(number+1),[number]);
+
   return (
     <div>
-      <p>{number}</p>
-      <button onClick={handleClick}>+</button>
+      <input type="text" value={name} onChange={event=>setName(event.target.value)}/>
+      {/* 测试memo */}
+      {/* <Child data={data} /> */}
+      {/* 测试callback */}
+      <Child data={data} handleClick={handleClick}/>
+
+      {/* <p>{number}</p>
+      <button onClick={handleClick}>+</button> */}
     </div>
   )
 }

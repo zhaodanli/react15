@@ -479,6 +479,27 @@ export function useCallback(callback,deps){
     }
 }
 
+export function useReducer(reducer, initialState){
+    hookStates[hookIndex] =  hookStates[hookIndex] || initialState; // 只存 state
+    let currentIndex = hookIndex;
+
+    function dispatch(action) {
+        //1.获取老状态
+        let oldState = hookStates[currentIndex];
+        //如果有reducer就使用reducer计算新状态
+        if (reducer) {
+            let newState = reducer(oldState, action);
+            hookStates[currentIndex] = newState;
+        } else {
+            //判断action是不是函数，如果是传入老状态，计算新状态
+            let newState = typeof action === 'function' ? action(oldState) : action;
+            hookStates[currentIndex] = newState;
+        }
+        scheduleUpdate();
+    }
+    return [ hookStates[hookIndex], dispatch];
+}
+
 const ReactDOM = {
     render,
     createPortal: render,

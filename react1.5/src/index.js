@@ -54,6 +54,29 @@ let  Child = ({data,handleClick})=>{
 }
 Child = React.memo(Child);
 
+/** ================ useReducer =============== */
+function reducer(state={number:0}, action) {
+  switch (action.type) {
+    case 'ADD':
+      return {number: state.number + 1};
+    case 'MINUS':
+      return {number: state.number - 1};
+    default:
+      return state;
+  }
+}
+
+function Counter(){
+    const [state, dispatch] = React.useReducer(reducer,{ number:0 });
+    return (
+        <div>
+          Count: {state.number}
+          <button onClick={() => dispatch({type: 'ADD'})}>+</button>
+          <button onClick={() => dispatch({type: 'MINUS'})}>-</button>
+        </div>
+    )
+}
+
 function App(){
   console.log('App render');
 
@@ -74,7 +97,7 @@ function App(){
       {/* <Child data={data} /> */}
       {/* 测试callback */}
       <Child data={data} handleClick={handleClick}/>
-
+      <Counter />
       {/* <p>{number}</p>
       <button onClick={handleClick}>+</button> */}
     </div>

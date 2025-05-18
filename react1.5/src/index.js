@@ -55,6 +55,8 @@ let  Child = ({data,handleClick})=>{
 Child = React.memo(Child);
 
 /** ================ useReducer =============== */
+
+const CounterContext = React.createContext();
 function reducer(state={number:0}, action) {
   switch (action.type) {
     case 'ADD':
@@ -67,12 +69,16 @@ function reducer(state={number:0}, action) {
 }
 
 function Counter(){
+    let { CounterContextState, CounterContextDispatch} = React.useContext(CounterContext);
     const [state, dispatch] = React.useReducer(reducer,{ number:0 });
     return (
         <div>
           Count: {state.number}
           <button onClick={() => dispatch({type: 'ADD'})}>+</button>
           <button onClick={() => dispatch({type: 'MINUS'})}>-</button>
+          <p>{CounterContextState.number}</p>
+          <button onClick={() => CounterContextDispatch({type: 'ADD'})}>+</button>
+          <button onClick={() => CounterContextDispatch({type: 'MINUS'})}>-</button>
         </div>
     )
 }
@@ -82,6 +88,7 @@ function App(){
 
   const [ name, setName ] = React.useState('1');
   const [ number, setNumber ]= React.useState(0);
+  const [CounterContextState, CounterContextDispatch] = React.useReducer(reducer,{ number:0 });
 
 
   // let data = { number };
@@ -91,16 +98,18 @@ function App(){
   let handleClick = React.useCallback(()=> setNumber(number+1),[number]);
 
   return (
-    <div>
-      <input type="text" value={name} onChange={event=>setName(event.target.value)}/>
-      {/* 测试memo */}
-      {/* <Child data={data} /> */}
-      {/* 测试callback */}
-      <Child data={data} handleClick={handleClick}/>
-      <Counter />
-      {/* <p>{number}</p>
-      <button onClick={handleClick}>+</button> */}
-    </div>
+    <CounterContext.Provider value={{CounterContextState, CounterContextDispatch }}>
+      <div>
+        <input type="text" value={name} onChange={event=>setName(event.target.value)}/>
+        {/* 测试memo */}
+        {/* <Child data={data} /> */}
+        {/* 测试callback */}
+        <Child data={data} handleClick={handleClick}/>
+        <Counter />
+        {/* <p>{number}</p>
+        <button onClick={handleClick}>+</button> */}
+      </div>
+    </CounterContext.Provider>
   )
 }
 

@@ -516,10 +516,8 @@ export function useEffect(callback,dependencies){
             hookIndex++;
         }
     } else {
-        setTimeout(() => {
-            setTimeout(()=>{
-                hookStates[currentIndex] = [ callback(), dependencies ]; // 第一次执行 callback 存储清理函数和依赖数组
-            })
+        setTimeout(()=>{
+            hookStates[currentIndex] = [ callback(), dependencies ]; // 第一次执行 callback 存储清理函数和依赖数组
         })
         hookIndex++;
     }
@@ -531,7 +529,7 @@ export function useLayoutEffect(callback,dependencies) {
         let [destroy,lastDeps] = hookStates[hookIndex]; // 获取上一次的清理函数和依赖数组
         let same = dependencies && dependencies.every((item,index) => item === lastDeps[index] ); // 比较依赖数组是否相同
         if(same) {
-            hookStates++; // 如果依赖数组相同，跳过执行
+            hookIndex++; // 如果依赖数组相同，跳过执行
         } else {
             destroy && destroy(); // 如果依赖数组不同，执行上一次的清理函数
             queueMicrotask(()=>{

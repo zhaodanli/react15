@@ -74,13 +74,14 @@ function Counter(){
 
     React.useEffect(() => {
       console.log('开启一个新的定时器')
-      const $timer = setInterval(() => {
-        dispatch(number => number + 1);
-      }, 1000);
-      return () => {
-          console.log('销毁老的定时器');
-          clearInterval($timer);
-      }
+      console.log(111)
+      // const $timer = setInterval(() => {
+      //   dispatch(number => number + 1);
+      // }, 1000);
+      // return () => {
+      //     console.log('销毁老的定时器');
+      //     clearInterval($timer);
+      // }
     }, []);
 
     return (
@@ -100,12 +101,16 @@ function InputChild(props, ref) {
   React.useImperativeHandle(ref, () => (
       {
           focus() {
-              inputRef.current.focus();
+              // inputRef.current.focus();
+              console.log(222)
           }
       }
   ));
   return (
-      <input type="text" ref={inputRef} />
+    <div>
+        {/* <input type="text" ref={inputRef} /> */}
+        <input type="text" />
+    </div>
   )
 }
 

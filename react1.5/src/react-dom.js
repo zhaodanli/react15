@@ -152,11 +152,13 @@ function mountClassComponent(vdom) {
     if(classInstance.componentWillMount) {
         classInstance.componentWillMount();
     }
+    
     if(ref) {
         ref.current = classInstance;
+        classInstance.ref = ref;
     }
     // 2. 调用类组件的render方法
-    const renderVdom = classInstance.mount();
+    const renderVdom = classInstance.render();
     // if(classInstance.componentDidMount) {
     //     classInstance.componentDidMount();
     // }

@@ -76,12 +76,12 @@ function Counter(){
       console.log('开启一个新的定时器')
       const $timer = setInterval(() => {
         dispatch(number => number + 1);
-      }, 5000);
+      }, 1000);
       return () => {
           console.log('销毁老的定时器');
           clearInterval($timer);
       }
-  });
+    }, []);
 
     return (
         <div>
@@ -101,6 +101,12 @@ function App(){
   const [ name, setName ] = React.useState('1');
   const [ number, setNumber ]= React.useState(0);
   const [CounterContextState, CounterContextDispatch] = React.useReducer(reducer,{ number:0 });
+  const ref = React.useRef();
+
+  React.useLayoutEffect(() => {
+    ref.current.style.transform = `translate(500px)`;//TODO
+    ref.current.style.transition = `all 500ms`;
+  });
 
 
   // let data = { number };
@@ -109,9 +115,16 @@ function App(){
   // let handleClick = ()=> setNumber(number+1);
   let handleClick = React.useCallback(()=> setNumber(number+1),[number]);
 
+  let style = {
+    width: '100px',
+    height: '100px',
+    borderRadius: '50%',
+    backgroundColor: 'red'
+  }
+
   return (
     <CounterContext.Provider value={{CounterContextState, CounterContextDispatch }}>
-      <div>
+      <div style = {style} ref={ref}>
         <input type="text" value={name} onChange={event=>setName(event.target.value)}/>
         {/* 测试memo */}
         {/* <Child data={data} /> */}

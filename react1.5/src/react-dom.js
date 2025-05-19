@@ -507,19 +507,49 @@ export function useEffect(callback,dependencies){
         let [destroy,lastDeps] = hookStates[hookIndex]; // 获取上一次的清理函数和依赖数组
         let same = dependencies && dependencies.every((item,index) => item === lastDeps[index] ); // 比较依赖数组是否相同
         if(same) {
-            hookStates++; // 如果依赖数组相同，跳过执行
+            hookIndex++; // 如果依赖数组相同，跳过执行
         } else {
             destroy && destroy(); // 如果依赖数组不同，执行上一次的清理函数
-            hookStates[currentIndex] = [ callback(), dependencies ]; // 执行 callback 并存储返回的清理函数和新的依赖数组
+            setTimeout(()=>{
+                hookStates[currentIndex] = [ callback(), dependencies ]; // 执行 callback 并存储返回的清理函数和新的依赖数组
+            })
             hookIndex++;
         }
     } else {
         setTimeout(() => {
-            let destroy = callback(); // 
-            hookStates[currentIndex] = [ destroy, dependencies ]; // 第一次执行 callback 存储清理函数和依赖数组
+            setTimeout(()=>{
+                hookStates[currentIndex] = [ callback(), dependencies ]; // 第一次执行 callback 存储清理函数和依赖数组
+            })
         })
         hookIndex++;
     }
+}
+
+export function useLayoutEffect(callback,dependencies) {
+    let currentIndex = hookIndex;
+    if(hookStates[hookIndex]) {
+        let [destroy,lastDeps] = hookStates[hookIndex]; // 获取上一次的清理函数和依赖数组
+        let same = dependencies && dependencies.every((item,index) => item === lastDeps[index] ); // 比较依赖数组是否相同
+        if(same) {
+            hookStates++; // 如果依赖数组相同，跳过执行
+        } else {
+            destroy && destroy(); // 如果依赖数组不同，执行上一次的清理函数
+            queueMicrotask(()=>{
+                hookStates[currentIndex] = [ callback(), dependencies ]; // 执行 callback 并存储返回的清理函数和新的依赖数组
+            })
+            hookIndex++;
+        }
+    } else {
+        queueMicrotask(()=>{
+            hookStates[currentIndex] = [ callback(), dependencies ]; // 执行 callback 并存储返回的清理函数和新的依赖数组
+        })
+        hookIndex++;
+    }
+}
+
+export function useRef(initialState) {
+    hookStates[hookIndex] =  hookStates[hookIndex] || { current: initialState };
+    return hookStates[hookIndex++];
 }
 
 const ReactDOM = {

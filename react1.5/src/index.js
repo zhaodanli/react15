@@ -150,20 +150,20 @@ function App(){
   }
 
   return (
-    // <CounterContext.Provider value={{CounterContextState, CounterContextDispatch }}>
+    <CounterContext.Provider value={{CounterContextState, CounterContextDispatch }}>
       <div style = {style} ref={ref}>
         <ForwardChild ref={inputRef} />
         <button onClick={getFocus}>获得焦点</button>
-        {/* <input type="text" value={name} onChange={event=>setName(event.target.value)}/> */}
+        <input type="text" value={name} onChange={event=>setName(event.target.value)}/>
         {/* 测试memo */}
-        {/* <Child data={data} /> */}
+        <Child data={data} />
         {/* 测试callback */}
-        {/* <Child data={data} handleClick={handleClick}/> */}
-        {/* <Counter /> */}
-        {/* <p>{number}</p>
-        <button onClick={handleClick}>+</button> */}
+        <Child data={data} handleClick={handleClick}/>
+        <Counter />
+        <p>{number}</p>
+        <button onClick={handleClick}>+</button>
       </div>
-    // </CounterContext.Provider>
+    </CounterContext.Provider>
   )
 }
 

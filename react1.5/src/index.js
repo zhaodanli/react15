@@ -71,6 +71,18 @@ function reducer(state={number:0}, action) {
 function Counter(){
     let { CounterContextState, CounterContextDispatch} = React.useContext(CounterContext);
     const [state, dispatch] = React.useReducer(reducer,{ number:0 });
+
+    React.useEffect(() => {
+      console.log('开启一个新的定时器')
+      const $timer = setInterval(() => {
+        dispatch(number => number + 1);
+      }, 5000);
+      return () => {
+          console.log('销毁老的定时器');
+          clearInterval($timer);
+      }
+  });
+
     return (
         <div>
           Count: {state.number}

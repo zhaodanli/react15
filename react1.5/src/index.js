@@ -95,6 +95,26 @@ function Counter(){
     )
 }
 
+function InputChild(props, ref) {
+  const inputRef = React.useRef();
+  React.useImperativeHandle(ref, () => (
+      {
+          focus() {
+              inputRef.current.focus();
+          }
+      }
+  ));
+  return (
+      <input type="text" ref={inputRef} />
+  )
+}
+
+/**
+ * forwardRef将ref从父组件中转发到子组件中的dom元素上,子组件接受props和ref作为参数
+ * useImperativeHandle 可以让你在使用 ref 时自定义暴露给父组件的实例值
+ */
+const ForwardChild = React.forwardRef(InputChild);
+
 function App(){
   console.log('App render');
 
@@ -102,6 +122,7 @@ function App(){
   const [ number, setNumber ]= React.useState(0);
   const [CounterContextState, CounterContextDispatch] = React.useReducer(reducer,{ number:0 });
   const ref = React.useRef();
+  const inputRef = React.useRef();
 
   React.useLayoutEffect(() => {
     ref.current.style.transform = `translate(500px)`;//TODO
@@ -122,19 +143,27 @@ function App(){
     backgroundColor: 'red'
   }
 
+  const getFocus = () => {
+    console.log(inputRef.current);
+    inputRef.current.value = 'focus';
+    inputRef.current.focus();
+  }
+
   return (
-    <CounterContext.Provider value={{CounterContextState, CounterContextDispatch }}>
+    // <CounterContext.Provider value={{CounterContextState, CounterContextDispatch }}>
       <div style = {style} ref={ref}>
-        <input type="text" value={name} onChange={event=>setName(event.target.value)}/>
+        <ForwardChild ref={inputRef} />
+        <button onClick={getFocus}>获得焦点</button>
+        {/* <input type="text" value={name} onChange={event=>setName(event.target.value)}/> */}
         {/* 测试memo */}
         {/* <Child data={data} /> */}
         {/* 测试callback */}
-        <Child data={data} handleClick={handleClick}/>
-        <Counter />
+        {/* <Child data={data} handleClick={handleClick}/> */}
+        {/* <Counter /> */}
         {/* <p>{number}</p>
         <button onClick={handleClick}>+</button> */}
       </div>
-    </CounterContext.Provider>
+    // </CounterContext.Provider>
   )
 }
 

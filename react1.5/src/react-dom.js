@@ -136,7 +136,7 @@ function mountContextComponent(vdom) {
 
 function mountForwardComponent(vdom) {
     let { type, props, ref } = vdom;
-    let renderVdom = type.mount(props, ref);
+    let renderVdom = type.render(props, ref);
     vdom.oldRenderVdom = renderVdom;
     if (!renderVdom) return null;  
     return createDOM(renderVdom);
@@ -550,6 +550,10 @@ export function useLayoutEffect(callback,dependencies) {
 export function useRef(initialState) {
     hookStates[hookIndex] =  hookStates[hookIndex] || { current: initialState };
     return hookStates[hookIndex++];
+}
+
+export function useImperativeHandle(ref, handler) {
+    ref.current = handler();
 }
 
 const ReactDOM = {

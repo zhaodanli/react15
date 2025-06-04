@@ -6,5 +6,8 @@ let element = (
   </h1>
 );
 
+// 创建根fiber
 const root = createRoot(document.getElementById("root"));
-console.log(root);
+
+// 构建虚拟dom
+root.render(element);

@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 /**
+ * vite用的
  * 配置全局常量，用于条件编译和功能控制。
  * 设置模块路径别名，方便开发时引用自定义模块。
  * 启用 React 插件，支持 React 项目开发。

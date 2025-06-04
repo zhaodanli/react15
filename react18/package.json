@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@babel/plugin-transform-react-jsx": "^7.27.1",
     "@vitejs/plugin-react": "^4.5.1",
     "vite": "^6.3.5"
   }

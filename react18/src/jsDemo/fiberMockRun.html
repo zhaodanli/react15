@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <script>
+      // 模拟一个耗时操作，通过阻塞主线程 d 毫秒来模拟任务的执行时间。
+      function sleep(d) {
+        // 使用 while 循环不断检查当前时间与起始时间的差值，直到达到指定的时间间隔。
+        for (var t = Date.now(); Date.now() - t <= d; );
+      }
+      // 初始化任务队列：
+      // 定义了一组任务，每个任务会模拟耗时 20 毫秒的操作。
+      const works = [
+        () => {
+          console.log("第1个任务开始");
+          sleep(20); //sleep(20);
+          console.log("第1个任务结束");
+        },
+        () => {
+          console.log("第2个任务开始");
+          sleep(20); //sleep(20);
+          console.log("第2个任务结束");
+        },
+        () => {
+          console.log("第3个任务开始");
+          sleep(20); //sleep(20);
+          console.log("第3个任务结束");
+        },
+      ];
+
+      // 开始调度：
+      // requestIdleCallback 调度 使用浏览器的 requestIdleCallback API，在浏览器空闲时间内调用 workLoop 函数。
+      // requestIdleCallback 的特点：
+      // 它会在浏览器空闲时执行回调函数，避免阻塞主线程的高优先级任务（如用户交互、动画等）。
+      // 回调函数会接收一个 deadline 对象，提供当前帧剩余的空闲时间。
+      requestIdleCallback(workLoop);
+
+      // 任务分片执行：
+      // 模拟时间分片机制，在每一帧的空闲时间内执行任务。
+      // deadline：由 requestIdleCallback 提供，包含当前帧剩余的空闲时间。
+      function workLoop(deadline) {
+        console.log("本帧剩余时间", parseInt(deadline.timeRemaining()));
+        // 在剩余时间大于 1 毫秒且任务队列不为空时，执行任务
+        while (deadline.timeRemaining() > 1 && works.length > 0) {
+          performUnitOfWork();
+        }
+        // 如果任务未完成（works.length > 0），打印剩余时间，并重新调度 workLoop，等待下一次空闲时间。
+        if (works.length > 0) {
+          console.log(`只剩下${parseInt(deadline.timeRemaining())}ms,时间片到了等待下次空闲时间的调度`);
+          requestIdleCallback(workLoop);
+        }
+      }
+
+      // 从任务队列中取出第一个任务并执行
+      function performUnitOfWork() {
+        // 使用 shift 方法移除并返回任务队列中的第一个任务，然后调用该任务。
+        works.shift()();
+      }
+
+      // 任务完成
+      // 当所有任务执行完毕（works.length === 0），调度结束。
+    </script>
+  </body>
+</html>

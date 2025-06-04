@@ -1,0 +1,16 @@
+{
+    // 主要用于配置项目的路径别名和编译选项。它通常用于帮助编辑器（如 VS Code）提供更好的代码提示、路径解析和跳转功能。
+    "compilerOptions": {
+      "baseUrl": "./", // baseUrl: 设置项目的基础路径，"./" 表示当前项目的根目录。所有相对路径的解析都会基于这个路径
+      "paths": { // 配置路径别名，用于简化模块导入路径。
+        "react/*": ["src/react/*"],
+        "react-dom/*": ["src/react-dom/*"],
+        "react-dom-bindings/*": ["react-dom-bindings/*"],
+        "react-reconciler/*": ["src/react-reconciler/*"],
+        "scheduler/*": ["scheduler/*"],
+        "shared/*": ["src/shared/*"]
+      }
+    },
+    // 指定需要排除的目录，避免这些目录中的文件被编辑器或工具处理。
+    "exclude": ["node_modules", "dist"] // 排除构建输出目录
+  }

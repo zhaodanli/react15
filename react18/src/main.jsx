@@ -1,10 +1,19 @@
 import { createRoot } from "react-dom/client";
 
-let element = (
-  <h1>
-    hello<span style={{ color: "red" }}>world</span>
-  </h1>
-);
+// let element = (
+//   <h1>
+//     hello<span style={{ color: "red" }}>world</span>
+//   </h1>
+// );
+
+function FunctionComponent() {
+  return (
+    <h1>
+      hello<span style={{ color: "red" }}>world Function</span>
+    </h1>
+  );
+}
+let element = <FunctionComponent />;
 
 // 创建根fiber
 const root = createRoot(document.getElementById("root"));

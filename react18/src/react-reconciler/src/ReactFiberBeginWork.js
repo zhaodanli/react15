@@ -1,8 +1,9 @@
-import { HostRoot, HostComponent, HostText } from "./ReactWorkTags";
+import { HostRoot, HostComponent, HostText, IndeterminateComponent, FunctionComponent } from "./ReactWorkTags";
 import { processUpdateQueue } from "./ReactFiberClassUpdateQueue";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { shouldSetTextContent } from "react-dom-bindings/src/client/ReactDOMHostConfig";
 import logger, { indent } from "shared/logger";
+import { renderWithHooks } from "react-reconciler/src/ReactFiberHooks";
 
 /** 根据当前 Fiber 节点类型，生成或更新其子 Fiber 链表，为后续的渲染和 DOM 更新做准备。
  * “构建 Fiber 子树”和“diff 虚拟 DOM”
@@ -59,6 +60,14 @@ function updateHostComponent(current, workInProgress) {
     return workInProgress.child;
 }
 
+function mountIndeterminateComponent(_current, workInProgress, Component) {
+    const props = workInProgress.pendingProps;
+    const value = renderWithHooks(null, workInProgress, Component, props);
+    workInProgress.tag = FunctionComponent;
+    reconcileChildren(null, workInProgress, value);
+    return workInProgress.child;
+}
+
 /** 根据 Fiber 节点类型，分发到不同的处理函数，生成/更新子 Fiber 链表。
  * 原生节点：判断是否有子节点，生成/更新子 Fiber。
  * 文本节点：没有子节点，返回 null。
@@ -72,6 +81,11 @@ export function beginWork(current, workInProgress) {
     logger(" ".repeat(indent.number) + "beginWork", workInProgress);
     indent.number += 2;
     switch (workInProgress.tag) {
+        case IndeterminateComponent: {
+            return mountIndeterminateComponent(
+                current, workInProgress, workInProgress.type
+            )
+        }
         case HostRoot:
             return updateHostRoot(current, workInProgress);
         case HostComponent:

@@ -1,8 +1,15 @@
 import { HostRoot, HostComponent, HostText } from "./ReactWorkTags";
 import { MutationMask, Placement } from "./ReactFiberFlags";
+import {
+    insertBefore,
+    appendChild,
+} from "react-dom-bindings/src/client/ReactDOMHostConfig.js";
 
 /** 这段代码实现了 React Fiber commit 阶段的副作用处理，
  *  主要负责根据 Fiber 节点上的副作用标记（flags），递归执行 DOM 操作（如插入、更新、删除等）。
+ * getHostSibling 用于在 commit 阶段确定插入位置，保证新节点插入到正确的 DOM 顺序。
+ * 它会跳过还没插入的节点（有 Placement 标记的），只返回已经在 DOM 中的兄弟节点。
+ * 如果找不到，说明应该插入到父节点末尾。
  */
 
 
@@ -51,7 +58,7 @@ function recursivelyTraverseMutationEffects(root, parentFiber) {
  */
 function commitReconciliationEffects(finishedWork) {
     const { flags } = finishedWork;
-    //   插入操作 
+    //  插入操作 
     if (flags & Placement) {
         commitPlacement(finishedWork);
         // 取反
@@ -64,4 +71,122 @@ function commitReconciliationEffects(finishedWork) {
  */
 function commitPlacement(finishedWork) {
     console.log("commitPlacement", finishedWork);
+    const parentFiber = getHostParentFiber(finishedWork);
+    switch (parentFiber.tag) {
+        case HostComponent: {
+            const parent = parentFiber.stateNode;
+            const before = getHostSibling(finishedWork);
+            insertOrAppendPlacementNode(finishedWork, before, parent);
+            break;
+        }
+        case HostRoot: {
+            const parent = parentFiber.stateNode.containerInfo;
+            const before = getHostSibling(finishedWork);
+            insertOrAppendPlacementNode(finishedWork, before, parent);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+function getHostParentFiber(fiber) {
+    let parent = fiber.return;
+    while (parent !== null) {
+        if (isHostParent(parent)) {
+            return parent;
+        }
+        parent = parent.return;
+    }
+    return parent;
+}
+
+/** 从当前 Fiber 节点向上查找，找到最近的“原生父节点”
+ * 在 commit 阶段插入 DOM 时，需要知道插入到哪个父节点下，这个函数就是用来找“真实 DOM 父节点”的。
+ *  
+ */
+function isHostParent(fiber) {
+    return fiber.tag === HostComponent || fiber.tag === HostRoot;
+}
+
+/** 查找当前 Fiber 节点在真实 DOM 中的“下一个兄弟节点”（host sibling）。
+ * 查找 fiber 在同级中下一个“已经存在于 DOM 中”的原生节点（HostComponent 或 HostText），用于插入操作时确定插入点。
+ * 如果找不到，返回 null，表示插入到父节点末尾
+ * @param {*} fiber 
+ * @returns 
+ */
+function getHostSibling(fiber) {
+    let node = fiber;
+    // 
+    siblings: while (true) {
+        // 从当前 fiber 开始，向右找兄弟节点（sibling）
+        while (node.sibling === null) {
+            // 如果没有兄弟节点（node.sibling === null），就往父节点（node.return）回溯
+            // 直到找到有兄弟的父节点，或者回溯到根/原生父节点为止。
+            // 如果回溯到根或原生父节点还没找到，说明当前节点已经是最后一个，返回 null。
+            if (node.return === null || isHostParent(node.return)) {
+                // 如果我们是根Fiber或者父亲是原生节点，我们就是最后的弟弟
+                return null;
+            }
+            node = node.return;
+        }
+        // 找到兄弟节点后，向下查找第一个原生节点（HostComponent 或 HostText）
+        // node.sibling.return = node.return
+        node = node.sibling;
+        // 如果兄弟节点不是原生节点，递归往下找它的 child。
+        while (node.tag !== HostComponent && node.tag !== HostText) {
+            // 如果兄弟节点有 Placement 副作用（即还没插入到 DOM），跳过它，继续找下一个兄弟（continue siblings）。
+            // 如果它不是原生节点，并且，我们可能在其中有一个原生节点
+            // 试着向下搜索，直到找到为止
+            if (node.flags & Placement) {
+                // 如果我们没有孩子，可以试试弟弟
+                continue siblings;
+            } else {
+                // 如果兄弟节点不是原生节点，递归往下找它的 child。
+                // node.child.return = node
+                node = node.child;
+            }
+        } // Check if this host node is stable or about to be placed.
+        // 检查此原生节点是否稳定可以放置
+        // 如果找到的节点没有 Placement 标记（即已经在 DOM 中），返回它的 stateNode（真实 DOM 节点）。
+        if (!(node.flags & Placement)) {
+            // 找到它了!
+            return node.stateNode;
+        }
+    }
+}
+
+/** 把当前 Fiber 节点及其所有原生子节点插入到父 DOM 节点的合适位置。
+ * 
+ * @param {*} node 
+ * @param {*} before 
+ * @param {*} parent 
+ */
+function insertOrAppendPlacementNode(node, before, parent) {
+    const { tag } = node;
+    // isHost：判断当前 Fiber 是否是原生 DOM 节点（HostComponent 或 HostText）。
+    const isHost = tag === HostComponent || tag === HostText;
+    if (isHost) {
+        // 如果当前节点是原生节点（如 div、span 或文本节点）
+        const { stateNode } = node; // 真实 DOM 节点
+        if (before) {
+            // 如果指定了 before 节点，则插入到 before 之前
+            insertBefore(parent, stateNode, before);
+        } else {
+            // 否则直接插入到父节点末尾
+            appendChild(parent, stateNode);
+        }
+    } else {
+        // 如果当前节点不是原生节点（比如 FunctionComponent、Fragment 等）
+        // 递归处理它的所有子节点
+        const { child } = node;
+        if (child !== null) {
+            insertOrAppendPlacementNode(child, before, parent);
+            let { sibling } = child;
+            while (sibling !== null) {
+                insertOrAppendPlacementNode(sibling, before, parent);
+                sibling = sibling.sibling;
+            }
+        }
+    }
 }

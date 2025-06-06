@@ -97,10 +97,10 @@ function completeUnitOfWork(unitOfWork) {
 
         const siblingFiber = completedWork.sibling;
         if(siblingFiber) {
-            completedWork = siblingFiber;
+            workInProgress = siblingFiber;
             return;
         }
         completedWork = returnFiber;
         workInProgress = completedWork;
-    } while(completedWork === null)
+    } while(completedWork !== null)
 }

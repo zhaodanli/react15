@@ -36,7 +36,8 @@ export function enqueueUpdate(fiber, update) {
     return markUpdateLaneFromFiberToRoot(fiber);
 }
 
-/**
+/** 主要作用是依次处理所有待更新的 state，并计算出最终的新状态。
+ * 类组件 setState 更新队列的处理核心，
  * 从虚拟DOM 拿取 状态 到 memoizedState
  * @param {当前正在处理的 Fiber 节点} workInProgress 
  */

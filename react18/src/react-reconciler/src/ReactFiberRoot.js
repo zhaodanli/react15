@@ -1,5 +1,5 @@
-import { createHostRootFiber } from "./ReactFiber"
-import { initializeUpdateQueue } from "./ReactFiberClassUpdateQueue";
+import { createHostRootFiber } from "./ReactFiber.js"
+import { initializeUpdateQueue } from "./ReactFiberClassUpdateQueue.js";
 
 
 /**

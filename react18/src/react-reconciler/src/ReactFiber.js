@@ -1,4 +1,4 @@
-import { HostRoot } from "./ReactWorkTags";
+import { HostRoot, IndeterminateComponent, HostComponent, HostText } from "./ReactWorkTags";
 import { NoFlags } from "./ReactFiberFlags";
 
 /**
@@ -53,4 +53,94 @@ function createFiber(tag, pendingProps, key) {
 // 创建根节点的 Fiber
 export function createHostRootFiber() {
     return createFiber(HostRoot, null, null);
+}
+
+/**
+ * 双缓冲池技术，一棵树最多只需要两个版本
+ * 将“其他”未使用的我们可以自由重用的节点
+ * 这是延迟创建的，以避免分配从未更新的内容的额外对象。它还允许我们如果需要，回收额外的内+存
+ * @param {*} current 
+ * @param {*} pendingProps 
+ */
+export function createWorkInProgress(current, pendingProps) {
+    let workInProgress = current.alternate;
+    if (workInProgress === null) {
+        workInProgress = createFiber(current.tag, pendingProps, current.key);
+        workInProgress.type = current.type;
+        workInProgress.stateNode = current.stateNode;
+        workInProgress.alternate = current;
+        current.alternate = workInProgress;
+    } else {
+        // 将新的属性（pendingProps）赋值给 workInProgress 节点。
+        workInProgress.pendingProps = pendingProps;
+        // 将 current 节点的类型（type）赋值给 workInProgress 节点。
+        workInProgress.type = current.type;
+        // 将 workInProgress.flags 重置为 NoFlags。每次更新时，workInProgress 节点的副作用标记需要重新计算。
+        // 更新完成后，flags 应该被重置为 NoFlags，以便下一次更新重新计算副作用。
+        workInProgress.flags = NoFlags;
+        // 如果不重置 subtreeFlags，可能会遗留上一次更新的标记，导致错误的操作。
+        workInProgress.subtreeFlags = NoFlags;
+    }
+    /**
+        * 第一次更新
+        * 创建 workInProgress 树：
+        * 调用 createWorkInProgress，为 RootFiber 创建或复用 workInProgress 节点。
+        * 复制 current.memoizedState 到 workInProgress.memoizedState。
+        * 更新 ChildFiber1 的状态：
+        * workInProgress.ChildFiber1.memoizedState 被更新为 { count: 2 }。
+        * 第二次更新
+        * 复用 workInProgress：
+        * 如果不重新赋值 workInProgress.memoizedState = current.memoizedState，workInProgress.ChildFiber1.memoizedState 仍然是 { count: 2 }。
+        * 这会导致状态不一致，因为 current.ChildFiber1.memoizedState 仍然是 { count: 1 }。
+        * 重新赋值：
+        * 通过 workInProgress.memoizedState = current.memoizedState，确保 workInProgress 的初始状态与 current 一致。
+        */
+    /**
+     * 其他字段（如 memoizedProps、memoizedState）表示上一次渲染的状态和属性，它们会在调和过程中被更新。
+     */
+    workInProgress.child = current.child;
+    workInProgress.memoizedProps = current.memoizedProps;
+    workInProgress.memoizedState = current.memoizedState;
+    workInProgress.updateQueue = current.updateQueue;
+    workInProgress.sibling = current.sibling;
+    workInProgress.index = current.index;
+    return workInProgress;
+}
+
+/**
+ * 根据 type 和 pendingProps 创建一个新的 Fiber 节点。
+ * @param {*} type 
+ * @param {*} key 
+ * @param {*} pendingProps 
+ * @returns 
+ */
+export function createFiberFromTypeAndProps(type, key, pendingProps) {
+    // 每个fiber都会有一个标签 IndeterminateComponent 表示未确定的组件类型
+    let fiberTag = IndeterminateComponent;
+    // 如果 type 是字符串（如 'div'），将 fiberTag 设置为 HostComponent（表示原生 DOM 节点）。
+    if (typeof type === "string") {
+        fiberTag = HostComponent;
+    }
+    const fiber = createFiber(fiberTag, pendingProps, key);
+    fiber.type = type;
+    return fiber;
+}
+
+/**
+ * 根据虚拟 DOM 创建 Fiber
+ * @param {*} element 
+ * @returns 
+ */
+export function createFiberFromElement(element) {
+    const { type, key, props: pendingProps } = element;
+    return createFiberFromTypeAndProps(type, key, pendingProps);
+}
+
+/**
+ * 从文本内容（content）创建一个新的文本类型的 Fiber 节点。
+ * @param {*} content 
+ * @returns 
+ */
+export function createFiberFromText(content) {
+    return createFiber(HostText, content, null);
 }

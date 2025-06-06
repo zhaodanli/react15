@@ -1,4 +1,4 @@
-import { createContainer, updateContainer } from "react-reconciler/src/ReactFiberReconciler";
+import { createContainer, updateContainer } from "react-reconciler/src/ReactFiberReconciler.js";
 
 function ReactDOMRoot(internalRoot) {
     // 初始化 Fiber 树的容器（internalRoot）

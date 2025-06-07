@@ -71,7 +71,7 @@ function commitReconciliationEffects(finishedWork) {
  * @param {*} finishedWork 
  */
 function commitPlacement(finishedWork) {
-    console.log("commitPlacement", finishedWork);
+    // console.log("commitPlacement", finishedWork);
     const parentFiber = getHostParentFiber(finishedWork);
     switch (parentFiber.tag) {
         case HostComponent: {

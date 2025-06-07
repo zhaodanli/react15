@@ -37,12 +37,12 @@ function ensureRootIsScheduled(root) {
  * @param {*} root 
  */
 function performConcurrentWorkOnRoot(root) {
-    console.log("performConcurrentWorkOnRoot");
+    // console.log("performConcurrentWorkOnRoot");
     // 初次渲染， 同步渲染根节点 第一次渲染 要尽快给用户看
     renderRootSync(root)
     const finishedWork = root.current.alternate;
-    printFiber(finishedWork);
-    console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
+    // printFiber(finishedWork);
+    // console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
     root.finishedWork = finishedWork;
     commitRoot(root);
 }
@@ -56,7 +56,7 @@ function commitRoot(root) {
     // 自己活着自节点有副作用
     if (subtreeHasEffects || rootHasEffect) {
         // 在fiber上提交变更操作的副作用
-        console.log("commitRoot");
+        // console.log("commitRoot");
         commitMutationEffectsOnFiber(finishedWork, root);
     }
     root.current = finishedWork;
@@ -146,7 +146,7 @@ function renderRootSync(root) {
 function prepareFreshStack(root) {
     // 创建新的HOSTRootFiber
     workInProgress = createWorkInProgress(root.current, null);
-    console.log('workInProgress>>>>>>>>>>>', workInProgress);
+    // console.log('workInProgress>>>>>>>>>>>', workInProgress);
 }
 
 function workLoopSync() {

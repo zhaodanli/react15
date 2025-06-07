@@ -78,8 +78,8 @@ function mountIndeterminateComponent(_current, workInProgress, Component) {
  * @param {新fiber} workInProgress 
  */
 export function beginWork(current, workInProgress) {
-    logger(" ".repeat(indent.number) + "beginWork", workInProgress);
-    indent.number += 2;
+    // logger(" ".repeat(indent.number) + "beginWork", workInProgress);
+    // indent.number += 2;
     switch (workInProgress.tag) {
         case IndeterminateComponent: {
             return mountIndeterminateComponent(

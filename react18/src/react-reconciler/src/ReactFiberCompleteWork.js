@@ -99,8 +99,8 @@ function appendAllChildren(parent, workInProgress) {
  * @param {*} workInProgress 
  */
 export function completeWork(current, workInProgress) {
-    indent.number -= 2;
-    logger(" ".repeat(indent.number) + "completeWork", workInProgress);
+    // indent.number -= 2;
+    // logger(" ".repeat(indent.number) + "completeWork", workInProgress);
 
     // 获取新 props。
     const newProps = workInProgress.pendingProps;

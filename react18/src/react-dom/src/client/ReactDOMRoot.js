@@ -1,4 +1,5 @@
 import { createContainer, updateContainer } from "react-reconciler/src/ReactFiberReconciler.js";
+import { listenToAllSupportedEvents } from "react-dom-bindings/src/events/DOMPluginEventSystem.js";
 
 function ReactDOMRoot(internalRoot) {
     // 初始化 Fiber 树的容器（internalRoot）
@@ -20,5 +21,6 @@ ReactDOMRoot.prototype.render = function render(children) {
 export function createRoot(container) {
     // 创建 React 应用的根节点（ReactDOMRoot）
     const root = createContainer(container);
+    listenToAllSupportedEvents(container);
     return new ReactDOMRoot(root);
 }

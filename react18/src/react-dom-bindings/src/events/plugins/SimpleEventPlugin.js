@@ -8,7 +8,7 @@ function extractEvents(dispatchQueue, domEventName, targetInst, nativeEvent, nat
     let SyntheticEventCtor;
     switch (domEventName) {
         case "click":
-            // SyntheticEventCtor = SyntheticMouseEvent;
+            SyntheticEventCtor = SyntheticMouseEvent;
             break;
         default:
             break;
@@ -17,9 +17,9 @@ function extractEvents(dispatchQueue, domEventName, targetInst, nativeEvent, nat
     // 累加单阶段监听
     const listeners = accumulateSinglePhaseListeners(targetInst, reactName, nativeEvent.type, inCapturePhase);
     if (listeners.length > 0) {
-        // const event = new SyntheticEventCtor(reactName, domEventName, targetInst, nativeEvent, nativeEventTarget);
+        const event = new SyntheticEventCtor(reactName, domEventName, targetInst, nativeEvent, nativeEventTarget);
         dispatchQueue.push({
-            // event,
+            event,
             listeners,
         });
     }

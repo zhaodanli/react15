@@ -41,6 +41,8 @@ export function listenToNativeEvent(domEventName, isCapturePhaseListener, target
     if (isCapturePhaseListener) {
         eventSystemFlags |= IS_CAPTURE_PHASE;
     }
+
+    // 添加捕获监听
     addTrappedEventListener(target, domEventName, eventSystemFlags, isCapturePhaseListener);
 }
 
@@ -75,6 +77,7 @@ export function dispatchEventForPluginEventSystem(
 function dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, targetInst, targetContainer) {
     const nativeEventTarget = getEventTarget(nativeEvent);
     const dispatchQueue = []; // dom 上的 props 上的 click
+    // 提取事件
     extractEvents(
         dispatchQueue,
         domEventName,
@@ -85,6 +88,61 @@ function dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, t
         targetContainer
     );
     console.log("dispatchQueue", dispatchQueue);
+    processDispatchQueue(dispatchQueue, eventSystemFlags);
+}
+
+export function processDispatchQueue(dispatchQueue, eventSystemFlags) {
+    const inCapturePhase = (eventSystemFlags & IS_CAPTURE_PHASE) !== 0;
+
+    for (let i = 0; i < dispatchQueue.length; i++) {
+        const { event, listeners } = dispatchQueue[i];
+        processDispatchQueueItemsInOrder(event, listeners, inCapturePhase);
+    }
+    // 如果是捕获阶段，反转分发队列
+    if (inCapturePhase) {
+        dispatchQueue.reverse();
+    }
+    // 遍历分发队列，处理每个事件
+    for (let i = 0; i < dispatchQueue.length; i++) {
+        const { event, listeners } = dispatchQueue[i];
+        // 触发事件监听函数
+        for (let j = 0; j < listeners.length; j++) {
+            const { instance, listener, currentTarget } = listeners[j];
+            // 调用监听函数
+            listener.call(currentTarget, event);
+        }
+    }
+}
+
+function processDispatchQueueItemsInOrder(event, dispatchListeners, inCapturePhase) {
+    // 这里可以根据需要处理事件的顺序
+    // 目前只是简单遍历，实际应用中可能需要根据优先级等进行排序
+    if (inCapturePhase) {
+        for (let i = dispatchListeners.length - 1; i >= 0; i--) {
+            const { currentTarget, listener } = dispatchListeners[i];
+            if (event.isPropagationStopped()) {
+                return; // 如果事件传播被停止，退出循环
+            }
+            // 调用监听函数
+            executeDispatch(event, listener, currentTarget);
+        }
+    } else {
+        for (let i = 0; i < dispatchListeners.length; i++) {
+            const { currentTarget, listener } = dispatchListeners[i];
+            if (event.isPropagationStopped()) {
+                return; // 如果事件传播被停止，退出循环
+            }
+            // 调用监听函数
+            executeDispatch(event, listener, currentTarget);
+        }
+    }
+}
+
+// 执行事件分发，调用监听函数
+function executeDispatch(event, listener, currentTarget) {
+    event.currentTarget = currentTarget;
+    listener(event);
+    event.currentTarget = null;
 }
 
 function extractEvents(
@@ -135,6 +193,8 @@ export function accumulateSinglePhaseListeners(targetFiber, reactName, nativeEve
     }
     return listeners;
 }
+
+// 把事件监听相关的信息（Fiber、监听函数、DOM 节点）打包成一个对象，方便后续事件分发时统一处理和调用。
 function createDispatchListener(instance, listener, currentTarget) {
     return {
         instance,

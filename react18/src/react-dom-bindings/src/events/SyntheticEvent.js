@@ -1,5 +1,3 @@
-import assign from "shared/assign";
-
 /** 这段代码实现了 React 的合成事件（SyntheticEvent）系统的核心部分。
  * 将原生浏览器事件包装成一个跨浏览器一致的“合成事件”对象，并提供统一的事件方法和属性。
  * @returns 
@@ -11,14 +9,13 @@ function functionThatReturnsFalse() {
     return false;
 }
 
-
-
 /** 合成事件工厂
  * createSyntheticEvent 是一个工厂函数，传入事件接口 如 MouseEventInterface），返回一个合成事件构造函数。
  * @param {*} Interface 
  * @returns 
  */
 function createSyntheticEvent(Interface) {
+    // 合成事件基类
     function SyntheticBaseEvent(reactName, reactEventType, targetInst, nativeEvent, nativeEventTarget) {
         this._reactName = reactName;
         this.type = reactEventType;

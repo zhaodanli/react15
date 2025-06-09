@@ -32,14 +32,18 @@ import { createRoot } from "react-dom/client";
 // >>>>>>>>>>>>>>>>>>>>>>. mountReducer <<<<<<<<<<<<<<<<<<<<<<<<<
 const reducer = (state, action) => {
   if (action.type === "add") {
-    return state + 1;
+    return state + action.payload;
   }
   return state;
 };
 
 function FunctionComponent() {
   const [number, setNumber] = React.useReducer(reducer, 0);
-  return <button onClick={() => setNumber({ type: "add" })}>{number}</button>;
+  return <button onClick={() => {
+    setNumber({ type: "add", payload: 1})
+    setNumber({ type: "add", payload: 1})
+    setNumber({ type: "add", payload: 1})
+  }}>{number}</button>;
 }
 
 let element = <FunctionComponent />;

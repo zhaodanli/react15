@@ -1,3 +1,5 @@
+import assign from "shared/assign";
+
 /** 这段代码实现了 React 的合成事件（SyntheticEvent）系统的核心部分。
  * 将原生浏览器事件包装成一个跨浏览器一致的“合成事件”对象，并提供统一的事件方法和属性。
  * @returns 

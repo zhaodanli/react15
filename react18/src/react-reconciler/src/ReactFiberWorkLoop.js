@@ -5,9 +5,11 @@ import { completeWork } from "./ReactFiberCompleteWork.js";
 import { commitMutationEffectsOnFiber } from "./ReactFiberCommitWork.js";
 import { MutationMask, NoFlags, Placement, Update,ChildDeletion } from "./ReactFiberFlags.js";
 import { HostRoot, HostComponent, HostText, FunctionComponent } from "./ReactWorkTags.js";
+import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
 
 // 新的 待更新， 正在构建中的 fiber, 相对current 是老的节点 （展示，页面上真实dom, 已经渲染完成的fiber）
 let workInProgress = null;
+let workInProgressRoot = null;
 
 /**
  * 用于调度更新
@@ -27,6 +29,8 @@ export function scheduleUpdateOnFiber(root) {
  * 这样，当调度器执行任务时，可以将 root 作为参数传递给 performConcurrentWorkOnRoot。
  */
 function ensureRootIsScheduled(root) {
+    if(workInProgressRoot) return;
+    workInProgressRoot = root;
     scheduleCallback(performConcurrentWorkOnRoot.bind(null, root));
 }
 
@@ -41,10 +45,11 @@ function performConcurrentWorkOnRoot(root) {
     // 初次渲染， 同步渲染根节点 第一次渲染 要尽快给用户看
     renderRootSync(root)
     const finishedWork = root.current.alternate;
-    // printFiber(finishedWork);
-    // console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
     root.finishedWork = finishedWork;
+    printFiber(finishedWork);
+    console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
     commitRoot(root);
+    workInProgressRoot = null;
 }
 
 function commitRoot(root) {
@@ -147,6 +152,8 @@ function prepareFreshStack(root) {
     // 创建新的HOSTRootFiber
     workInProgress = createWorkInProgress(root.current, null);
     // console.log('workInProgress>>>>>>>>>>>', workInProgress);
+    // 完成队列的的并发更新
+    finishQueueingConcurrentUpdates();
 }
 
 function workLoopSync() {

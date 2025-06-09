@@ -98,20 +98,6 @@ export function processDispatchQueue(dispatchQueue, eventSystemFlags) {
         const { event, listeners } = dispatchQueue[i];
         processDispatchQueueItemsInOrder(event, listeners, inCapturePhase);
     }
-    // 如果是捕获阶段，反转分发队列
-    if (inCapturePhase) {
-        dispatchQueue.reverse();
-    }
-    // 遍历分发队列，处理每个事件
-    for (let i = 0; i < dispatchQueue.length; i++) {
-        const { event, listeners } = dispatchQueue[i];
-        // 触发事件监听函数
-        for (let j = 0; j < listeners.length; j++) {
-            const { instance, listener, currentTarget } = listeners[j];
-            // 调用监听函数
-            listener.call(currentTarget, event);
-        }
-    }
 }
 
 function processDispatchQueueItemsInOrder(event, dispatchListeners, inCapturePhase) {

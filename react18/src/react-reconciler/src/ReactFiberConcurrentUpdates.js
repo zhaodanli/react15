@@ -75,15 +75,17 @@ export function finishQueueingConcurrentUpdates() {
       // 拿到 pending
       const pending = queue.pending;
       if (pending === null) { // 第一个更新，形成自环
-        // queue.pending = update;
         update.next = update; // 循环链表
       } else { // 如果 pending 不为空，说明已经有更新存在
         // const last = pending;
         // last.next = update;
-        update.next = queue.pending; // 循环链表
+        update.next = pending.next; // 循环链表
         pending.next = update; // 循环链表
       }
+      queue.pending = update;
     }
+
+    console.log('update >>>>>>>>>>>>', update)
   }
 }
 

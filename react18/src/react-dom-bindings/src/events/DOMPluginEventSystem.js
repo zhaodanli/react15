@@ -5,6 +5,10 @@ import { createEventListenerWrapperWithPriority } from "./ReactDOMEventListener.
 import { IS_CAPTURE_PHASE } from "./EventSystemFlags.js";
 import { addEventCaptureListener, addEventBubbleListener } from "./EventListener.js";
 
+import getEventTarget from "./getEventTarget.js";
+import getListener from "./getListener.js";
+import { HostComponent } from "react-reconciler/src/ReactWorkTags.js";
+
 
 /** 事件注册：在根容器上为所有支持的事件类型注册捕获和冒泡监听器（事件委托）。
  * 注册所有原生事件（如 click、input 等）。
@@ -19,8 +23,8 @@ SimpleEventPlugin.registerEvents();
  * @param {*} rootContainerElement 
  */
 export function listenToAllSupportedEvents(rootContainerElement) {
+    console.log("listenToAllSupportedEvents >>>>>>>>>>>>>>>", allNativeEvents)
     allNativeEvents.forEach((domEventName) => {
-        console.log(domEventName);
         listenToNativeEvent(domEventName, true, rootContainerElement);
         listenToNativeEvent(domEventName, false, rootContainerElement);
     });
@@ -51,7 +55,90 @@ function addTrappedEventListener(targetContainer, domEventName, eventSystemFlags
     const listener = createEventListenerWrapperWithPriority(targetContainer, domEventName, eventSystemFlags);
     if (isCapturePhaseListener) {
         addEventCaptureListener(targetContainer, domEventName, listener);
-    }else {
+    } else {
         addEventBubbleListener(targetContainer, domEventName, listener);
     }
+}
+
+/** dispatchEvent 最终派发的事件 
+ */
+export function dispatchEventForPluginEventSystem(
+    domEventName,
+    eventSystemFlags,
+    nativeEvent,
+    targetInst,
+    targetContainer
+) {
+    dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, targetInst, targetContainer);
+}
+
+function dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, targetInst, targetContainer) {
+    const nativeEventTarget = getEventTarget(nativeEvent);
+    const dispatchQueue = []; // dom 上的 props 上的 click
+    extractEvents(
+        dispatchQueue,
+        domEventName,
+        targetInst,
+        nativeEvent,
+        nativeEventTarget,
+        eventSystemFlags,
+        targetContainer
+    );
+    console.log("dispatchQueue", dispatchQueue);
+}
+
+function extractEvents(
+    dispatchQueue,
+    domEventName,
+    targetInst,
+    nativeEvent,
+    nativeEventTarget,
+    eventSystemFlags,
+    targetContainer
+) {
+    SimpleEventPlugin.extractEvents(
+        dispatchQueue,
+        domEventName,
+        targetInst,
+        nativeEvent,
+        nativeEventTarget,
+        eventSystemFlags,
+        targetContainer
+    );
+}
+
+/** 累加单阶段监听
+ * 
+ * @param {*} targetFiber 
+ * @param {*} reactName 
+ * @param {*} nativeEventType 
+ * @param {*} inCapturePhase 
+ * @returns 
+ */
+export function accumulateSinglePhaseListeners(targetFiber, reactName, nativeEventType, inCapturePhase) {
+    const captureName = reactName + "Capture";
+    const reactEventName = inCapturePhase ? captureName : reactName;
+    const listeners = [];
+    let instance = targetFiber;
+    while (instance !== null) {
+        const { stateNode, tag } = instance;
+        // 原生节点 且 节点存在
+        if (tag === HostComponent && stateNode !== null) {
+            if (reactEventName !== null) {
+                const listener = getListener(instance, reactEventName);
+                if (listener !== null && listener !== undefined) {
+                    listeners.push(createDispatchListener(instance, listener, stateNode));
+                }
+            }
+        }
+        instance = instance.return;
+    }
+    return listeners;
+}
+function createDispatchListener(instance, listener, currentTarget) {
+    return {
+        instance,
+        listener,
+        currentTarget,
+    };
 }

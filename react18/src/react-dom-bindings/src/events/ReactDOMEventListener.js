@@ -1,3 +1,7 @@
+import getEventTarget from "./getEventTarget.js";
+import { getClosestInstanceFromNode } from "../client/ReactDOMComponentTree.js";
+import { dispatchEventForPluginEventSystem } from "./DOMPluginEventSystem.js";
+
 /** 创建带有优先级的事件监听器包装函数。
  * 事件触发时，分发到 React 的事件系统。
  * @param {*} targetContainer 
@@ -28,6 +32,7 @@ function dispatchDiscreteEvent(domEventName, eventSystemFlags, container, native
 }
 
 /** 这里简单打印，实际实现会进行事件合成和冒泡等处理。
+ * 将事件委托给容器，在这里处理事件回调和冒泡
  * @param {*} domEventName 
  * @param {*} eventSystemFlags 
  * @param {*} targetContainer 
@@ -35,4 +40,14 @@ function dispatchDiscreteEvent(domEventName, eventSystemFlags, container, native
  */
 export function dispatchEvent(domEventName, eventSystemFlags, targetContainer, nativeEvent) {
     console.log("dispatchEvent", domEventName, eventSystemFlags, targetContainer, nativeEvent);
+    const nativeEventTarget = getEventTarget(nativeEvent); // 获取目标事件
+    const targetInst = getClosestInstanceFromNode(nativeEventTarget);
+    // 派发
+    dispatchEventForPluginEventSystem(
+        domEventName, // click
+        eventSystemFlags, // 捕获活着冒泡
+        nativeEvent, // 原生事件
+        targetInst, // dom 对应 fiber
+        targetContainer // 目标容器
+    );
 }

@@ -89,6 +89,12 @@ function mountIndeterminateComponent(_current, workInProgress, Component) {
     return workInProgress.child;
 }
 
+function updateFunctionComponent(current, workInProgress, Component, nextProps) {
+    const nextChildren = renderWithHooks(current, workInProgress, Component, nextProps);
+    reconcileChildren(current, workInProgress, nextChildren);
+    return workInProgress.child;
+}
+
 /** 根据 Fiber 节点类型，分发到不同的处理函数，生成/更新子 Fiber 链表。
  * 根节点：处理更新队列，生成子 Fiber。
  * 原生节点：判断是否有子节点，生成/更新子 Fiber。
@@ -107,6 +113,11 @@ export function beginWork(current, workInProgress) {
             return mountIndeterminateComponent(
                 current, workInProgress, workInProgress.type
             )
+        }
+        case FunctionComponent: {
+            return updateFunctionComponent(
+                current, workInProgress, workInProgress.type,  workInProgress.pendingProps
+            );
         }
         case HostRoot:
             return updateHostRoot(current, workInProgress);

@@ -1,7 +1,7 @@
 import { REACT_ELEMENT_TYPE } from "shared/ReactSymbols";
 import isArray from "shared/isArray";
-import { createFiberFromElement, FiberNode, createFiberFromText } from "./ReactFiber";
-import { Placement } from "./ReactFiberFlags";
+import { createFiberFromElement, FiberNode, createFiberFromText, createWorkInProgress } from "./ReactFiber";
+import { Placement, ChildDeletion } from "./ReactFiberFlags";
 import { HostText } from "./ReactWorkTags";
 
 /**
@@ -48,6 +48,7 @@ function createChildReconciler(shouldTrackSideEffects) {
     }
 
     /** 为新创建的 Fiber 节点设置索引（index）和副作用标记（Placement）。
+     * .副作用标记逻辑
      * @param {*} newFiber 
      * @param {*} newIndex 
      */
@@ -62,16 +63,77 @@ function createChildReconciler(shouldTrackSideEffects) {
      * @returns 
      */
     function placeSingleChild(newFiber) {
-        if (shouldTrackSideEffects) newFiber.flags |= Placement;
+        // 说明要添加副作用
+        // shouldTrackSideEffects true：表示当前是“更新阶段”，需要跟踪副作用
+        // alternate 指向上一次渲染的旧 Fiber。 为 null：说明这个 Fiber 是新创建的，不是复用的老节点。
+        // 执行插入操作
+        if (shouldTrackSideEffects && newFiber.alternate === null) {
+            newFiber.flags |= Placement;
+        }
         return newFiber;
+    }
+
+    function useFiber(fiber, pendingProps) {
+        // 创建一个新的 Fiber 节点，复用现有的 Fiber 节点（fiber），并更新其 props。
+        const clone = createWorkInProgress(fiber, pendingProps);
+        clone.index = 0;
+        clone.sibling = null;
+        return clone;
+    }
+
+    function deleteChild(returnFiber, childToDelete) {
+        if (!shouldTrackSideEffects) {
+            return;
+        }
+        const deletions = returnFiber.deletions;
+        if (deletions === null) {
+            returnFiber.deletions = [childToDelete];
+            returnFiber.flags |= ChildDeletion;
+        } else {
+            deletions.push(childToDelete);
+        }
     }
 
     /** 调和单个 React 元素，生成对应的 Fiber 节点
      * 将新 Fiber 节点的 return 指针指向父节点（returnFiber）。
+     * 单节点 diff diff逻辑如下
+     * 是否有老fiber节点
+     * 如果没有老fiber节点，创建新fiber节点
+     * 
+     * 如果有老fiber节点，复用老fiber节点 判断key
+     * 如果key相同，
+        *  判断type
+            * 如果type相同，复用老fiber节点，更新props
+            * 如果type不同，删除包括fiber在内的所有老fiber，老fiber节点，创建新fiber节点
+    * 如果key不同，删除当前fiber, 继续查找下一个 fiber节点A(key="a") -> B(key="b") -> C(key="c")
      * @param {*} newFiber 
      * @returns 
      */
     function reconcileSingleElement(returnFiber, currentFirstChild, element) {
+        const key = element.key;
+        let child = currentFirstChild;
+        while (child !== null) {
+            if (child.key === key) {
+                // 找到匹配的子节点，返回该子节点
+                const elementType = element.type;
+                // key 相同，说明新旧节点在语义上是“同一个位置的节点”。
+                // 但 type 不同，说明节点类型变了（比如 <div key="a"> 变成 <span key="a">），不能复用，必须把这个位置及其后面的所有老 fiber 全部删除，然后用新 type 创建 fiber。
+                // [ {key:"a", type:"span"} ]
+                // key="a" 匹配，但 type 不同（div 变成 span），
+                // 这时要删除 A 及其后面的所有 fiber（包括 B），然后新建一个 span 的 fiber
+                // 当前位置的节点类型变了，后面兄弟节点也都不再有意义，全部清除。
+                if (child.type === elementType) {
+                    // 复用节点
+                    const existing = useFiber(child, element.props);
+                    existing.return = returnFiber;
+                    return existing;
+                }
+            } else {
+                // 只删除当前 fiber，是为了支持“乱序重用”，比如 key="b" 只是位置变了，不应该直接删除所有后续节点。
+                deleteChild(returnFiber, child);
+            }
+            child = child.sibling;
+        }
         const created = createFiberFromElement(element);
         created.return = returnFiber;
         return created;
@@ -153,7 +215,7 @@ function createChildReconciler(shouldTrackSideEffects) {
  * 将 newChild 与 currentFirstChild 进行比较。
  * 尽可能复用已有的 Fiber 节点，减少不必要的创建和销毁。
  * 跟踪副作用（如插入、删除等操作）。
- *  */ 
+ *  */
 export const reconcileChildFibers = createChildReconciler(true);
 // 用于初次挂载阶段，不跟踪副作用（shouldTrackSideEffects = false）。
 export const mountChildFibers = createChildReconciler(false);

@@ -3,9 +3,10 @@ import {
     createInstance,
     createTextInstance,
     finalizeInitialChildren,
+    prepareUpdate,
 } from "react-dom-bindings/src/client/ReactDOMHostConfig.js";
-import { HostComponent, HostRoot, HostText } from "./ReactWorkTags.js";
-import { NoFlags } from "./ReactFiberFlags.js";
+import { HostComponent, HostRoot, HostText, FunctionComponent } from "./ReactWorkTags.js";
+import { NoFlags, Update } from "./ReactFiberFlags.js";
 import logger, { indent } from "shared/logger.js";
 
 /**
@@ -109,14 +110,19 @@ export function completeWork(current, workInProgress) {
         // HostComponent 创建 DOM 实例，递归挂载子节点，初始化属性，冒泡副作用。
         case HostComponent: { // 表示原生 DOM 节点
             const { type } = workInProgress;
-            // 创建 DOM 实例：创建 DOM/文本实例并挂载。
-            const instance = createInstance(type, newProps, workInProgress);
-            // 递归挂载子节点 递归处理子节点
-            appendAllChildren(instance, workInProgress);
-            // 保存实例
-            workInProgress.stateNode = instance;
-            // 初始化属性
-            finalizeInitialChildren(instance, type, newProps);
+            if (current !== null && workInProgress.stateNode != null) {
+                updateHostComponent(current, workInProgress, type, newProps);
+                console.log("updatePayload", workInProgress.updateQueue);
+            } else {
+                // 创建 DOM 实例：创建 DOM/文本实例并挂载。
+                const instance = createInstance(type, newProps, workInProgress);
+                // 递归挂载子节点 递归处理子节点
+                appendAllChildren(instance, workInProgress);
+                // 保存实例
+                workInProgress.stateNode = instance;
+                // 初始化属性
+                finalizeInitialChildren(instance, type, newProps);
+            }
             // 冒泡副作用标记。
             bubbleProperties(workInProgress);
             break;
@@ -133,7 +139,27 @@ export function completeWork(current, workInProgress) {
             bubbleProperties(workInProgress);
             break;
         }
+        case FunctionComponent:
+            // 处理函数组件的逻辑
+            bubbleProperties(workInProgress);
+            break;
         default:
             break;
     }
 }
+
+function updateHostComponent(current, workInProgress, type, newProps) {
+    const oldProps = current.memoizedProps;
+    const instance = workInProgress.stateNode;
+     const updatePayload = prepareUpdate(instance, type, oldProps, newProps);
+     workInProgress.updateQueue = updatePayload;
+     if (updatePayload) {
+        markUpdate(workInProgress);
+     }
+}
+
+function markUpdate(workInProgress) {
+    workInProgress.flags |= Update;
+}
+
+

@@ -14,6 +14,14 @@ let currentHook = null;
  * @returns 
  */
 
+/**
+ * 参考流程（React 源码）
+ * dispatchReducerAction → enqueueConcurrentHookUpdate
+ * scheduleUpdateOnFiber → 调度流程
+ * finishQueueingConcurrentUpdates → update 挂到 queue.pending
+ * render 阶段调用 updateReducer，pendingQueue 才有值
+ */
+
 export function renderWithHooks(current, workInProgress, Component, props) {
     // 设置当前正在渲染的 Fiber，并初始化 Hooks 调度器。
     currentlyRenderingFiber = workInProgress;
@@ -81,7 +89,7 @@ function mountWorkInProgressHook() {
         queue: null, // 存放本hook的更新队列： 里面有pending， 放置了update的双向循环链表
         next: null, // 一个函数会有多个hook, hook 会生成单向链表
     };
-    
+
     if (workInProgressHook === null) {
         // 第一个 hook
         currentlyRenderingFiber.memoizedState = workInProgressHook = hook;
@@ -134,7 +142,7 @@ function updateReducer(reducer) {
             if (update.hasEagerState) {
                 // 如果更新有急切状态，直接使用急切状态
                 newState = update.eagerState;
-            }else {
+            } else {
                 // 如果没有急切状态，使用 reducer 计算新的状态
                 const action = update.action
                 newState = reducer(newState, action)
@@ -143,6 +151,8 @@ function updateReducer(reducer) {
         } while (update !== null && update !== first); // 如果回到第一个更新，说明遍历完了所有更新
     }
     hook.memoizedState = queue.lastRenderedState = newState; // 更新 Hook 的状态和 lastRenderedState
+
+    console.log("updateReducer>>>>>>>>>>>>>>", newState, queue.lastRenderedState, queue.lastRenderedReducer)
     // 返回新的状态和 dispatch 函数
     return [newState, queue.dispatch];
 }

@@ -60,7 +60,11 @@ function FunctionComponent() {
   const [number2, setNumber2] = React.useState(0);
 
   return (
-    <button onClick={() => setNumber2(number2 + 1)}>{number2}</button>
+    <button onClick={() => {
+      setNumber2(number2);
+      setNumber2(number2 + 1);
+      setNumber2(number2 + 2);
+    }}>{number2}</button>
   )
 }
 

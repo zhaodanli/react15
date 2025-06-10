@@ -54,8 +54,19 @@ function createChildReconciler(shouldTrackSideEffects) {
      */
     function placeChild(newFiber, newIndex) {
         newFiber.index = newIndex;
+
+        if (!shouldTrackSideEffects) {
+            return;
+        }
+
+        const current = newFiber.alternate;
+        if(current !== null) {
+            return;
+        } else {
+            newFiber.flags |= Placement;
+        }
         // 如果 shouldTrackSideEffects 为 true，会将 Placement 标记添加到 newFiber.flags，表示该节点需要插入到 DOM 中。
-        if (shouldTrackSideEffects) newFiber.flags |= Placement;
+        // if (shouldTrackSideEffects) newFiber.flags |= Placement;
     }
 
     /** 为新创建的 Fiber 节点设置索引（index）和副作用标记（Placement）。
@@ -175,32 +186,111 @@ function createChildReconciler(shouldTrackSideEffects) {
         return created;
     }
 
+    function updateElement(returnFiber, current, element) {
+        const elementType = element.type;
+
+        if (current !== null) {
+            // 如果 oldFiber 存在且类型匹配，复用 oldFiber。
+            // 复用 oldFiber，更新其 props。
+            if (current.type === elementType) {
+                const existing = useFiber(current, element.props);
+                existing.return = returnFiber;
+                return existing;
+            }
+        }
+
+        // 如果 oldFiber 是 null，说明没有老节点，直接创建新节点
+        const created = createFiberFromElement(element);
+        created.return = returnFiber;
+        return created;
+    }
+
+    function updateSlot(returnFiber, oldFiber, newChild) {
+        const key = oldFiber !== null ? oldFiber.key : null;
+        if (typeof newChild === "object" && newChild !== null) {
+            switch (newChild.$$typeof) {
+                case REACT_ELEMENT_TYPE: {
+                    // 如果 newChild 是 React 元素，检查 key 是否匹配。
+                    if (newChild.key === key) {
+                        return updateElement(returnFiber, oldFiber, newChild);
+                    }
+                }
+                default:
+                    break;
+            }
+        }
+    }
+
     /** 调和子节点数组，生成对应的 Fiber 节点链表。
      * @param {*} returnFiber 
      * @param {*} currentFirstChild 
      * @param {*} newChildren 
      * @returns 
+     * React 源码的 reconcileChildrenArray 实现比你看到的伪代码更复杂，它 break 后还会有一段“map-based diff”逻辑，专门处理这种“乱序/插入/删除混合”的场景：
+        break 后会把剩下的 oldFiber 按 key/type 建立一个 map
+        然后遍历剩下的 newChildren，尝试在 map 里找可复用的 oldFiber，找不到就新建
+        最后把 map 里没用到的 oldFiber 全部删除
+        你当前看到的代码是简化版，适合“头部对齐”场景。更复杂的场景需要 map diff。
      */
     function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren) {
-        let resultingFirstChild = null; // 用于存储新创建的 Fiber 节点链表的第一个节点 最终会作为函数的返回值。
-        let previousNewFiber = null; // 用于存储当前链表中的最后一个节点，方便将新节点连接到链表中。
-        let newIdx = 0;
-        // 遍历 newChildren 数组，为每个子节点调用 createChild 创建新的 Fiber 节点。
-        for (; newIdx < newChildren.length; newIdx++) {
-            const newFiber = createChild(returnFiber, newChildren[newIdx]);
-            // 如果 createChild 返回 null（表示该子节点无效），跳过当前循环。
+        let resultingFirstChild = null; // 新链表的头 用于存储新创建的 Fiber 节点链表的第一个节点 最终会作为函数的返回值。
+        let previousNewFiber = null; // 新链表的尾 用于存储当前链表中的最后一个节点，方便将新节点连接到链表中。
+        let newIdx = 0; // 新子节点数组的下标
+
+        let oldFiber = currentFirstChild; // 当前旧 Fiber 链表的节点
+        let nextOldFiber = null;
+        // 1. 同时遍历 oldFiber 和 newChildren，尝试复用、更新、删除
+        // 尝试复用 oldFiber，能复用就复用，不能复用就 break。
+        // 主循环：同步遍历 oldFiber 和 newChildren
+        for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
+            nextOldFiber = oldFiber.sibling;
+            // 尝试用 oldFiber 和 newChildren[newIdx] 生成新 Fiber（能复用就复用，不能复用就新建）
+            const newFiber = updateSlot(returnFiber, oldFiber, newChildren[newIdx]);
+            // 如果 newFiber === null，说明不能复用，跳出循环，后续节点需要特殊处理。
             if (newFiber === null) {
-                continue;
+                break; // 不能复用，跳出循环
             }
-            // 调用 placeChild 为每个新节点设置索引和副作用标记。
+            if (shouldTrackSideEffects) {
+                if (oldFiber && newFiber.alternate === null) {
+                    // 如果新 Fiber 没有 alternate（不是复用的），则把 oldFiber 标记为删除。
+                    deleteChild(returnFiber, oldFiber);
+                }
+            }
+            // 为新 Fiber 设置 index 和副作用标记（如 Placement）。
             placeChild(newFiber, newIdx);
-            // 将新节点连接成链表，返回链表的第一个节点
+            // 把新 Fiber 挂到链表上。
             if (previousNewFiber === null) {
                 resultingFirstChild = newFiber;
-            } else {
+            }else {
                 previousNewFiber.sibling = newFiber;
             }
+
             previousNewFiber = newFiber;
+            oldFiber = nextOldFiber;
+        }
+
+        // 2. 如果 newChildren 用完了，老fiber还有剩余，全部删除
+        // 说明新数组比旧链表短，多余的 oldFiber 都要删除
+        if (newIdx === newChildren.length) {
+            deleteRemainingChildren(returnFiber, oldFiber);
+        }
+
+        // 3. 如果老fiber用完了，newChildren还有剩余，全部新建
+        // 说明新数组比旧链表长，多出来的 newChildren 都要新建 Fiber
+        if (oldFiber === null) {
+            for (; newIdx < newChildren.length; newIdx++) {
+                const newFiber = createChild(returnFiber, newChildren[newIdx]);
+                if (newFiber === null) {
+                    continue;
+                }
+                placeChild(newFiber, newIdx);
+                if (previousNewFiber === null) {
+                    resultingFirstChild = newFiber;
+                } else {
+                    previousNewFiber.sibling = newFiber;
+                }
+                previousNewFiber = newFiber;
+            }
         }
         return resultingFirstChild;
     }

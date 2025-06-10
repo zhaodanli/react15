@@ -115,7 +115,7 @@ export function completeWork(current, workInProgress) {
             // 说明是更新流程（不是首次挂载），当前 Fiber 已经有对应的 DOM 实例
             if (current !== null && workInProgress.stateNode != null) {
                 updateHostComponent(current, workInProgress, type, newProps);
-                console.log("updatePayload", workInProgress.updateQueue);
+                // console.log("updatePayload", workInProgress.updateQueue);
             } else {
                 // 创建 DOM 实例：创建 DOM/文本实例并挂载。
                 const instance = createInstance(type, newProps, workInProgress);

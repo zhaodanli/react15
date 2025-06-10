@@ -86,7 +86,7 @@ function createChildReconciler(shouldTrackSideEffects) {
         if (!shouldTrackSideEffects) {
             return;
         }
-        const deletions = returnFiber.deletions = null;
+        const deletions = returnFiber.deletions;
         if (deletions === null) {
             returnFiber.deletions = [childToDelete];
             returnFiber.flags |= ChildDeletion;

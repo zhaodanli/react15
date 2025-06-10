@@ -113,49 +113,49 @@ import { createRoot } from "react-dom/client";
 // }
 
 // >>>>>>>>>>>>>>>>>>>>>> 4. 单节点(key 不相同,类型不相同)  <<<<<<<<<<<<<<<<<<<<<<<<<
-function FunctionComponent() {
-  const [number, setNumber] = React.useState(0);
+// function FunctionComponent() {
+//   const [number, setNumber] = React.useState(0);
 
-  return number%2 === 0 ? (
-    <div onClick={() => setNumber(number + 1)} key="title" id="title">title</div>
-  ): (
-    <p onClick={() => setNumber(number + 1)} key="title2" id="title2">title2</p>
-  )
+//   return number%2 === 0 ? (
+//     <div onClick={() => setNumber(number + 1)} key="title" id="title">title</div>
+//   ): (
+//     <p onClick={() => setNumber(number + 1)} key="title2" id="title2">title2</p>
+//   )
+// }
+
+// >>>>>>>>>>>>>>>>>>>>>> 原来多个节点，现在只有一个节点F  <<<<<<<<<<<<<<<<<<<<<<<<<
+function FunctionComponent() {
+    const [number, setNumber] = React.useState(0);
+    return number === 0 ? (
+        <ul key="container" onClick={() => setNumber(number + 1)}>
+            <li key="A">A</li>
+            <li key="B" id="B">
+                B
+            </li>
+            <li key="C">C</li>
+        </ul>
+    ) : (
+        <ul key="container" onClick={() => setNumber(number + 1)}>
+            <li key="B" id="B2">
+                B2
+            </li>
+        </ul>
+    );
 }
 
 // >>>>>>>>>>>>>>>>>>>>>> 多节点 DIFF  <<<<<<<<<<<<<<<<<<<<<<<<<
-// const reducer = (state, action) => {
-//   if (action.type === "add") {
-//     return state + action.payload;
-//   }
-//   return state;
-// };
 
-// function FunctionComponent() {
-//   const [number, setNumber] = React.useReducer(reducer, 0);
+// >>>>>>>>>>>>>>>>>>>>>> 多个节点的数量和 key 相同，有的 type 不同  <<<<<<<<<<<<<<<<<<<<<<<<<
 
-//   return number === 0 ? (
-//     <ul key="container" onClick={() => setNumber(number 1)}>
-//       <li key="A">A</li>
-//       <li key="B" id="B">
-//         B
-//       </li>
-//       <li key="C" id="C">
-//         C
-//       </li>
-//     </ul>
-//   ) : (
-//     <ul key="container" onClick={() => setNumber(number 1)}>
-//       <li key="A">A2</li>
-//       <p key="B" id="B2">
-//         B2
-//       </p>
-//       <li key="C" id="C2">
-//         C2
-//       </li>
-//     </ul>
-//   );
-// }
+// >>>>>>>>>>>>>>>>>>>>>> 多个节点的类型和 key 全部相同，有新增元素 <<<<<<<<<<<<<<<<<<<<<<<<<
+
+// >>>>>>>>>>>>>>>>>>>>>> 多个节点的类型和 key 全部相同，有删除老元素 <<<<<<<<<<<<<<<<<<<<<<<<<
+
+// >>>>>>>>>>>>>>>>>>>>>> 多个节点数量不同、key 不同 <<<<<<<<<<<<<<<<<<<<<<<<<
+
+// >>>>>>>>>>>>>>>>>>>>>> useEffect <<<<<<<<<<<<<<<<<<<<<<<<<
+
+// >>>>>>>>>>>>>>>>>>>>>> useLayoutEffect <<<<<<<<<<<<<<<<<<<<<<<<<
 
 // >>>>>>>>>>>>>>>>>>>>>>. mountReducer <<<<<<<<<<<<<<<<<<<<<<<<<
 // function FunctionComponent2() {

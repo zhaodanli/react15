@@ -92,7 +92,7 @@ function dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, t
         eventSystemFlags,
         targetContainer
     );
-    console.log("dispatchQueue", dispatchQueue);
+    // console.log("dispatchQueue", dispatchQueue);
     processDispatchQueue(dispatchQueue, eventSystemFlags);
 }
 

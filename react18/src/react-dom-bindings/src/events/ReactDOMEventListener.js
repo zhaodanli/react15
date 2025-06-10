@@ -39,7 +39,7 @@ function dispatchDiscreteEvent(domEventName, eventSystemFlags, container, native
  * @param {*} nativeEvent 
  */
 export function dispatchEvent(domEventName, eventSystemFlags, targetContainer, nativeEvent) {
-    console.log("dispatchEvent", domEventName, eventSystemFlags, targetContainer, nativeEvent);
+    // console.log("dispatchEvent", domEventName, eventSystemFlags, targetContainer, nativeEvent);
     const nativeEventTarget = getEventTarget(nativeEvent); // 获取目标事件
     const targetInst = getClosestInstanceFromNode(nativeEventTarget);
     // 派发

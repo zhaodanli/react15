@@ -3,7 +3,7 @@ import { createWorkInProgress } from "./ReactFiber.js";
 import { beginWork } from "./ReactFiberBeginWork.js";
 import { completeWork } from "./ReactFiberCompleteWork.js";
 import { commitMutationEffectsOnFiber } from "./ReactFiberCommitWork.js";
-import { MutationMask, NoFlags, Placement, Update,ChildDeletion } from "./ReactFiberFlags.js";
+import { MutationMask, NoFlags, Placement, Update, ChildDeletion } from "./ReactFiberFlags.js";
 import { HostRoot, HostComponent, HostText, FunctionComponent } from "./ReactWorkTags.js";
 import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
 
@@ -29,7 +29,7 @@ export function scheduleUpdateOnFiber(root) {
  * 这样，当调度器执行任务时，可以将 root 作为参数传递给 performConcurrentWorkOnRoot。
  */
 function ensureRootIsScheduled(root) {
-    if(workInProgressRoot) return;
+    if (workInProgressRoot) return;
     workInProgressRoot = root;
     scheduleCallback(performConcurrentWorkOnRoot.bind(null, root));
 }
@@ -47,6 +47,7 @@ function performConcurrentWorkOnRoot(root) {
     const finishedWork = root.current.alternate;
     root.finishedWork = finishedWork;
     printFiber(finishedWork);
+    printFinishedWork(finishedWork)
     console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
     commitRoot(root);
     workInProgressRoot = null;
@@ -76,15 +77,22 @@ function printFiber(fiber) {
      */
     if (fiber.flags !== 0) {
         console.log(
-            getFlags(fiber.flags),
+            'printFiber >>>>>>>>>>>>>>>>>',
+            getFlags(fiber),
             getTag(fiber.tag),
             typeof fiber.type === "function" ? fiber.type.name : fiber.type,
             fiber.memoizedProps
-        )
+        );
         if (fiber.deletions) {
             for (let i = 0; i < fiber.deletions.length; i++) {
                 const childToDelete = fiber.deletions[i];
-                console.log(getTag(childToDelete.tag), childToDelete.type, childToDelete.memoizedProps);
+                console.log(
+                    'printFiber >>>>>>>>>>>>>>>>>',
+                    'fiber.deletions >>>>>>>>>>>>>>>>>',
+                    getTag(childToDelete.tag), 
+                    childToDelete.type, 
+                    childToDelete.memoizedProps
+                );
             }
         }
     }
@@ -110,7 +118,33 @@ function getTag(tag) {
     }
 }
 
-function getFlags(flags) {
+function printFinishedWork(fiber) {
+    const { flags, tag, type, deletions } = fiber;
+    if((flags & ChildDeletion) !== NoFlags) {
+        fiber.flags &= ~ChildDeletion;
+        console.log(
+            '子节点有删除' + 
+            (deletions.map(fiber => `${fiber.type}#${fiber.memoizedProps.id}`).join(', '))
+        );
+    }
+    let child = fiber.child;
+    while (child) {
+        printFinishedWork(child);
+        child = child.sibling;
+    }
+
+    if(fiber.flags === NoFlags) {
+        console.log(
+            getFlags(fiber), 
+            getTag(fiber.tag), 
+            typeof fiber.type === 'function'? fiber.type.name: type,
+            fiber.memoizedProps
+        );
+    }
+}
+
+function getFlags(fiber) {
+    const { flags, deletions } = fiber;
     if (flags === (Update | Placement | ChildDeletion)) {
         return `自己移动和子元素有删除`;
     }
@@ -118,7 +152,7 @@ function getFlags(flags) {
         return `自己有更新和子元素有删除`;
     }
     if (flags === ChildDeletion) {
-        return `子元素有删除`;
+        return `子元素有删除` + deletions.map(fiber => `${fiber.type}#${fiber.memoizedProps.id}`).join(', ');
     }
     if (flags === (Placement | Update)) {
         return `移动并更新`;

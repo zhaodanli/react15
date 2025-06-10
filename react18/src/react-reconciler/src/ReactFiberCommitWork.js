@@ -76,6 +76,7 @@ function recursivelyTraverseMutationEffects(root, parentFiber) {
             const childToDelete = deletions[i];
             commitDeletionEffects(root, parentFiber, childToDelete);
         }
+        console.log("commitMutationEffectsOnFiber >>>>>>>>>>>>>> deletions:", deletions);
         parentFiber.deletions = null; // 清除已处理的删除列表
     }
     if (parentFiber.subtreeFlags & MutationMask) {
@@ -260,16 +261,9 @@ function commitDeletionEffectsOnFiber(finishedRoot, nearestMountedAncestor, dele
             // 遍历执行子节点删除
             recursivelyTraverseDeletionEffects(finishedRoot, nearestMountedAncestor, deletedFiber);
             // 删除当前节点
-            console.log('hostParent:', hostParent);
-            console.log('hostParent.childNodes:', hostParent.childNodes);
-            console.log('deletedFiber.stateNode:', deletedFiber.stateNode);
             if (hostParent !== null) {
-                console.log("commitDeletionEffectsOnFiber>>>>>>>", hostParent, deletedFiber.stateNode, hostParent.contains(deletedFiber.stateNode));
                 removeChild(hostParent, deletedFiber.stateNode);
             }
-            console.log('hostParent:', hostParent);
-            console.log('hostParent.childNodes:', hostParent.childNodes);
-            console.log('deletedFiber.stateNode:', deletedFiber.stateNode);
             break;
         }
         default:

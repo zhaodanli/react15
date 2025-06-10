@@ -86,13 +86,26 @@ function createChildReconciler(shouldTrackSideEffects) {
         if (!shouldTrackSideEffects) {
             return;
         }
-        const deletions = returnFiber.deletions;
+        const deletions = returnFiber.deletions = null;
         if (deletions === null) {
             returnFiber.deletions = [childToDelete];
             returnFiber.flags |= ChildDeletion;
         } else {
             deletions.push(childToDelete);
         }
+    }
+
+    // 删除所有剩余的子节点。
+    function deleteRemainingChildren(returnFiber, currentFirstChild) {
+        if (!shouldTrackSideEffects) {
+            return;
+        }
+        let childToDelete = currentFirstChild;
+        while (childToDelete !== null) {
+            deleteChild(returnFiber, childToDelete);
+            childToDelete = childToDelete.sibling;
+        }
+        return null;
     }
 
     /** 调和单个 React 元素，生成对应的 Fiber 节点
@@ -126,10 +139,16 @@ function createChildReconciler(shouldTrackSideEffects) {
                 // 这时要删除 A 及其后面的所有 fiber（包括 B），然后新建一个 span 的 fiber
                 // 当前位置的节点类型变了，后面兄弟节点也都不再有意义，全部清除。
                 if (child.type === elementType) {
+                    deleteRemainingChildren(returnFiber, child.sibling);
                     // 复用节点
                     const existing = useFiber(child, element.props);
                     existing.return = returnFiber;
                     return existing;
+                }else {
+                    // 2.1 如果 type 不同，删除包括 fiber 在内的所有老 fiber 节点。
+                    // 删除当前 fiber 及其后续所有兄弟节点
+                    deleteRemainingChildren(returnFiber, child);
+                    break;
                 }
             } else {
                 // 2.2 如果key不同，删除当前fiber, 继续查找下一个 fiber节点A(key="a") -> B(key="b") -> C(key="c")

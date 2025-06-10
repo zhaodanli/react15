@@ -69,7 +69,7 @@ import { createRoot } from "react-dom/client";
 // }
 
 
-// >>>>>>>>>>>>>>>>>>>>>> 单节点(key 相同,类型相同) 1 <<<<<<<<<<<<<<<<<<<<<<<<<
+// >>>>>>>>>>>>>>>>>>>>>> 1. 单节点(key 相同,类型相同)  <<<<<<<<<<<<<<<<<<<<<<<<<
 /**   reconcileSingleElement    */
 // const reducer = (state, action) => {
 //   if (action.type === "add") {
@@ -88,34 +88,40 @@ import { createRoot } from "react-dom/client";
 //   )
 // }
 
-// >>>>>>>>>>>>>>>>>>>>>> 单节点(key 不相同,类型相同)  <<<<<<<<<<<<<<<<<<<<<<<<<
+
+// >>>>>>>>>>>>>>>>>>>>>> 2. 单节点(key 相同,类型不相同) 1 <<<<<<<<<<<<<<<<<<<<<<<<<
+/**   reconcileSingleElement    */
+// function FunctionComponent() {
+//   const [number, setNumber] = React.useState(0);
+
+//   return number%2 === 0 ? (
+//     <div onClick={() => setNumber(number + 1)} key="title" id="title">title</div>
+//   ): (
+//     <p onClick={() => setNumber(number + 1)} key="title" id="title2">title2</p>
+//   )
+// }
+
+// >>>>>>>>>>>>>>>>>>>>>> 3. 单节点(key 不相同,类型相同) 1 <<<<<<<<<<<<<<<<<<<<<<<<<
+// function FunctionComponent() {
+//   const [number, setNumber] = React.useState(0);
+
+//   return number%2 === 0 ? (
+//     <div onClick={() => setNumber(number + 1)} key="title" id="title">title</div>
+//   ): (
+//     <div onClick={() => setNumber(number + 1)} key="title2" id="title2">title2</div>
+//   )
+// }
+
+// >>>>>>>>>>>>>>>>>>>>>> 4. 单节点(key 不相同,类型不相同)  <<<<<<<<<<<<<<<<<<<<<<<<<
 function FunctionComponent() {
   const [number, setNumber] = React.useState(0);
 
   return number%2 === 0 ? (
     <div onClick={() => setNumber(number + 1)} key="title" id="title">title</div>
   ): (
-    <div onClick={() => setNumber(number + 1)} key="title2" id="title2">title2</div>
+    <p onClick={() => setNumber(number + 1)} key="title2" id="title2">title2</p>
   )
 }
-
-// >>>>>>>>>>>>>>>>>>>>>> 单节点(key 不相同,类型不相同)  <<<<<<<<<<<<<<<<<<<<<<<<<
-// const reducer = (state, action) => {
-//   if (action.type === "add") {
-//     return state + action.payload;
-//   }
-//   return state;
-// };
-
-// function FunctionComponent() {
-//   const [number, setNumber] = React.useReducer(reducer, 0);
-
-//   return number%2 === 0 ? (
-//     <div onClick={() => setNumber({ type: "add", payload: 1 })} key="title" id="title">title</div>
-//   ): (
-//     <p onClick={() => setNumber({ type: "add", payload: 1 })} key="title2" id="title2">title2</p>
-//   )
-// }
 
 // >>>>>>>>>>>>>>>>>>>>>> 多节点 DIFF  <<<<<<<<<<<<<<<<<<<<<<<<<
 // const reducer = (state, action) => {

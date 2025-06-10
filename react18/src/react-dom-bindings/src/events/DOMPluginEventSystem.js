@@ -17,6 +17,7 @@ import { HostComponent } from "react-reconciler/src/ReactWorkTags.js";
  */
 // 注册事件名
 SimpleEventPlugin.registerEvents();
+const listeningMarker = "_reactListening" + Math.random().toString(36).slice(2);
 
 /** 遍历所有原生事件名，分别在捕获和冒泡阶段注册监听。
  * 
@@ -24,10 +25,14 @@ SimpleEventPlugin.registerEvents();
  */
 export function listenToAllSupportedEvents(rootContainerElement) {
     console.log("listenToAllSupportedEvents >>>>>>>>>>>>>>>", allNativeEvents)
-    allNativeEvents.forEach((domEventName) => {
-        listenToNativeEvent(domEventName, true, rootContainerElement);
-        listenToNativeEvent(domEventName, false, rootContainerElement);
-    });
+    if (!rootContainerElement[listeningMarker]) {
+        // 如果没有标记，说明还没有注册过事件监听
+        rootContainerElement[listeningMarker] = true;
+        allNativeEvents.forEach((domEventName) => {
+            listenToNativeEvent(domEventName, true, rootContainerElement);
+            listenToNativeEvent(domEventName, false, rootContainerElement);
+        });
+    }
 }
 
 /** 事件监听：监听器是包装过的，会把事件传递给 React 的事件系统。

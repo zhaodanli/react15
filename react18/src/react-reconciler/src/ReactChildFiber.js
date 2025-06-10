@@ -97,26 +97,28 @@ function createChildReconciler(shouldTrackSideEffects) {
     /** 调和单个 React 元素，生成对应的 Fiber 节点
      * 将新 Fiber 节点的 return 指针指向父节点（returnFiber）。
      * 单节点 diff diff逻辑如下
-     * 是否有老fiber节点
+     * 1. 是否有老fiber节点
      * 如果没有老fiber节点，创建新fiber节点
      * 
-     * 如果有老fiber节点，复用老fiber节点 判断key
+     * 2. 如果有老fiber节点，复用老fiber节点 判断key
      * 如果key相同，
-        *  判断type
+        *  2.1判断type
             * 如果type相同，复用老fiber节点，更新props
             * 如果type不同，删除包括fiber在内的所有老fiber，老fiber节点，创建新fiber节点
-    * 如果key不同，删除当前fiber, 继续查找下一个 fiber节点A(key="a") -> B(key="b") -> C(key="c")
+    * 2.2 如果key不同，删除当前fiber, 继续查找下一个 fiber节点A(key="a") -> B(key="b") -> C(key="c")
      * @param {*} newFiber 
      * @returns 
      */
     function reconcileSingleElement(returnFiber, currentFirstChild, element) {
         const key = element.key;
         let child = currentFirstChild;
+        //  1. 是否有老fiber节点
         while (child !== null) {
+            // 2. 如果有老fiber节点，复用老fiber节点 判断key
             if (child.key === key) {
                 // 找到匹配的子节点，返回该子节点
                 const elementType = element.type;
-                // key 相同，说明新旧节点在语义上是“同一个位置的节点”。
+                // 2.1 key 相同，说明新旧节点在语义上是“同一个位置的节点”。
                 // 但 type 不同，说明节点类型变了（比如 <div key="a"> 变成 <span key="a">），不能复用，必须把这个位置及其后面的所有老 fiber 全部删除，然后用新 type 创建 fiber。
                 // [ {key:"a", type:"span"} ]
                 // key="a" 匹配，但 type 不同（div 变成 span），
@@ -129,6 +131,7 @@ function createChildReconciler(shouldTrackSideEffects) {
                     return existing;
                 }
             } else {
+                // 2.2 如果key不同，删除当前fiber, 继续查找下一个 fiber节点A(key="a") -> B(key="b") -> C(key="c")
                 // 只删除当前 fiber，是为了支持“乱序重用”，比如 key="b" 只是位置变了，不应该直接删除所有后续节点。
                 deleteChild(returnFiber, child);
             }

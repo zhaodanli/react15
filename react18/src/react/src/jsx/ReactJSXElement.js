@@ -48,7 +48,6 @@ const ReactElement = (type, key, ref, props) => {
  * @returns 
  */
 export function jsxDEV(type, config, maybeKey) {
-    debugger
     // 初始化
     let propName;
     const props = {};

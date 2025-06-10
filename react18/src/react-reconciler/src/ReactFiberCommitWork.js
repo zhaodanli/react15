@@ -4,7 +4,7 @@ import {
     insertBefore,
     appendChild,
     commitUpdate,
-    // removeChild
+    removeChild
 } from "react-dom-bindings/src/client/ReactDOMHostConfig.js";
 
 /** 这段代码实现了 React Fiber commit 阶段的副作用处理，
@@ -69,13 +69,14 @@ export function commitMutationEffectsOnFiber(finishedWork, root) {
  * @param {*} parentFiber 
  */
 function recursivelyTraverseMutationEffects(root, parentFiber) {
-    // const deletions = parentFiber.deletions;
-    // if (deletions !== null) {
-    //     for (let i = 0; i < deletions.length; i++) {
-    //         const childToDelete = deletions[i];
-    //         commitDeletionEffects(root, parentFiber, childToDelete);
-    //     }
-    // }
+    const deletions = parentFiber.deletions;
+    // 有需要被删除的 子fiber
+    if (deletions !== null) {
+        for (let i = 0; i < deletions.length; i++) {
+            const childToDelete = deletions[i];
+            commitDeletionEffects(root, parentFiber, childToDelete);
+        }
+    }
     if (parentFiber.subtreeFlags & MutationMask) {
         let { child } = parentFiber;
         while (child !== null) {
@@ -226,46 +227,57 @@ function insertOrAppendPlacementNode(node, before, parent) {
 }
 
 /**>>>>>>>>>>>>>>>>>>>>>>>> 以下是删除代码相关 <<<<<<<<<<<<<<<<<<<<<<<<<<< */
-// let hostParent = null;
-// function commitDeletionEffects(root, returnFiber, deletedFiber) {
-//     let parent = returnFiber;
-//     findParent: while (parent !== null) {
-//         switch (parent.tag) {
-//             case HostComponent: {
-//                 hostParent = parent.stateNode;
-//                 break findParent;
-//             }
-//             case HostRoot: {
-//                 hostParent = parent.stateNode.containerInfo;
-//                 break findParent;
-//             }
-//             default:
-//                 break;
-//         }
-//         parent = parent.return;
-//     }
-//     commitDeletionEffectsOnFiber(root, returnFiber, deletedFiber);
-//     hostParent = null;
-// }
+let hostParent = null;
+function commitDeletionEffects(root, returnFiber, deletedFiber) {
+    let parent = returnFiber;
+    // 如果只写 break;，只会跳出 switch，while 循环还会继续执行，会继续往上找父节点，这不是我们想要的。
+    // 而 break findParent; 可以直接跳出整个 while 循环，查找结束。
+    findParent: while (parent !== null) {
+        switch (parent.tag) {
+            case HostComponent: {
+                hostParent = parent.stateNode;
+                break findParent;
+            }
+            case HostRoot: {
+                hostParent = parent.stateNode.containerInfo;
+                break findParent;
+            }
+            default:
+                break;
+        }
+        parent = parent.return;
+    }
+    commitDeletionEffectsOnFiber(root, returnFiber, deletedFiber);
+    hostParent = null;
+}
 
-// function commitDeletionEffectsOnFiber(finishedRoot, nearestMountedAncestor, deletedFiber) {
-//     switch (deletedFiber.tag) {
-//         case HostComponent:
-//         case HostText: {
-//             recursivelyTraverseDeletionEffects(finishedRoot, nearestMountedAncestor, deletedFiber);
-//             if (hostParent !== null) {
-//                 removeChild(hostParent, deletedFiber.stateNode);
-//             }
-//             break;
-//         }
-//         default:
-//             break;
-//     }
-// }
-// function recursivelyTraverseDeletionEffects(finishedRoot, nearestMountedAncestor, parent) {
-//     let child = parent.child;
-//     while (child !== null) {
-//         commitDeletionEffectsOnFiber(finishedRoot, nearestMountedAncestor, child);
-//         child = child.sibling;
-//     }
-// }
+function commitDeletionEffectsOnFiber(finishedRoot, nearestMountedAncestor, deletedFiber) {
+    switch (deletedFiber.tag) {
+        case HostComponent:
+        case HostText: {
+            // 遍历执行子节点删除
+            recursivelyTraverseDeletionEffects(finishedRoot, nearestMountedAncestor, deletedFiber);
+            // 删除当前节点
+            if (hostParent !== null) {
+                removeChild(hostParent, deletedFiber.stateNode);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+/**
+ * 递归遍历子节点，执行删除效果
+ * @param {*} finishedRooremoveChildt 
+ * @param {*} nearestMountedAncestor 
+ * @param {*} parent 
+ */
+function recursivelyTraverseDeletionEffects(finishedRoot, nearestMountedAncestor, parent) {
+    let child = parent.child;
+    while (child !== null) {
+        commitDeletionEffectsOnFiber(finishedRoot, nearestMountedAncestor, child);
+        child = child.sibling;
+    }
+}

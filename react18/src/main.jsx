@@ -56,17 +56,17 @@ import { createRoot } from "react-dom/client";
 // }
 
 // >>>>>>>>>>>>>>>>>>>>>>. mount useState <<<<<<<<<<<<<<<<<<<<<<<<<
-function FunctionComponent() {
-  const [number2, setNumber2] = React.useState(0);
+// function FunctionComponent() {
+//   const [number2, setNumber2] = React.useState(0);
 
-  return (
-    <button onClick={() => {
-      setNumber2(number2);
-      setNumber2(number2 + 1);
-      setNumber2(number2 + 2);
-    }}>{number2}</button>
-  )
-}
+//   return (
+//     <button onClick={() => {
+//       setNumber2(number2);
+//       setNumber2(number2 + 1);
+//       setNumber2(number2 + 2);
+//     }}>{number2}</button>
+//   )
+// }
 
 
 // >>>>>>>>>>>>>>>>>>>>>> 单节点(key 相同,类型相同) 1 <<<<<<<<<<<<<<<<<<<<<<<<<
@@ -89,22 +89,15 @@ function FunctionComponent() {
 // }
 
 // >>>>>>>>>>>>>>>>>>>>>> 单节点(key 不相同,类型相同)  <<<<<<<<<<<<<<<<<<<<<<<<<
-// const reducer = (state, action) => {
-//   if (action.type === "add") {
-//     return state + action.payload;
-//   }
-//   return state;
-// };
+function FunctionComponent() {
+  const [number, setNumber] = React.useState(0);
 
-// function FunctionComponent() {
-//   const [number, setNumber] = React.useReducer(reducer, 0);
-
-//   return number%2 === 0 ? (
-//     <div onClick={() => setNumber({ type: "add", payload: 1 })} key="title" id="title">title</div>
-//   ): (
-//     <div onClick={() => setNumber({ type: "add", payload: 1 })} key="title2" id="title2">title2</div>
-//   )
-// }
+  return number%2 === 0 ? (
+    <div onClick={() => setNumber(number + 1)} key="title" id="title">title</div>
+  ): (
+    <div onClick={() => setNumber(number + 1)} key="title2" id="title2">title2</div>
+  )
+}
 
 // >>>>>>>>>>>>>>>>>>>>>> 单节点(key 不相同,类型不相同)  <<<<<<<<<<<<<<<<<<<<<<<<<
 // const reducer = (state, action) => {

@@ -45,6 +45,8 @@ const ReactElement = (type, key, ref, props) => {
  * @param {元素的类型（如 div、组件等} type 
  * @param {包含元素的属性（如 className、id 等）以及保留属性（如 key、ref）} config 
  * @param {可能的 key 值} maybeKey 
+ * 17之前 config: {key: "value", ref: "value", className: "value", ...}, children: "value"
+ * 17之后 children: "value" 直接放在 config: { children } ; key 在第三个参数中
  * @returns 
  */
 export function jsxDEV(type, config, maybeKey) {
@@ -55,7 +57,7 @@ export function jsxDEV(type, config, maybeKey) {
     let ref = null;
 
     // 如果 maybeKey 存在，将其转换为字符串并赋值给 key
-    if (maybeKey !== undefined) {
+    if (typeof maybeKey !== 'undefined') {
         key = "" + maybeKey;
     }
     

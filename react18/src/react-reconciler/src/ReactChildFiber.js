@@ -82,6 +82,7 @@ function createChildReconciler(shouldTrackSideEffects) {
     }
 
     function deleteChild(returnFiber, childToDelete) {
+        // 不需要跟踪副作用，则返回 18之前是放在effectlist中， 现在是存在变量里
         if (!shouldTrackSideEffects) {
             return;
         }

@@ -55,8 +55,18 @@ import { createRoot } from "react-dom/client";
 //   )
 // }
 
+// >>>>>>>>>>>>>>>>>>>>>>. mount useState <<<<<<<<<<<<<<<<<<<<<<<<<
+function FunctionComponent() {
+  const [number2, setNumber2] = React.useState(0);
 
-// >>>>>>>>>>>>>>>>>>>>>> 单节点(key 相同,类型相同)  <<<<<<<<<<<<<<<<<<<<<<<<<
+  return (
+    <button onClick={() => setNumber2(number2 + 1)}>{number2}</button>
+  )
+}
+
+
+// >>>>>>>>>>>>>>>>>>>>>> 单节点(key 相同,类型相同) 1 <<<<<<<<<<<<<<<<<<<<<<<<<
+/**   reconcileSingleElement    */
 // const reducer = (state, action) => {
 //   if (action.type === "add") {
 //     return state + action.payload;
@@ -92,23 +102,57 @@ import { createRoot } from "react-dom/client";
 //   )
 // }
 
-// >>>>>>>>>>>>>>>>>>>>>> 单节点(key 不相同,类型bu相同)  <<<<<<<<<<<<<<<<<<<<<<<<<
-const reducer = (state, action) => {
-  if (action.type === "add") {
-    return state + action.payload;
-  }
-  return state;
-};
+// >>>>>>>>>>>>>>>>>>>>>> 单节点(key 不相同,类型不相同)  <<<<<<<<<<<<<<<<<<<<<<<<<
+// const reducer = (state, action) => {
+//   if (action.type === "add") {
+//     return state + action.payload;
+//   }
+//   return state;
+// };
 
-function FunctionComponent() {
-  const [number, setNumber] = React.useReducer(reducer, 0);
+// function FunctionComponent() {
+//   const [number, setNumber] = React.useReducer(reducer, 0);
 
-  return number%2 === 0 ? (
-    <div onClick={() => setNumber({ type: "add", payload: 1 })} key="title" id="title">title</div>
-  ): (
-    <p onClick={() => setNumber({ type: "add", payload: 1 })} key="title2" id="title2">title2</p>
-  )
-}
+//   return number%2 === 0 ? (
+//     <div onClick={() => setNumber({ type: "add", payload: 1 })} key="title" id="title">title</div>
+//   ): (
+//     <p onClick={() => setNumber({ type: "add", payload: 1 })} key="title2" id="title2">title2</p>
+//   )
+// }
+
+// >>>>>>>>>>>>>>>>>>>>>> 多节点 DIFF  <<<<<<<<<<<<<<<<<<<<<<<<<
+// const reducer = (state, action) => {
+//   if (action.type === "add") {
+//     return state + action.payload;
+//   }
+//   return state;
+// };
+
+// function FunctionComponent() {
+//   const [number, setNumber] = React.useReducer(reducer, 0);
+
+//   return number === 0 ? (
+//     <ul key="container" onClick={() => setNumber(number 1)}>
+//       <li key="A">A</li>
+//       <li key="B" id="B">
+//         B
+//       </li>
+//       <li key="C" id="C">
+//         C
+//       </li>
+//     </ul>
+//   ) : (
+//     <ul key="container" onClick={() => setNumber(number 1)}>
+//       <li key="A">A2</li>
+//       <p key="B" id="B2">
+//         B2
+//       </p>
+//       <li key="C" id="C2">
+//         C2
+//       </li>
+//     </ul>
+//   );
+// }
 
 // >>>>>>>>>>>>>>>>>>>>>>. mountReducer <<<<<<<<<<<<<<<<<<<<<<<<<
 // function FunctionComponent2() {

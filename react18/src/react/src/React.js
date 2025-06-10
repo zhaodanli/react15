@@ -1,4 +1,4 @@
-import { useReducer } from "./ReactHooks.js";
+import { useReducer, useState } from "./ReactHooks.js";
 import ReactSharedInternals from "./ReactSharedInternals.js";
 
 /**
@@ -12,5 +12,5 @@ import ReactSharedInternals from "./ReactSharedInternals.js";
  *   ReactCurrentDispatcher: {}
  * }
  */
-export { useReducer, ReactSharedInternals as __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED };
+export { useReducer, useState, ReactSharedInternals as __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED };
 

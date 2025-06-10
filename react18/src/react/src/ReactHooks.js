@@ -28,3 +28,10 @@ export function useReducer(reducer, initialArg, init) {
     // 执行派发器的 useReducer， 函数执行前给 useReducer 到 dispatcher
     return dispatcher.useReducer(reducer, initialArg, init);
 }
+
+export function useState(initialState) {
+    // 找到派发器
+    const dispatcher = resolveDispatcher();
+    // 执行派发器的 useState， 函数执行前给 useState 到 dispatcher
+    return dispatcher.useState(initialState);   
+}

@@ -31,12 +31,14 @@ import logger, { indent } from "shared/logger.js";
  * @param {*} completedWork 
  */
 function bubbleProperties(completedWork) {
-    // 初始化 subtreeFlags 为 NoFlags
+    // 初始化 subtreeFlags 为 NoFlags （即没有副作用）
     let subtreeFlags = NoFlags;
     let child = completedWork.child;
     // 遍历当前节点的所有子节点，将子节点的 flags 和 subtreeFlags 合并到 subtreeFlags 中。
     while (child !== null) {
+        // 3. 合并子节点的 subtreeFlags（子树副作用）到本地 subtreeFlags
         subtreeFlags |= child.subtreeFlags;
+        // 4. 合并子节点自身的 flags（自身副作用）到本地 subtreeFlags
         subtreeFlags |= child.flags;
         child = child.sibling;
     }
@@ -110,6 +112,7 @@ export function completeWork(current, workInProgress) {
         // HostComponent 创建 DOM 实例，递归挂载子节点，初始化属性，冒泡副作用。
         case HostComponent: { // 表示原生 DOM 节点
             const { type } = workInProgress;
+            // 说明是更新流程（不是首次挂载），当前 Fiber 已经有对应的 DOM 实例
             if (current !== null && workInProgress.stateNode != null) {
                 updateHostComponent(current, workInProgress, type, newProps);
                 console.log("updatePayload", workInProgress.updateQueue);

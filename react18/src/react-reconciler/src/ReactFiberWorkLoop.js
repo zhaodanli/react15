@@ -58,7 +58,7 @@ function commitRoot(root) {
     const subtreeHasEffects = (finishedWork.subtreeFlags & MutationMask) !== NoFlags;
     const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
 
-    // 自己活着自节点有副作用
+    // 自己 或者 自节点有副作用
     if (subtreeHasEffects || rootHasEffect) {
         // 在fiber上提交变更操作的副作用
         // console.log("commitRoot");

@@ -44,21 +44,28 @@ function FunctionComponent() {
         setNumber({ type: "add", payload: 2})
         setNumber({ type: "add", payload: 3})
   }}>{number}</button>
-  // return number === 0 ? (
-  //   <div onClick={() => setNumber({ type: "add", payload: 1})} key="title" id="title">
-  //     title
-  //     <button onClick={() => {
-  //       setNumber({ type: "add", payload: 1})
-  //       setNumber({ type: "add", payload: 2})
-  //       setNumber({ type: "add", payload: 3})
-  //     }}>{number}</button>
-  //   </div>
-  // ) : (
-  //   <div onClick={() => setNumber({ type: "add", payload: 1})}  key="title" id="title2">
-  //     title2
-  //   </div>
-  // );
 }
+
+// >>>>>>>>>>>>>>>>>>>>>>. mountReducer <<<<<<<<<<<<<<<<<<<<<<<<<
+// function FunctionComponent2() {
+//   const [number, setNumber] = React.useReducer(reducer, 0);
+//   return number === 0 ? (
+//     <div onClick={() => setNumber({ type: "add", payload: 1})} key="title" id="title">
+//       title
+//       <button onClick={() => {
+//         setNumber({ type: "add", payload: 1})
+//         setNumber({ type: "add", payload: 2})
+//         setNumber({ type: "add", payload: 3})
+//       }}>{number}</button>
+//     </div>
+//   ) : (
+//     <div onClick={() => setNumber({ type: "add", payload: 1})}  key="title" id="title2">
+//       title2
+//     </div>
+//   );
+// }
+
+
 
 let element = <FunctionComponent />;
 

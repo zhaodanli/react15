@@ -14,8 +14,8 @@ let currentHook = null;
 const HooksDispatcherOnMountInDEV = {
     useReducer: mountReducer,
     useState: mountState,
-    useEffect: mountEffect,
-    useLayoutEffect: mountLayoutEffect,
+    useEffect: mountEffect, // 绘制之后执行
+    useLayoutEffect: mountLayoutEffect, // 绘制之前执行
 }
 
 const HooksDispatcherOnUpdateInDEV = {
@@ -43,6 +43,17 @@ const HooksDispatcherOnUpdateInDEV = {
 export function renderWithHooks(current, workInProgress, Component, props) {
     // 设置当前正在渲染的 Fiber，并初始化 Hooks 调度器。
     currentlyRenderingFiber = workInProgress;
+
+    /** >>>>> 每次渲染前都要清空这两个字段，确保本次渲染时重新生成新的 hook 链表和 
+ *            effect 队列，防止上次遗留数据影响本次渲染。 <<<<<< */
+    // 存储当前 Fiber 上的副作用队列（如 effect 链表）。
+    // 主要用于保存 useEffect/useLayoutEffect 等副作用相关的信息，commit 阶段会统一处理。
+    // 保存 effect 副作用链表（如 useEffect 的 effect 信息）。
+    workInProgress.updateQueue = null;
+    // 存储当前 Fiber 上的hook 链表的头节点。每个 hook（如 useState/useEffect）会形成一个链表，挂在该字段上。
+    // 用于保存每个 hook 的状态（如 useState 的 state、useEffect 的 effect 信息等）。
+    // 保存 hook 链表（每个 hook 的状态）。
+    workInProgress.memoizedState = null; 
 
     if (current !== null && current.memoizedState !== null) {
         ReactCurrentDispatcher.current = HooksDispatcherOnUpdateInDEV;
@@ -118,9 +129,64 @@ function mountState(initialState) {
     return [hook.memoizedState, dispatch];
 }
 
-function mountEffect(create, deps) {}
+function mountEffect(create, deps) {
+    return mountEffectImpl(PassiveEffect, HookPassive, create, deps);
+}
 
-function mountLayoutEffect(create, deps) {}
+// 负责把 useEffect 的副作用信息收集到 updateQueue 上，供 commit 阶段统一处理。
+function mountEffectImpl(fiberFlags, hookFlags, create, deps) {
+    // 创建一个新的 hook 节点
+    const hook = mountWorkInProgressHook();
+    // 处理依赖数组 deps。
+    const nextDeps = deps === undefined ? null : deps;
+    // 给当前 Fiber 打上副作用标记（如 PassiveEffect）
+    currentlyRenderingFiber.flags |= fiberFlags;
+    // 把 effect 信息（create、deps 等）通过 pushEffect 挂到 hook.memoizedState 上。
+    hook.memoizedState = pushEffect(HookHasEffect | hookFlags, create, undefined, nextDeps);
+}
+
+function pushEffect(tag, create, destroy, deps) {
+    // 创建一个 effect 对象，包含 effect 的类型、回调、依赖等。
+    const effect = {
+        tag,
+        create,
+        destroy,
+        deps,
+        next: null,
+    }
+    // 获取当前 Fiber 的 updateQueue（副作用队列）。
+    let componentUpdateQueue = currentlyRenderingFiber.updateQueue;
+    if (componentUpdateQueue === null) {
+        // 如果没有队列，创建一个新的队列，并把 effect 挂上去（形成循环链表）。
+        componentUpdateQueue = createFunctionComponentUpdateQueue();
+        currentlyRenderingFiber.updateQueue = componentUpdateQueue;
+        componentUpdateQueue.lastEffect = effect.next = effect;
+    }else {
+        // 如果已有队列，把 effect 加到链表尾部，维护循环结构
+        const lastEffect = componentUpdateQueue.lastEffect;
+        if (lastEffect === null) {
+            componentUpdateQueue.lastEffect = effect.next = effect;
+        } else {
+            const firstEffect = lastEffect.next;
+            lastEffect.next = effect;
+            effect.next = firstEffect;
+            componentUpdateQueue.lastEffect = effect;
+        }
+    }
+    // 返回 effect 对象
+    return effect;
+}
+
+function createFunctionComponentUpdateQueue() {
+    return {
+        lastEffect: null,
+    }
+}
+
+function mountLayoutEffect(create, deps) {
+    const fiberFlags = UpdateEffect;
+    return mountEffectImpl(fiberFlags, HookLayout, create, deps);
+}
 
 // 挂载工作中的 Hook
 /**
@@ -236,12 +302,52 @@ function updateState(initialState) {
 }
 
 function updateEffect(create, deps) {
+    return updateEffectImpl(PassiveEffect, HookPassive, create, deps);
 }
 
 function updateLayoutEffect(create, deps) {}
 
 function basicStateReducer(state, action) {
     return typeof action === "function" ? action(state) : action;
+}
+
+function updateEffectImpl(fiberFlags, hookFlags, create, deps) {
+    const hook = updateWorkInProgressHook();
+    const nextDeps = deps === undefined ? null : deps;
+    let destroy;
+    // 拿到老hook
+    if (currentHook !== null) {
+        const prevEffect = currentHook.memoizedState; // 上一次的 effect 信息
+        destroy = prevEffect.destroy; // 上一次的清理函数
+        if (nextDeps !== null) {
+            const prevDeps = prevEffect.deps; // 上一次的依赖
+            if (areHookInputsEqual(nextDeps, prevDeps)) {
+                // 依赖没变，不需要执行 effect，只收集 effect 信息，不打副作用标记
+                // 这里的 hookFlags 只包含 effect 的类型（如 Passive、Layout），没有包含 HookHasEffect 标记。
+                // 仅把 effect 信息（create、destroy、deps）收集到链表上，但不标记本次 commit 需要执行 effect。
+                // 依赖没变时，不需要重复执行 effect，只需保留 effect 信息，方便后续卸载时清理
+                hook.memoizedState = pushEffect(hookFlags, create, destroy, nextDeps);
+                return;
+            }
+        }
+    }
+    // 依赖变了，或者首次渲染，或者没有依赖，打上副作用标记
+    currentlyRenderingFiber.flags |= fiberFlags;
+    // 收集 effect 信息，标记本 effect 需要执行
+    hook.memoizedState = pushEffect(HookHasEffect | hookFlags, create, destroy, nextDeps);
+}
+
+function areHookInputsEqual(nextDeps, prevDeps) {
+    if (prevDeps === null) {
+        return false;
+    }
+    for (let i = 0; i < prevDeps.length && i < nextDeps.length; i++) {
+        if (is(nextDeps[i], prevDeps[i])) {
+            continue;
+        }
+        return false;
+    }
+    return true;
 }
 
 /** >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 其他 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */

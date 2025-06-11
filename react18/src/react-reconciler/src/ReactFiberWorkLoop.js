@@ -2,14 +2,17 @@ import { scheduleCallback } from "scheduler";
 import { createWorkInProgress } from "./ReactFiber.js";
 import { beginWork } from "./ReactFiberBeginWork.js";
 import { completeWork } from "./ReactFiberCompleteWork.js";
-import { commitMutationEffectsOnFiber } from "./ReactFiberCommitWork.js";
-import { MutationMask, NoFlags, Placement, Update, ChildDeletion } from "./ReactFiberFlags.js";
+import { commitMutationEffectsOnFiber, commitMutationEffects, commitPassiveUnmountEffects, commitPassiveMountEffects } from "./ReactFiberCommitWork.js";
+import { MutationMask, NoFlags, Placement, Update, ChildDeletion, Passive } from "./ReactFiberFlags.js";
 import { HostRoot, HostComponent, HostText, FunctionComponent } from "./ReactWorkTags.js";
 import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
 
 // 新的 待更新， 正在构建中的 fiber, 相对current 是老的节点 （展示，页面上真实dom, 已经渲染完成的fiber）
 let workInProgress = null;
 let workInProgressRoot = null;
+
+let rootDoesHavePassiveEffects = false; // 此根节点有没有副作用
+let rootWithPendingPassiveEffects = null; // 有 effct 副作用 的根节点， 根fiber 的 stateNode
 
 /**
  * 用于调度更新
@@ -48,13 +51,24 @@ function performConcurrentWorkOnRoot(root) {
     root.finishedWork = finishedWork;
     printFiber(finishedWork);
     printFinishedWork(finishedWork)
-    console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
     commitRoot(root);
     workInProgressRoot = null;
 }
 
 function commitRoot(root) {
     const { finishedWork } = root;
+    
+    // 判断是否有 effect 副作用
+    if ((finishedWork.subtreeFlags & Passive) !== NoFlags || (finishedWork.flags & Passive) !== NoFlags) {
+        if (!rootDoesHavePassiveEffects) {
+            // 表示跟上有要执行的副作用
+            rootDoesHavePassiveEffects = true;
+            // 刷新 副作用 开启新的宏任务，等待赋值之后执行
+            scheduleCallback(flushPassiveEffects);
+        }
+    }
+
+    console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
     // MutationMask 插入或者更新
     const subtreeHasEffects = (finishedWork.subtreeFlags & MutationMask) !== NoFlags;
     const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
@@ -63,9 +77,31 @@ function commitRoot(root) {
     if (subtreeHasEffects || rootHasEffect) {
         // 在fiber上提交变更操作的副作用
         // console.log("commitRoot");
-        commitMutationEffectsOnFiber(finishedWork, root);
+        // commitMutationEffectsOnFiber(finishedWork, root);
+        commitMutationEffects(finishedWork, root);
+        // DOM 执行变更后，根节点指向新的 根fiber
+        root.current = finishedWork;
+
+        // 重制 root 变量
+        if (rootDoesHavePassiveEffects) {
+            rootDoesHavePassiveEffects = false;
+            // 第一次赋值， 在下一个宏任务执行挂载操作
+            rootWithPendingPassiveEffects = root;
+        }
     }
     root.current = finishedWork;
+}
+
+// 刷新 PassiveEffect
+function flushPassiveEffects() {
+    // 有要执行副作用的根
+    if (rootWithPendingPassiveEffects !== null) {
+        const root = rootWithPendingPassiveEffects;
+        // 卸载副作用 destory
+        commitPassiveUnmountEffects(root.current);
+        // 挂载副作用 create
+        commitPassiveMountEffects(root, root.current);
+    }
 }
 
 function printFiber(fiber) {

@@ -11,6 +11,27 @@ let currentlyRenderingFiber = null;
 let workInProgressHook = null;
 let currentHook = null;
 
+/**
+ * Effects {
+	{type: useEffect1, creat: useEffect1fn， destory: useEffect1returnFn},
+	{type: useLayoutEffect1, creat: useLayoutEffect1fn， destory: useLayoutEffect1returnFn},
+	{type: useEffect2, creat: useEffect2fn， destory: useEffect2returnFn},
+	{type: useLayoutEffect2, creat: useLayoutEffect2fn， destory: useLayoutEffect2returnFn},
+}
+commit 提供阶段 
+    commitBeforeMutationEffects 更新前
+    commitMutationEffects 更新
+    commitHookLayOutEffects 更新后
+commit 完成后初次挂载
+
+	更新前 执行commitHookLayOutEffects的时候执行  
+        useLayoutEffect1fn， useLayoutEffect2fn	
+        在下一个宏任务中  执行 useEffect1fn，useEffect2fn更新
+	更新后 在commitMutationEffects 的时候执行 
+        同步执行 useLayoutEffect1returnFn， useLayoutEffect2returnFn
+	    在下一个宏任务异步执行 useEffect1returnFn，useEffect2returnFn	
+        在下一个宏任务异步执行 useEffect1fn，useEffect2fn
+*/
 const HooksDispatcherOnMountInDEV = {
     useReducer: mountReducer,
     useState: mountState,

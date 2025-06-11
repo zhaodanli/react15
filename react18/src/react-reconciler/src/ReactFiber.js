@@ -45,6 +45,8 @@ export function FiberNode(tag, pendingProps, key) {
 
     // 双缓存机制 双缓存机制允许 React 在内存中构建新的 Fiber 树，同时保留当前屏幕上显示的 Fiber 树。
     this.alternate = null; // 双缓存机制中的另一个 Fiber 节点
+
+    this.index = 0;
 }
 
 // 创建一个新的 Fiber 节点。

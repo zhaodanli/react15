@@ -143,7 +143,112 @@ import { createRoot } from "react-dom/client";
 //     );
 // }
 
+/** >>>>>>>>>>>>>>>>>>>>>>> 以上是单节点diff <<<<<<<<<<<<<<<<<<<<<<<<<<< */
+
 // >>>>>>>>>>>>>>>>>>>>>> 多节点 DIFF  <<<<<<<<<<<<<<<<<<<<<<<<<
+
+// function FunctionComponent() {
+//     console.log("FunctionComponent");
+//     const [number, setNumber] = React.useState(0);
+//     return number === 0 ? (
+//         <ul key="container" onClick={() => setNumber(number + 1)}>
+//             <li key="A">A</li>
+//             <li key="B" id="B">
+//                 B
+//             </li>
+//             <li key="C" id="C">
+//                 C
+//             </li>
+//         </ul>
+//     ) : (
+//         <ul key="container" onClick={() => setNumber(number + 1)}>
+//             <li key="A">A2</li>
+//             <p key="B" id="B2">
+//                 B2
+//             </p>
+//             <li key="C" id="C2">
+//                 C2
+//             </li>
+//         </ul>
+//     );
+// }
+
+// >>>>>>>>>>>>>>>>>>>>>> 多个节点的数量和 key 相同，有的 type 不同  <<<<<<<<<<<<<<<<<<<<<<<<<
+// function FunctionComponent() {
+//     console.log("FunctionComponent");
+//     const [number, setNumber] = React.useState(0);
+//     return number === 0 ? (
+//         <ul key="container" onClick={() => setNumber(number + 1)}>
+//             <li key="A">A</li>
+//             <li key="B" id="B">
+//                 B
+//             </li>
+//             <li key="C" id="C">
+//                 C
+//             </li>
+//         </ul>
+//     ) : (
+//         <ul key="container" onClick={() => setNumber(number + 1)}>
+//             <li key="A">A2</li>
+//             <p key="B" id="B2">
+//                 B2
+//             </p>
+//             <li key="C" id="C2">
+//                 C2
+//             </li>
+//         </ul>
+//     );
+// }
+
+// >>>>>>>>>>>>>>>>>>>>>> 多个节点的类型和 key 全部相同，有新增元素 <<<<<<<<<<<<<<<<<<<<<<<<<
+
+// function FunctionComponent() {
+//     console.log("FunctionComponent");
+//     const [number, setNumber] = React.useState(0);
+//     return number === 0 ? (
+//         <ul key="container" onClick={() => setNumber(number + 1)}>
+//             <li key="A">A</li>
+//             <li key="B" id="B">
+//                 B
+//             </li>
+//             <li key="C">C</li>
+//         </ul>
+//     ) : (
+//         <ul key="container" onClick={() => setNumber(number + 1)}>
+//             <li key="A">A</li>
+//             <li key="B" id="B2">
+//                 B2
+//             </li>
+//             <li key="C">C2</li>
+//             <li key="D">D</li>
+//         </ul>
+//     );
+// }
+
+// >>>>>>>>>>>>>>>>>>>>>> 多个节点的类型和 key 全部相同，有删除老元素 <<<<<<<<<<<<<<<<<<<<<<<<<
+
+// function FunctionComponent() {
+//     console.log("FunctionComponent");
+//     const [number, setNumber] = React.useState(0);
+//     return number === 0 ? (
+//         <ul key="container" onClick={() => setNumber(number + 1)}>
+//             <li key="A">A</li>
+//             <li key="B" id="B">
+//                 B
+//             </li>
+//             <li key="C">C</li>
+//         </ul>
+//     ) : (
+//         <ul key="container" onClick={() => setNumber(number + 1)}>
+//             <li key="A">A</li>
+//             <li key="B" id="B2">
+//                 B2
+//             </li>
+//         </ul>
+//     );
+// }
+
+// >>>>>>>>>>>>>>>>>>>>>> 多个节点数量不同、key 不同 <<<<<<<<<<<<<<<<<<<<<<<<<
 
 function FunctionComponent() {
     console.log("FunctionComponent");
@@ -151,33 +256,27 @@ function FunctionComponent() {
     return number === 0 ? (
         <ul key="container" onClick={() => setNumber(number + 1)}>
             <li key="A">A</li>
-            <li key="B" id="B">
+            <li key="B" id="b">
                 B
             </li>
-            <li key="C" id="C">
-                C
-            </li>
+            <li key="C">C</li>
+            <li key="D">D</li>
+            <li key="E">E</li>
+            <li key="F">F</li>
         </ul>
     ) : (
         <ul key="container" onClick={() => setNumber(number + 1)}>
             <li key="A">A2</li>
-            <p key="B" id="B2">
+            <li key="C">C2</li>
+            <li key="E">E2</li>
+            <li key="B" id="b2">
                 B2
-            </p>
-            <li key="C" id="C2">
-                C2
             </li>
+            <li key="G">G</li>
+            <li key="D">D2</li>
         </ul>
     );
 }
-
-// >>>>>>>>>>>>>>>>>>>>>> 多个节点的数量和 key 相同，有的 type 不同  <<<<<<<<<<<<<<<<<<<<<<<<<
-
-// >>>>>>>>>>>>>>>>>>>>>> 多个节点的类型和 key 全部相同，有新增元素 <<<<<<<<<<<<<<<<<<<<<<<<<
-
-// >>>>>>>>>>>>>>>>>>>>>> 多个节点的类型和 key 全部相同，有删除老元素 <<<<<<<<<<<<<<<<<<<<<<<<<
-
-// >>>>>>>>>>>>>>>>>>>>>> 多个节点数量不同、key 不同 <<<<<<<<<<<<<<<<<<<<<<<<<
 
 // >>>>>>>>>>>>>>>>>>>>>> useEffect <<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -204,7 +303,12 @@ function FunctionComponent() {
 
 
 
-let element = <FunctionComponent />;
+let element1 = <FunctionComponent />;
+// let element2 = <FunctionComponent2 />;
+// let element3 = <FunctionComponent3 />;
+// let element4 = <FunctionComponent4 />;
+
+let element = element1;
 
 // 创建根fiber
 const root = createRoot(document.getElementById("root"));

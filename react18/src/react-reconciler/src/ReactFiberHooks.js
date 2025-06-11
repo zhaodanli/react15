@@ -3,6 +3,9 @@ import { enqueueConcurrentHookUpdate } from "./ReactFiberConcurrentUpdates";
 import { scheduleUpdateOnFiber } from "./ReactFiberWorkLoop";
 import is from "shared/objectIs";
 
+import { Passive as PassiveEffect, Update as UpdateEffect } from "./ReactFiberFlags";
+import { HasEffect as HookHasEffect, Passive as HookPassive, Layout as HookLayout } from "./ReactHookEffectTags";
+
 const { ReactCurrentDispatcher } = ReactSharedInternals;
 let currentlyRenderingFiber = null;
 let workInProgressHook = null;
@@ -10,12 +13,16 @@ let currentHook = null;
 
 const HooksDispatcherOnMountInDEV = {
     useReducer: mountReducer,
-    useState: mountState
+    useState: mountState,
+    useEffect: mountEffect,
+    useLayoutEffect: mountLayoutEffect,
 }
 
 const HooksDispatcherOnUpdateInDEV = {
     useReducer: updateReducer,
     useState: updateState,
+    useEffect: updateEffect,
+    useLayoutEffect: updateLayoutEffect,
 }
 
 
@@ -45,7 +52,8 @@ export function renderWithHooks(current, workInProgress, Component, props) {
 
     const children = Component(props);
 
-    // 清除对当前正在渲染的 Fiber 的引用 这里是为了在函数组件中使用 hooks 时，能够正确地记录当前的 Fiber 在函数组件执行完后，清除引用，避免内存泄漏
+    // 清除对当前正在渲染的 Fiber 的引用 这里是为了在函数组件中使用 hooks 时，
+    // 能够正确地记录当前的 Fiber 在函数组件执行完后，清除引用，避免内存泄漏
     currentlyRenderingFiber = null;
     workInProgressHook = null;
     currentHook = null;
@@ -63,7 +71,7 @@ export function renderWithHooks(current, workInProgress, Component, props) {
     return children;
 }
 
-/** >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 挂载 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
+/** >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 挂载 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 function mountReducer(reducer, initialArg) {
     const hook = mountWorkInProgressHook(); // 挂载工作中的 Hook
     hook.memoizedState = initialArg; // 初始化 hook 的状态为初始参数
@@ -110,6 +118,10 @@ function mountState(initialState) {
     return [hook.memoizedState, dispatch];
 }
 
+function mountEffect(create, deps) {}
+
+function mountLayoutEffect(create, deps) {}
+
 // 挂载工作中的 Hook
 /**
  * 函数组件 memoizedState 存的 第一次的 hook链表。 后面不再更新
@@ -139,7 +151,7 @@ function mountWorkInProgressHook() {
 }
 
 
-/** >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 挂载辅助 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
+/** >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 挂载辅助 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 /**  处理 reducer 的更新逻辑
  * @param {*} fiber 
  * @param {更新队列} queue 
@@ -183,7 +195,7 @@ function dispatchSetState(fiber, queue, action) {
     scheduleUpdateOnFiber(root, fiber);
 }
 
-/** >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 派发阶段 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
+/** >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 派发阶段 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 function updateReducer(reducer) {
     // 获取新HOOK
     const hook = updateWorkInProgressHook();
@@ -222,6 +234,11 @@ function updateReducer(reducer) {
 function updateState(initialState) {
     return updateReducer(basicStateReducer, initialState);
 }
+
+function updateEffect(create, deps) {
+}
+
+function updateLayoutEffect(create, deps) {}
 
 function basicStateReducer(state, action) {
     return typeof action === "function" ? action(state) : action;

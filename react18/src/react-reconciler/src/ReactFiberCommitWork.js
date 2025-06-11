@@ -1,12 +1,12 @@
 import { HostRoot, HostComponent, HostText, FunctionComponent } from "./ReactWorkTags";
-import { MutationMask, Placement, Update, Passive } from "./ReactFiberFlags";
+import { MutationMask, Placement, Update, Passive, LayoutMask } from "./ReactFiberFlags";
 import {
     insertBefore,
     appendChild,
     commitUpdate,
     removeChild
 } from "react-dom-bindings/src/client/ReactDOMHostConfig.js";
-import { HasEffect as HookHasEffect, Passive as HookPassive } from "./ReactHookEffectTags";
+import { HasEffect as HookHasEffect, Passive as HookPassive, Layout as HookLayout } from "./ReactHookEffectTags";
 
 /** 这段代码实现了 React Fiber commit 阶段的副作用处理，
  *  主要负责根据 Fiber 节点上的副作用标记（flags），递归执行 DOM 操作（如插入、更新、删除等）。
@@ -15,6 +15,7 @@ import { HasEffect as HookHasEffect, Passive as HookPassive } from "./ReactHookE
  * 如果找不到，说明应该插入到父节点末尾。
  */
 
+/** >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 处理Hooks部分 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 
 /** 对当前 Fiber 节点及其子树递归处理副作用。
  * 先递归处理所有子节点（recursivelyTraverseMutationEffects），再处理当前节点自身的副作用（commitReconciliationEffects）。
@@ -29,6 +30,10 @@ export function commitMutationEffectsOnFiber(finishedWork, root) {
         case FunctionComponent:
             recursivelyTraverseMutationEffects(root, finishedWork);
             commitReconciliationEffects(finishedWork);
+            if (flags & Update) {
+                // layoutEffect unmount 同 useEffect 作用一样，此时 useEffect 还没有值，可以先执行 unmount
+                commitHookEffectListUnmount(HookLayout | HookHasEffect, finishedWork, finishedWork.return);
+            }
             break;
         case HostRoot:
             recursivelyTraverseMutationEffects(root, finishedWork);
@@ -286,11 +291,17 @@ function recursivelyTraverseDeletionEffects(finishedRoot, nearestMountedAncestor
     }
 }
 
+export function commitMutationEffects(finishedWork, root) {
+    commitMutationEffectsOnFiber(finishedWork, root);
+}
+
 /** >>>>>>>>>>>>>>>>>>>>>> 处理 effect <<<<<<<<<<<<<<<<<<<<<<< */
 
 
 
 /** >>>>>>>>>>>>>>>>>>>>>> 挂载 <<<<<<<<<<<<<<<<<<<<<<< */
+
+// commitRoot -> flushPassiveEffects -> commitPassiveMountEffects
 export function commitPassiveMountEffects(root, finishedWork) {
     commitPassiveMountOnFiber(root, finishedWork);
 }
@@ -355,13 +366,10 @@ function recursivelyTraversePassiveMountEffects(root, parentFiber) {
     }
 }
 
-export function commitMutationEffects(finishedWork, root) {
-    commitMutationEffectsOnFiber(finishedWork, root);
-}
-
 
 /** >>>>>>>>>>>>>>>>>>>>>> 卸载 <<<<<<<<<<<<<<<<<<<<<<< */
 
+// commitRoot -> flushPassiveEffects -> commitPassiveUnmountEffects
 export function commitPassiveUnmountEffects(finishedWork) {
     commitPassiveUnmountOnFiber(finishedWork);
 }
@@ -413,4 +421,42 @@ function commitHookEffectListUnmount(flags, finishedWork) {
             effect = effect.next;
         } while (effect !== firstEffect);
     }
+}
+
+/** >>>>>>>>>>>>>>>>>>> 执行 layoutEffect <<<<<<<<<<<<<<<<<<<<<<<<<<< */
+// commitRoot -> commitMutationEffects 之后同步执行 -> commitLayoutEffects
+export function commitLayoutEffects(finishedWork, root) {
+    const current = finishedWork.alternate;
+    commitLayoutEffectOnFiber(root, current, finishedWork);
+}
+function commitLayoutEffectOnFiber(finishedRoot, current, finishedWork) {
+    const flags = finishedWork.flags;
+    switch (finishedWork.tag) {
+        case FunctionComponent: {
+            recursivelyTraverseLayoutEffects(finishedRoot, finishedWork);
+            if (flags & Update) {
+                commitHookLayoutEffects(finishedWork, HookLayout | HookHasEffect);
+            }
+            break;
+        }
+        case HostRoot: {
+            recursivelyTraverseLayoutEffects(finishedRoot, finishedWork);
+            break;
+        }
+        default:
+            break;
+    }
+}
+function recursivelyTraverseLayoutEffects(root, parentFiber) {
+    if (parentFiber.subtreeFlags & LayoutMask) {
+        let child = parentFiber.child;
+        while (child !== null) {
+            const current = child.alternate;
+            commitLayoutEffectOnFiber(root, current, child);
+            child = child.sibling;
+        }
+    }
+}
+function commitHookLayoutEffects(finishedWork, hookFlags) {
+    commitHookEffectListMount(hookFlags, finishedWork);
 }

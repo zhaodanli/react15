@@ -2,7 +2,7 @@ import { scheduleCallback } from "scheduler";
 import { createWorkInProgress } from "./ReactFiber.js";
 import { beginWork } from "./ReactFiberBeginWork.js";
 import { completeWork } from "./ReactFiberCompleteWork.js";
-import { commitMutationEffectsOnFiber, commitMutationEffects, commitPassiveUnmountEffects, commitPassiveMountEffects } from "./ReactFiberCommitWork.js";
+import { commitMutationEffectsOnFiber, commitMutationEffects, commitPassiveUnmountEffects, commitPassiveMountEffects, commitLayoutEffects } from "./ReactFiberCommitWork.js";
 import { MutationMask, NoFlags, Placement, Update, ChildDeletion, Passive } from "./ReactFiberFlags.js";
 import { HostRoot, HostComponent, HostText, FunctionComponent } from "./ReactWorkTags.js";
 import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
@@ -79,6 +79,8 @@ function commitRoot(root) {
         // console.log("commitRoot");
         // commitMutationEffectsOnFiber(finishedWork, root);
         commitMutationEffects(finishedWork, root);
+        // 这里执行 layOutEffect的 副作用
+        commitLayoutEffects(finishedWork, root);
         // DOM 执行变更后，根节点指向新的 根fiber
         root.current = finishedWork;
 

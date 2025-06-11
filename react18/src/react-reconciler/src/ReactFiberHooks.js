@@ -305,7 +305,9 @@ function updateEffect(create, deps) {
     return updateEffectImpl(PassiveEffect, HookPassive, create, deps);
 }
 
-function updateLayoutEffect(create, deps) {}
+function updateLayoutEffect(create, deps) {
+    return updateEffectImpl(UpdateEffect, HookLayout, create, deps);
+}
 
 function basicStateReducer(state, action) {
     return typeof action === "function" ? action(state) : action;
@@ -326,6 +328,7 @@ function updateEffectImpl(fiberFlags, hookFlags, create, deps) {
                 // 这里的 hookFlags 只包含 effect 的类型（如 Passive、Layout），没有包含 HookHasEffect 标记。
                 // 仅把 effect 信息（create、destroy、deps）收集到链表上，但不标记本次 commit 需要执行 effect。
                 // 依赖没变时，不需要重复执行 effect，只需保留 effect 信息，方便后续卸载时清理
+                // 不管是不是变化，都会保证完整循环链表
                 hook.memoizedState = pushEffect(hookFlags, create, destroy, nextDeps);
                 return;
             }

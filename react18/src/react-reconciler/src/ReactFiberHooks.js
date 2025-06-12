@@ -6,6 +6,8 @@ import is from "shared/objectIs";
 import { Passive as PassiveEffect, Update as UpdateEffect } from "./ReactFiberFlags";
 import { HasEffect as HookHasEffect, Passive as HookPassive, Layout as HookLayout } from "./ReactHookEffectTags";
 
+import { NoLane } from './ReactFiberLane';
+
 const { ReactCurrentDispatcher } = ReactSharedInternals;
 let currentlyRenderingFiber = null;
 let workInProgressHook = null;
@@ -257,6 +259,7 @@ function dispatchReducerAction(fiber, queue, action) {
 }
 
 function dispatchSetState(fiber, queue, action) {
+    // 获取/ 请求当前的更新赛道
     const lane = requestUpdateLane(fiber);
     const update = {
         lane,
@@ -266,20 +269,31 @@ function dispatchSetState(fiber, queue, action) {
         eagerState: null, // 急切状态
     };
 
-    // 获取上次渲染用的 reducer 和 state
-    const lastRenderedReducer = queue.lastRenderedReducer;
-    const currentState = queue.lastRenderedState;
-    // 计算“急切状态”
-    const eagerState = lastRenderedReducer(currentState, action);
-    update.hasEagerState = true; // 标记为急切状态
-    update.eagerState = eagerState; // 计算急切状态
+    
+    // 什么时候应该做急切判断，
+    /**
+     * 1. 这里的 if 判断用于**“急切计算”优化**（eager state optimization）。
+        * 当 fiber.lanes === NoLane 并且 alternate.lanes === NoLanes，说明当前 fiber 及其备份 fiber 上都没有未处理的更新
+        * 这时可以安全地用上一次渲染用的 reducer 和 state，直接计算本次 action 的新状态（eagerState）。
+     */
+    const alternate = fiber.alternate;
+    if(fiber.lanes === NoLane && (alternate === null || alternate.lanes === NoLanes)){
+        // 获取上次渲染用的 reducer 和 state
+        const lastRenderedReducer = queue.lastRenderedReducer;
+        const currentState = queue.lastRenderedState;
+        // 计算“急切状态” 利用上次状态和上次reducer结合本次action 进行计算新状态
+        const eagerState = lastRenderedReducer(currentState, action);
+        update.hasEagerState = true; // 标记为急切状态
+        update.eagerState = eagerState; // 计算急切状态
 
-    // 如果新旧状态相同，直接跳过，不触发更新
-    if (is(eagerState, currentState)) {
-        return; // 如果急切状态和当前状态相同，不需要更新
+        // 如果新旧状态相同，直接跳过，不触发更新
+        if (is(eagerState, currentState)) {
+            return; // 如果急切状态和当前状态相同，不需要更新
+        }
+
     }
-
-    // 入队并调度
+    
+    // 入队 并 调度
     const root = enqueueConcurrentHookUpdate(fiber, queue, update, lane);
     scheduleUpdateOnFiber(root, fiber, lane);
 }

@@ -11,6 +11,19 @@ import { DiscreteEventPriority, ContinuousEventPriority, DefaultEventPriority,
  * @param {*} domEventName 
  * @param {*} eventSystemFlags 
  * @returns 
+ * 用户点击 ->>>> createEventListenerWrapperWithPriority --->>>>> dispatchDiscreteEvent ->>>> dispatchEventForPluginEventSystem
+ * --> dispatchEventsForPlugins ->>> extractEvents (如 SimpleEventPlugin.extractEvents）会根据事件类型、Fiber 树结构，收集所有相关的事件监听函数（如 onClick），并组装成 dispatchQueue。)
+ * ->>> processDispatchQueue ---> executeDispatch(调用监听) --->  调用用户的事件处理函数（如 onClick） -->>> setState
+ * ----> dispatchSetState --> 内部会读取当前的“事件优先级”，并据此分配 lane（如 DiscreteEventPriority → SyncLane）
+ * ---->>>> 生成 update 对象，插入 Fiber 的 updateQueue。 ----> scheduleUpdateOnFiber 根据 lane/优先级决定同步还是异步调度。
+ * DOM 事件触发
+    * createEventListenerWrapperWithPriority → dispatchDiscreteEvent
+ * 事件分发
+    * dispatchDiscreteEvent → dispatchEvent → dispatchEventForPluginEventSystem → dispatchEventsForPlugins → extractEvents → processDispatchQueue → executeDispatch
+ * 用户事件处理
+    * onClick → setState/dispatchSetState
+ * 状态更新
+    * dispatchSetState（读取当前事件优先级，分配 lane，插入 updateQueue，调度
  */
 
 /** 返回一个包装后的监听函数，实际会调用 dispatchDiscreteEvent。
@@ -32,11 +45,14 @@ export function createEventListenerWrapperWithPriority(targetContainer, domEvent
  */
 function dispatchDiscreteEvent(domEventName, eventSystemFlags, container, nativeEvent) {
     // dispatchEvent(domEventName, eventSystemFlags, container, nativeEvent);
+    // 获取老的更新优先级
     const previousPriority = getCurrentUpdatePriority();
     try {
+        // 将当前优先级设置为 离线更新优先级
         setCurrentUpdatePriority(DiscreteEventPriority);
         dispatchEvent(domEventName, eventSystemFlags, container, nativeEvent)
     }finally {
+        // 改回成原来的值
         setCurrentUpdatePriority(previousPriority);
     }
 }

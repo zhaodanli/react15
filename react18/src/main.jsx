@@ -337,17 +337,17 @@ import { createRoot } from "react-dom/client";
 // }
 
 // >>>>>>>>>>>>>>>>>>>>>> 初次渲染 <<<<<<<<<<<<<<<<<<<<<<<<<
-let element = <h1>hello</h1>;
+// let element = <h1>hello</h1>;
 
 // >>>>>>>>>>>>>>>>>>>>>> 更新渲染 <<<<<<<<<<<<<<<<<<<<<<<<<
-// function FunctionComponent() {
-//   const [number, setNumber] = React.useState(0);
-//   return <button onClick={() => {
-//     setNumber(number + 1)
-//   }}>{number}</button>
-// }
+function FunctionComponent() {
+    const [number, setNumber] = React.useState(0);
+    return <button onClick={() => {
+        setNumber(number + 1)
+    }}>{number}</button>
+}
 
-// let element = FunctionComponent;
+let element = <FunctionComponent />;
 
 // 创建根fiber
 const root = createRoot(document.getElementById("root"));

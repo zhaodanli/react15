@@ -61,8 +61,10 @@ function ensureRootIsScheduled(root) {
     // 从 nextLanes 这个集合中，选出“优先级最高的那个 lane”。这是“当前最紧急需要处理的优先级”。
     const newCallbackPriority = getHighestPriorityLane(nextLanes);
     // 新优先级是同步
-    if (newCallbackPriority === SyncLane) { // 同步 16 !== 1 
+    if (newCallbackPriority === SyncLane) { // 同步 如点击事件
+        // 调度同步回调 将 performSyncWorkOnRoot 放到同步回调
         scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root));
+        // 将 flushSyncCallbacks 放到微任务
         queueMicrotask(flushSyncCallbacks);
     } else { // 异步
         let schedulerPriorityLevel;
@@ -94,12 +96,17 @@ function ensureRootIsScheduled(root) {
     Scheduler_scheduleCallback(NormalSchedulerPriority, performConcurrentWorkOnRoot.bind(null, root));
 }
 
+// 调度同步回调
 function performSyncWorkOnRoot(root) {
+    // 拿到最高优的lane
     const lanes = getNextLanes(root, NoLanes);
+    // 同步渲染根节点, 渲染新的fiber树
     renderRootSync(root, lanes);
+    // 获取完成的fiber 根节点
     const finishedWork = root.current.alternate
     root.finishedWork = finishedWork
     commitRoot(root)
+    // flushSyncCallbacks 执行时是以callback返回null为依据的
     return null;//如果没有任务了一定要返回null
 }
 
@@ -141,6 +148,7 @@ function commitRoot(root) {
     const previousPriority = getCurrentUpdatePriority();
 
     try {
+        // 把当前的更新优先级设置为1， 提交阶段不能去暂停
         setCurrentUpdatePriority(DiscreteEventPriority);
         commitRootImpl(root);
     } finally {
@@ -306,6 +314,7 @@ function getFlags(fiber) {
  * @param {*} root 
  */
 function renderRootSync(root, lanes) {
+    // 新的根和老的根不一样 或者 新的渲染优先级和老的渲染优先级不一样
     if (workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes) {
         // 为根节点创建新的 Fiber 栈 创建新的HOSTRootFiber === workInProgress（正在构建的
         prepareFreshStack(root, lanes);
@@ -375,10 +384,12 @@ function completeUnitOfWork(unitOfWork) {
 /** 将 根据lane 转换为事件优先级
  */
 export function requestUpdateLane() {
+    // 获取当前更新优先级
     const updateLane = getCurrentUpdatePriority();
     if (updateLane !== NoLane) {
         return updateLane;
     }
+    // 取事件优先级赛道
     const eventLane = getCurrentEventPriority();
     return eventLane;
 }

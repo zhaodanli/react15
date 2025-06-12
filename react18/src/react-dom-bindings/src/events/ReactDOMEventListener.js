@@ -1,7 +1,9 @@
 import getEventTarget from "./getEventTarget.js";
 import { getClosestInstanceFromNode } from "../client/ReactDOMComponentTree.js";
 import { dispatchEventForPluginEventSystem } from "./DOMPluginEventSystem.js";
-import { DiscreteEventPriority, ContinuousEventPriority, DefaultEventPriority } from 'react-reconciler/src/ReactEventPriorities.js';
+import { DiscreteEventPriority, ContinuousEventPriority, DefaultEventPriority,
+    getCurrentUpdatePriority, setCurrentUpdatePriority
+ } from 'react-reconciler/src/ReactEventPriorities.js';
 
 /** 创建带有优先级的事件监听器包装函数。
  * 事件触发时，分发到 React 的事件系统。
@@ -29,7 +31,14 @@ export function createEventListenerWrapperWithPriority(targetContainer, domEvent
  * @param {*} nativeEvent 
  */
 function dispatchDiscreteEvent(domEventName, eventSystemFlags, container, nativeEvent) {
-    dispatchEvent(domEventName, eventSystemFlags, container, nativeEvent);
+    // dispatchEvent(domEventName, eventSystemFlags, container, nativeEvent);
+    const previousPriority = getCurrentUpdatePriority();
+    try {
+        setCurrentUpdatePriority(DiscreteEventPriority);
+        dispatchEvent(domEventName, eventSystemFlags, container, nativeEvent)
+    }finally {
+        setCurrentUpdatePriority(previousPriority);
+    }
 }
 
 /** 这里简单打印，实际实现会进行事件合成和冒泡等处理。

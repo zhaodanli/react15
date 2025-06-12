@@ -1,6 +1,6 @@
 import ReactSharedInternals from "shared/ReactSharedInternals.js";
 import { enqueueConcurrentHookUpdate } from "./ReactFiberConcurrentUpdates";
-import { scheduleUpdateOnFiber } from "./ReactFiberWorkLoop";
+import { scheduleUpdateOnFiber, requestUpdateLane } from "./ReactFiberWorkLoop";
 import is from "shared/objectIs";
 
 import { Passive as PassiveEffect, Update as UpdateEffect } from "./ReactFiberFlags";
@@ -257,7 +257,9 @@ function dispatchReducerAction(fiber, queue, action) {
 }
 
 function dispatchSetState(fiber, queue, action) {
+    const lane = requestUpdateLane(fiber);
     const update = {
+        lane,
         action,
         next: null,
         hasEagerState: false, // 是否有急切状态
@@ -278,8 +280,8 @@ function dispatchSetState(fiber, queue, action) {
     }
 
     // 入队并调度
-    const root = enqueueConcurrentHookUpdate(fiber, queue, update);
-    scheduleUpdateOnFiber(root, fiber);
+    const root = enqueueConcurrentHookUpdate(fiber, queue, update, lane);
+    scheduleUpdateOnFiber(root, fiber, lane);
 }
 
 /** >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 派发阶段 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */

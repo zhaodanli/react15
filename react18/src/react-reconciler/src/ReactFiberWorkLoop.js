@@ -6,6 +6,7 @@ import { commitMutationEffectsOnFiber, commitMutationEffects, commitPassiveUnmou
 import { MutationMask, NoFlags, Placement, Update, ChildDeletion, Passive } from "./ReactFiberFlags.js";
 import { HostRoot, HostComponent, HostText, FunctionComponent } from "./ReactWorkTags.js";
 import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
+import { NormalPriority as NormalSchedulerPriority, scheduleCallback as Scheduler_scheduleCallback } from "./Scheduler";
 
 // 新的 待更新， 正在构建中的 fiber, 相对current 是老的节点 （展示，页面上真实dom, 已经渲染完成的fiber）
 let workInProgress = null;
@@ -32,9 +33,12 @@ export function scheduleUpdateOnFiber(root) {
  * 这样，当调度器执行任务时，可以将 root 作为参数传递给 performConcurrentWorkOnRoot。
  */
 function ensureRootIsScheduled(root) {
-    if (workInProgressRoot) return;
-    workInProgressRoot = root;
-    scheduleCallback(performConcurrentWorkOnRoot.bind(null, root));
+    // if (workInProgressRoot) return;
+    // workInProgressRoot = root;
+    // scheduleCallback(performConcurrentWorkOnRoot.bind(null, root));
+
+    // NormalSchedulerPriority 优先级
+    Scheduler_scheduleCallback(NormalSchedulerPriority, performConcurrentWorkOnRoot.bind(null, root));
 }
 
 /**
@@ -64,7 +68,8 @@ function commitRoot(root) {
             // 表示跟上有要执行的副作用
             rootDoesHavePassiveEffects = true;
             // 刷新 副作用 开启新的宏任务，等待赋值之后执行
-            scheduleCallback(flushPassiveEffects);
+            // scheduleCallback(flushPassiveEffects);
+            Scheduler_scheduleCallback(NormalSchedulerPriority, flushPassiveEffects);
         }
     }
 

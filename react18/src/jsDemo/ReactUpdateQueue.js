@@ -134,7 +134,7 @@ function processUpdateQueue(fiber, renderLanes) {
     if (firstBaseUpdate !== null) {
         // 先获取老的值{number:0}
         let newState = queue.baseState;
-        let newLanes = NoLanes;
+        let newLanes = NoLanes; // 所有被跳过 update 的 lane 的合集。 表示该 Fiber 还有哪些优先级的 update 没被处理，下次调度时可以快速知道需要处理哪些优先级的更新。保证低优先级 update 不会丢失，等到合适的时机再处理。
         let newBaseState = null; // 新的基础状态
         let newFirstBaseUpdate = null; // 第一个跳过的更新
         let newLastBaseUpdate = null; // 新的最后一个基本更新

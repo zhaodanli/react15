@@ -311,58 +311,33 @@ import { createRoot } from "react-dom/client";
 // }
 
 // >>>>>>>>>>>>>>>>>>>>>> useLayoutEffect <<<<<<<<<<<<<<<<<<<<<<<<<
-function FunctionComponent() {
-    const [number, setNumber] = React.useState(0);
-    React.useEffect(() => {
-        console.log("useEffect1");
-        return () => {
-            console.log("destroy useEffect1");
-        };
-    });
-    React.useLayoutEffect(() => {
-        console.log("useLayoutEffect1");
-        return () => {
-            console.log("destroy useLayoutEffect1");
-        };
-    });
-    return (
-        <div
-            onClick={() => {
-                setNumber(number + 1);
-            }}
-        >
-            {number}
-        </div>
-    );
-}
-
-// >>>>>>>>>>>>>>>>>>>>>>. mountReducer <<<<<<<<<<<<<<<<<<<<<<<<<
-// function FunctionComponent2() {
-//   const [number, setNumber] = React.useReducer(reducer, 0);
-//   return number === 0 ? (
-//     <div onClick={() => setNumber({ type: "add", payload: 1})} key="title" id="title">
-//       title
-//       <button onClick={() => {
-//         setNumber({ type: "add", payload: 1})
-//         setNumber({ type: "add", payload: 2})
-//         setNumber({ type: "add", payload: 3})
-//       }}>{number}</button>
-//     </div>
-//   ) : (
-//     <div onClick={() => setNumber({ type: "add", payload: 1})}  key="title" id="title2">
-//       title2
-//     </div>
-//   );
+// function FunctionComponent() {
+//     const [number, setNumber] = React.useState(0);
+//     React.useEffect(() => {
+//         console.log("useEffect1");
+//         return () => {
+//             console.log("destroy useEffect1");
+//         };
+//     });
+//     React.useLayoutEffect(() => {
+//         console.log("useLayoutEffect1");
+//         return () => {
+//             console.log("destroy useLayoutEffect1");
+//         };
+//     });
+//     return (
+//         <div
+//             onClick={() => {
+//                 setNumber(number + 1);
+//             }}
+//         >
+//             {number}
+//         </div>
+//     );
 // }
 
-
-
-let element1 = <FunctionComponent />;
-// let element2 = <FunctionComponent2 />;
-// let element3 = <FunctionComponent3 />;
-// let element4 = <FunctionComponent4 />;
-
-let element = element1;
+// >>>>>>>>>>>>>>>>>>>>>> 初次渲染 <<<<<<<<<<<<<<<<<<<<<<<<<
+let element = <h1>hello</h1>;
 
 // 创建根fiber
 const root = createRoot(document.getElementById("root"));

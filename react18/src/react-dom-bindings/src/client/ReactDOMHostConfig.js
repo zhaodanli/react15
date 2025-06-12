@@ -1,5 +1,7 @@
 import { setInitialProperties, diffProperties, updateProperties } from "./ReactDOMComponent";
 import { precacheFiberNode, updateFiberProps } from "./ReactDOMComponentTree.js";
+import { getEventPriority } from '../events/ReactDOMEventListener.js';
+import { DefaultEventPriority } from 'react-reconciler/src/ReactEventPriorities.js';
 
 export function shouldSetTextContent(type, props) {
     return typeof props.children === "string" || typeof props.children === "number";
@@ -67,4 +69,13 @@ export function commitUpdate(domElement, updatePayload, type, oldProps, newProps
 
 export function removeChild(parentInstance, child) {
     parentInstance.removeChild(child);
+}
+
+// 获取当前更新优先级
+export function getCurrentEventPriority() {
+    const currentEvent = window.event;
+    if (currentEvent === undefined) {
+        return DefaultEventPriority;
+    }
+    return getEventPriority(currentEvent.type);
 }

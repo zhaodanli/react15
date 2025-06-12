@@ -1,10 +1,13 @@
-import { markUpdateLaneFromFiberToRoot } from "./ReactFiberConcurrentUpdates";
+import { markUpdateLaneFromFiberToRoot, enqueueConcurrentClassUpdate } from "./ReactFiberConcurrentUpdates";
 import assign from "shared/assign";
 export const UpdateState = 0;
 
 export function initializeUpdateQueue(fiber) {
     // pending 是 循环链表
     const queue = {
+        baseState: fiber.memoizedState,
+        firstBaseUpdate: null,
+        lastBaseUpdate: null,
         shared: {
             pending: null,
         },
@@ -12,28 +15,30 @@ export function initializeUpdateQueue(fiber) {
     fiber.updateQueue = queue;
 }
 
-// 创建更新
-export function createUpdate() {
-    const update = { tag: UpdateState };
+export function createUpdate(lane) {
+    const update = { tag: UpdateState, lane, next: null };
     return update;
 }
+
 
 /** 将状态更新（update）插入到 Fiber 节点的更新队列中。
  * 它的作用是将新的更新对象添加到更新队列中，并返回从当前 Fiber 节点到根节点的路径，用于触发调度和渲染。
  * */
-export function enqueueUpdate(fiber, update) {
-    const updateQueue = fiber.updateQueue;
-    const sharedQueue = updateQueue.shared;
-    const pending = sharedQueue.pending;
-    if (pending === null) {
-        update.next = update;
-    } else {
-        update.next = pending.next;
-        pending.next = update
-    }
-    updateQueue.shared.pending = update;
-    // 返回根节点路径
-    return markUpdateLaneFromFiberToRoot(fiber);
+export function enqueueUpdate(fiber, update, lane) {
+    const updateQueue = fiber.updateQueue; // 获取更新队列
+    const sharedQueue = updateQueue.shared; // 获取共享队列
+    // 该用并发方式写
+    return enqueueConcurrentClassUpdate(fiber, sharedQueue, update, lane);
+    // const pending = sharedQueue.pending;
+    // if (pending === null) {
+    //     update.next = update;
+    // } else {
+    //     update.next = pending.next;
+    //     pending.next = update
+    // }
+    // updateQueue.shared.pending = update;
+    // // 返回根节点路径
+    // return markUpdateLaneFromFiberToRoot(fiber);
 }
 
 /** 主要作用是依次处理所有待更新的 state，并计算出最终的新状态。
@@ -75,10 +80,33 @@ function getStateFromUpdate(update, prevState) {
     switch (update.tag) {
         case UpdateState: {
             const { payload } = update;
-            const partialState = payload;
+            let partialState;
+            if (typeof payload === 'function') {
+                partialState = payload.call(null, prevState, nextProps);
+            } else {
+                partialState = payload;
+            }
+
+            // const partialState = payload;
             return assign({}, prevState, partialState);
         }
         default:
             return prevState;
+    }
+}
+
+export function cloneUpdateQueue(current, workInProgress) {
+    // 拿到新队列和老队列
+    const queue = workInProgress.updateQueue;
+    const currentQueue = current.updateQueue;
+    // 一样的话就克隆一份
+    if (queue === currentQueue) {
+        const clone = {
+            baseState: currentQueue.baseState,
+            firstBaseUpdate: currentQueue.firstBaseUpdate,
+            lastBaseUpdate: currentQueue.lastBaseUpdate,
+            shared: currentQueue.shared,
+        };
+        workInProgress.updateQueue = clone;
     }
 }

@@ -1,5 +1,5 @@
 import { HostRoot, HostComponent, HostText, IndeterminateComponent, FunctionComponent } from "./ReactWorkTags";
-import { processUpdateQueue } from "./ReactFiberClassUpdateQueue";
+import { processUpdateQueue, cloneUpdateQueue } from "./ReactFiberClassUpdateQueue";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { shouldSetTextContent } from "react-dom-bindings/src/client/ReactDOMHostConfig";
 import logger, { indent } from "shared/logger";
@@ -38,9 +38,11 @@ function reconcileChildren(current, workInProgress, nextChildren) {
  * @param {*} workInProgress 
  * @returns 
  */
-function updateHostRoot(current, workInProgress) {
+function updateHostRoot(current, workInProgress, renderLanes) {
+    const nextProps = workInProgress.pendingProps;
+    cloneUpdateQueue(current, workInProgress);
     // 从更新队列里拿去子虚拟DOM信息 workInProgress.memoizedState = palyload.elemnt
-    processUpdateQueue(workInProgress); // 处理 setState 队列，得到最新 state
+    processUpdateQueue(workInProgress, nextProps, renderLanes); // 处理 setState 队列，得到最新 state
     const nextState = workInProgress.memoizedState;
     // 获取新的虚拟DOM
     const nextChildren = nextState.element; // 拿到新的虚拟 DOM
@@ -105,24 +107,24 @@ function updateFunctionComponent(current, workInProgress, Component, nextProps) 
  * @param {老fiber} current 
  * @param {新fiber} workInProgress 
  */
-export function beginWork(current, workInProgress) {
+export function beginWork(current, workInProgress, renderLanes) {
     // logger(" ".repeat(indent.number) + "beginWork", workInProgress);
     // indent.number += 2;
     switch (workInProgress.tag) {
         case IndeterminateComponent: {
             return mountIndeterminateComponent(
-                current, workInProgress, workInProgress.type
+                current, workInProgress, workInProgress.type, renderLanes
             )
         }
         case FunctionComponent: {
             return updateFunctionComponent(
-                current, workInProgress, workInProgress.type,  workInProgress.pendingProps
+                current, workInProgress, workInProgress.type,  workInProgress.pendingProps, renderLanes
             );
         }
         case HostRoot:
-            return updateHostRoot(current, workInProgress);
+            return updateHostRoot(current, workInProgress, renderLanes);
         case HostComponent:
-            return updateHostComponent(current, workInProgress);
+            return updateHostComponent(current, workInProgress, renderLanes);
         case HostText: // 文本节点没有子节点，所以是null
         default:
             return null;

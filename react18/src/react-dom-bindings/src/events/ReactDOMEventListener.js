@@ -1,6 +1,7 @@
 import getEventTarget from "./getEventTarget.js";
 import { getClosestInstanceFromNode } from "../client/ReactDOMComponentTree.js";
 import { dispatchEventForPluginEventSystem } from "./DOMPluginEventSystem.js";
+import { DiscreteEventPriority, ContinuousEventPriority, DefaultEventPriority } from 'react-reconciler/src/ReactEventPriorities.js';
 
 /** 创建带有优先级的事件监听器包装函数。
  * 事件触发时，分发到 React 的事件系统。
@@ -50,4 +51,17 @@ export function dispatchEvent(domEventName, eventSystemFlags, targetContainer, n
         targetInst, // dom 对应 fiber
         targetContainer // 目标容器
     );
+}
+
+// 通过事件名拿到优先级
+export function getEventPriority(domEventName) {
+    switch (domEventName) {
+        // case 连续/离散/默认事件
+        case 'click':
+            return DiscreteEventPriority;
+        case 'drag':
+            return ContinuousEventPriority;
+        default:
+            return DefaultEventPriority;
+    }
 }

@@ -1,6 +1,6 @@
 import { createHostRootFiber } from "./ReactFiber.js"
 import { initializeUpdateQueue } from "./ReactFiberClassUpdateQueue.js";
-
+import { NoLanes } from './ReactFiberLane.js'
 
 /**
  * 。
@@ -8,6 +8,7 @@ import { initializeUpdateQueue } from "./ReactFiberClassUpdateQueue.js";
  */
 function FiberRootNode(containerInfo) {
     this.containerInfo = containerInfo;
+    this.pendingLanes = NoLanes; // 更上有哪些车道待处理
 }
 
 export function createFiberRoot(containerInfo) {

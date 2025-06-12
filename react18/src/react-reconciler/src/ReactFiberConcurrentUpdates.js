@@ -20,18 +20,19 @@ let concurrentQueuesIndex = 0;
  * @param {*} update 
  * @returns 
  */
-export function enqueueConcurrentHookUpdate(fiber, queue, update) {
+export function enqueueConcurrentHookUpdate(fiber, queue, update, lane) {
   // 把一次 Hook 更新（如 setState）加入并发队列
-  enqueueUpdate(fiber, queue, update);
+  enqueueUpdate(fiber, queue, update, lane);
   // 返回根节点（HostRoot）
   return getRootForUpdatedFiber(fiber);
 }
 
 /** 把 fiber、更新队列和更新对象依次存入数组。 */
-function enqueueUpdate(fiber, queue, update) {
+function enqueueUpdate(fiber, queue, update, lane) {
   concurrentQueues[concurrentQueuesIndex++] = fiber;
   concurrentQueues[concurrentQueuesIndex++] = queue;
   concurrentQueues[concurrentQueuesIndex++] = update;
+  concurrentQueues[concurrentQueuesIndex++] = lane;
 }
 
 /** 查找根节点*/
@@ -68,6 +69,7 @@ export function finishQueueingConcurrentUpdates() {
     const fiber = concurrentQueues[i++];
     const queue = concurrentQueues[i++];
     const update = concurrentQueues[i++];
+    const lane = concurrentQueues[i++]
 
     // 将更新加入到对应的更新队列（形成循环链表）
     if (queue !== null && update !== null) {
@@ -101,4 +103,16 @@ export function markUpdateLaneFromFiberToRoot(sourceFiber) {
     return root;
   }
   return null;
+}
+
+/** 入队并发类的更新
+ * 
+ * @param {根fiber} fiber 
+ * @param {* 更新队列} queue 
+ * @param {*} update 
+ * @param {*} lane 
+ */
+export function enqueueConcurrentClassUpdate(fiber, queue, update, lane) {
+    enqueueUpdate(fiber, queue, update, lane);
+    return getRootForUpdatedFiber(fiber);
 }

@@ -1,6 +1,6 @@
 import { HostRoot, IndeterminateComponent, HostComponent, HostText } from "./ReactWorkTags";
 import { NoFlags } from "./ReactFiberFlags";
-import { NoLane } from "./ReactFiberLane";
+import { NoLane, NoLanes } from "./ReactFiberLane";
 
 /**
  * 代码功能概述
@@ -45,6 +45,7 @@ export function FiberNode(tag, pendingProps, key) {
     this.deletions = null; // 存储需要删除的子节点列表
 
     this.lanes = NoLane;
+    this.childLanes = NoLanes;
 
     // 双缓存机制 双缓存机制允许 React 在内存中构建新的 Fiber 树，同时保留当前屏幕上显示的 Fiber 树。
     this.alternate = null; // 双缓存机制中的另一个 Fiber 节点
@@ -88,6 +89,8 @@ export function createWorkInProgress(current, pendingProps) {
         workInProgress.flags = NoFlags;
         // 如果不重置 subtreeFlags，可能会遗留上一次更新的标记，导致错误的操作。
         workInProgress.subtreeFlags = NoFlags;
+
+        workInProgress.deletions = null;
     }
     /**
         * 第一次更新
@@ -113,6 +116,10 @@ export function createWorkInProgress(current, pendingProps) {
     workInProgress.sibling = current.sibling;
     workInProgress.index = current.index;
     workInProgress.ref = current.ref;
+
+    workInProgress.flags = current.flags;
+    workInProgress.childLanes = current.childLanes;
+    workInProgress.lanes = current.lanes;
     return workInProgress;
 }
 

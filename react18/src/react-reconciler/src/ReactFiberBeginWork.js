@@ -4,6 +4,7 @@ import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { shouldSetTextContent } from "react-dom-bindings/src/client/ReactDOMHostConfig";
 import logger, { indent } from "shared/logger";
 import { renderWithHooks } from "react-reconciler/src/ReactFiberHooks";
+import { NoLanes } from './ReactFiberLane';
 
 /** React Fiber 架构中beginWork 阶段的核心逻辑
  * 1. 根据虚拟 DOM 生成/更新 Fiber 子链表。
@@ -91,8 +92,8 @@ function mountIndeterminateComponent(_current, workInProgress, Component) {
     return workInProgress.child;
 }
 
-function updateFunctionComponent(current, workInProgress, Component, nextProps) {
-    const nextChildren = renderWithHooks(current, workInProgress, Component, nextProps);
+function updateFunctionComponent(current, workInProgress, Component, nextProps, renderLanes) {
+    const nextChildren = renderWithHooks(current, workInProgress, Component, nextProps, renderLanes);
     reconcileChildren(current, workInProgress, nextChildren);
     return workInProgress.child;
 }
@@ -108,6 +109,7 @@ function updateFunctionComponent(current, workInProgress, Component, nextProps) 
  * @param {新fiber} workInProgress 
  */
 export function beginWork(current, workInProgress, renderLanes) {
+    workInProgress.lanes = NoLanes;
     // logger(" ".repeat(indent.number) + "beginWork", workInProgress);
     // indent.number += 2;
     switch (workInProgress.tag) {
@@ -117,8 +119,10 @@ export function beginWork(current, workInProgress, renderLanes) {
             )
         }
         case FunctionComponent: {
+            const Component = workInProgress.type;
+            const resolvedProps = workInProgress.pendingProps;
             return updateFunctionComponent(
-                current, workInProgress, workInProgress.type,  workInProgress.pendingProps, renderLanes
+                current, workInProgress, Component, resolvedProps, renderLanes
             );
         }
         case HostRoot:

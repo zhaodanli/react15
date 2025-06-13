@@ -378,23 +378,64 @@ import { createRoot } from "react-dom/client";
 
 // >>>>>>>>>>>>>>>>>>>>>> 高优先级打断低优先级更新 <<<<<<<<<<<<<<<<<<<<<<<<<
 
+// function FunctionComponent() {
+//     const [numbers, setNumbers] = React.useState(new Array(20).fill('A'));
+//     // const buttonRef = React.useRef();
+//     React.useEffect(() => {
+//         setTimeout(() => {
+//             // buttonRef.current.click();
+//         }, 50);
+//         setNumbers(numbers => numbers.map(item => item + 'B'))
+//     }, []);
+//     return (
+//         <button 
+//             // ref={buttonRef} 
+//             onClick={() => {
+//                 setNumbers(numbers => numbers.map(item => item + 'C'))
+//             }}>
+//             {numbers.map((number, index) => <span key={index}>{number}</span>)}
+//         </button>
+//     )
+// }
+
+// >>>>>>>>>>>>>>>>>>>>>> 解决饥饿问题 <<<<<<<<<<<<<<<<<<<<<<<<<
+
+let counter = 0;
+let timer;
+let bCounter = 0;
+let cCounter = 0;
 function FunctionComponent() {
-    const [numbers, setNumbers] = React.useState(new Array(20).fill('A'));
-    // const divRef = React.useRef();
+    const [numbers, setNumbers] = React.useState(new Array(100).fill('A'));
+
+    const buttonRef = React.useRef();
+    const updateB = (numbers) => new Array(100).fill(numbers[0] + 'B')
+    updateB.id = 'updateB' + (bCounter++);
+    const updateC = (numbers) => new Array(100).fill(numbers[0] + 'C')
+    updateC.id = 'updateC' + (cCounter++);
+
     React.useEffect(() => {
-        setTimeout(() => {
-            // divRef.current.click();
-        }, 50);
-        setNumbers(numbers => numbers.map(item => item + 'B'))
+        timer = setInterval(() => {
+            console.log(buttonRef);
+            buttonRef.current.click();
+            if (counter++ === 0) {
+                setNumbers(updateB)
+            }
+            buttonRef.current.click();
+            if (counter++ > 10) {
+                clearInterval(timer);
+            }
+        });
     }, []);
+
     return (
-        <button 
-            // ref={divRef} 
+        <div 
+            ref={buttonRef} 
             onClick={() => {
-                setNumbers(numbers => numbers.map(item => item + 'C'))
+                // debugger;
+                setNumbers(updateC)
             }}>
             {numbers.map((number, index) => <span key={index}>{number}</span>)}
-        </button>
+        </ div>
     )
 }
 

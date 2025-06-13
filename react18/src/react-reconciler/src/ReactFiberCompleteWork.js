@@ -8,6 +8,7 @@ import {
 import { HostComponent, HostRoot, HostText, FunctionComponent } from "./ReactWorkTags.js";
 import { NoFlags, Update, Ref } from "./ReactFiberFlags.js";
 import logger, { indent } from "shared/logger.js";
+import { NoLanes, mergeLanes } from './ReactFiberLane';
 
 /**
  * 这个文件实现了 React Fiber 架构中completeWork 阶段的核心逻辑，是 React 渲染流程的关键部分
@@ -31,17 +32,24 @@ import logger, { indent } from "shared/logger.js";
  * @param {*} completedWork 
  */
 function bubbleProperties(completedWork) {
+    let newChildLanes = NoLanes;
+
     // 初始化 subtreeFlags 为 NoFlags （即没有副作用）
     let subtreeFlags = NoFlags;
     let child = completedWork.child;
     // 遍历当前节点的所有子节点，将子节点的 flags 和 subtreeFlags 合并到 subtreeFlags 中。
     while (child !== null) {
+        newChildLanes = mergeLanes(newChildLanes, mergeLanes(child.lanes, child.childLanes));
+
         // 3. 合并子节点的 subtreeFlags（子树副作用）到本地 subtreeFlags
         subtreeFlags |= child.subtreeFlags;
         // 4. 合并子节点自身的 flags（自身副作用）到本地 subtreeFlags
         subtreeFlags |= child.flags;
         child = child.sibling;
     }
+    
+    completedWork.childLanes = newChildLanes;
+
     // 将合并后的 subtreeFlags 赋值给当前节点的 subtreeFlags。
     completedWork.subtreeFlags |= subtreeFlags;
 }

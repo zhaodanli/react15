@@ -1,4 +1,5 @@
 import { HostRoot } from "./ReactWorkTags";
+import { mergeLanes, NoLanes } from './ReactFiberLane';
 
 
 /**
@@ -33,6 +34,9 @@ function enqueueUpdate(fiber, queue, update, lane) {
   concurrentQueues[concurrentQueuesIndex++] = queue;
   concurrentQueues[concurrentQueuesIndex++] = update;
   concurrentQueues[concurrentQueuesIndex++] = lane;
+
+  // 当我们向上一个fiber添加更新的时候， 要把次更新集合合并到赛道上
+  fiber.lanes = mergeLanes(fiber.lanes, lane);
 }
 
 /** 查找根节点*/

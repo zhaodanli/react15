@@ -5,7 +5,13 @@ import { commitMutationEffectsOnFiber, commitMutationEffects, commitPassiveUnmou
 import { MutationMask, NoFlags, Placement, Update, ChildDeletion, Passive } from "./ReactFiberFlags.js";
 import { HostRoot, HostComponent, HostText, FunctionComponent } from "./ReactWorkTags.js";
 import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
-import { NormalPriority as NormalSchedulerPriority, scheduleCallback as Scheduler_scheduleCallback, shouldYield, cancelCallback as Scheduler_cancelCallback, now } from "./Scheduler";
+import { 
+    NormalPriority as NormalSchedulerPriority, 
+    scheduleCallback as Scheduler_scheduleCallback, 
+    shouldYield, 
+    cancelCallback as Scheduler_cancelCallback, 
+    now 
+} from "./Scheduler";
 import {
     NoLane,
     markRootUpdated,
@@ -13,7 +19,9 @@ import {
     getNextLanes,
     getHighestPriorityLane,
     SyncLane,
-    includesBlockingLane
+    includesBlockingLane,
+    markStarvedLanesAsExpired, includesExpiredLane,
+    mergeLanes, markRootFinished, NoTimestamp
 } from './ReactFiberLane.js';
 import {
     getCurrentUpdatePriority,
@@ -42,14 +50,24 @@ const RootInProgress = 0; // fiber 构建进行中
 const RootCompleted = 5; // fiber 构建已完成
 let workInProgressRootExitStatus = RootInProgress; // fiber 构建已结束
 
+let currentEventTime = NoTimestamp;
+
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 饥饿问题 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+function cancelCallback(callbackNode) {
+    console.log('cancelCallback>>>>>>>>>>>>>>>>>>>>>');
+    return Scheduler_cancelCallback(callbackNode);
+}
+
 /**
  * 用于调度更新
  * @param {} root 
  */
-export function scheduleUpdateOnFiber(root, fiber, lane) {
+export function scheduleUpdateOnFiber(root, fiber, lane, eventTime) {
     markRootUpdated(root, lane);
     // 确保调度执行root上的更新
-    ensureRootIsScheduled(root);
+    ensureRootIsScheduled(root, eventTime);
 }
 
 
@@ -60,22 +78,28 @@ export function scheduleUpdateOnFiber(root, fiber, lane) {
  * 将 performConcurrentWorkOnRoot 函数绑定到当前的 root，生成一个回调函数。
  * 这样，当调度器执行任务时，可以将 root 作为参数传递给 performConcurrentWorkOnRoot。
  */
-function ensureRootIsScheduled(root) {
+function ensureRootIsScheduled(root, currentTime) {
     // >>>>>>>>>>> 高优先级打断低优先级 <<<<<<<<<<<<<<<<<<<
     // 获取当前跟上任务
     const existingCallbackNode = root.callbackNode;
+
+    // 解决饥饿问题，设置事件
+    markStarvedLanesAsExpired(root, currentTime);
 
     // 将当前正在渲染车道
     const nextLanes = getNextLanes(root, root === workInProgressRoot ? workInProgressRootRenderLanes : NoLanes);
     // 从整个 Fiber 树（root）上，计算出“当前所有待处理的 lane（车道）”的合集（即还有哪些优先级的更新没有被处理）。 可能包含多个 lane
     // const nextLanes = getNextLanes(root, NoLanes);
 
-    // 如果没有下一个任务，则返回
+    // 先判断当前根节点是否有待处理的任务（nextLanes），如果没有，root.callbackNode = null。
     if (nextLanes === NoLanes) {
         root.callbackNode = null;
         root.callbackPriority = NoLane;
         return;
     }
+
+    debugger
+
     // 从 nextLanes 这个集合中，选出“优先级最高的那个 lane”。这是“当前最紧急需要处理的优先级”。
     const newCallbackPriority = getHighestPriorityLane(nextLanes);
     // 处理批量更新逻辑
@@ -83,26 +107,30 @@ function ensureRootIsScheduled(root) {
     // 防止重复调度同一优先级的任务，实现批量合并。
     // 如果当前根节点（root）已经有一个相同优先级的调度任务在排队，就不需要再重复调度一次。
     // callbackPriority 是 现在根上正在运行的优先级
+    // 如果 root.callbackNode 存在，且优先级发生变化（existingCallbackPriority !== newCallbackPriority），则调用 cancelCallback(existingCallbackNode) 取消旧的调度任务。
+    // 这样可以防止低优先级任务被高优先级任务“饿死”，也避免重复调度。
     const existingCallbackPriority = root.callbackPriority;
     if (existingCallbackPriority === newCallbackPriority) {
         return;
     }
 
-    // 有值， 则取下任务
+    // 如果有新任务，且优先级发生变化，会先取消旧的回调（见下文“取消”）。
     if (existingCallbackNode !== null) {
         console.log('Scheduler_cancelCallback>>>>>>>>>>>>>>>>>>>>')
-        Scheduler_cancelCallback(existingCallbackNode);
+        cancelCallback(existingCallbackNode);
     }
 
     // 获取下一个回调
     let newCallbackNode;
 
-    // 新优先级是同步
+    // 根据优先级（同步/异步）：
     if (newCallbackPriority === SyncLane) { // 同步 如点击事件
         // 调度同步回调 将 performSyncWorkOnRoot 放到同步回调
         scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root));
         // 将 flushSyncCallbacks 放到微任务
         queueMicrotask(flushSyncCallbacks);
+
+        // 同步任务：newCallbackNode = null，同步任务直接执行，不需要调度器回调。
         newCallbackNode = null; // 同步执行完成清空回调
     } else { // 异步
         let schedulerPriorityLevel;
@@ -125,7 +153,7 @@ function ensureRootIsScheduled(root) {
                 schedulerPriorityLevel = NormalSchedulerPriority;
                 break;
         }
-        // 先new Task，返回 new Task
+        // 异步任务：通过 Scheduler_scheduleCallback 创建调度回调，返回的回调句柄赋值给 root.callbackNode 先new Task，返回 new Task
         newCallbackNode = Scheduler_scheduleCallback(schedulerPriorityLevel, performConcurrentWorkOnRoot.bind(null, root))
     }
 
@@ -168,9 +196,14 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
         return null
     }
 
+    const nonIncludesBlockingLane = !includesBlockingLane(root, lanes);
+    const nonIncludesExpiredLane = !includesExpiredLane(root, lanes);
+    const nonTimeout = !didTimeout;
+
     // 判断是否需要时间分片：不包含阻塞车道 并且没有超时
     // 默认是同步的， allowConcurrentByDefault 默认情况下允许并发
-    const shouldTimeSlice = !includesBlockingLane(root, lanes) && (!didTimeout);
+    // const shouldTimeSlice = !includesBlockingLane(root, lanes) && (!didTimeout);
+    const shouldTimeSlice = nonIncludesBlockingLane && nonIncludesExpiredLane && nonTimeout;
     // console.log('判断是否需要时间分片', shouldTimeSlice)
     // >>>>>>>>> 并发渲染 <<<<<<<<<<<<<<
     const exitStatus = shouldTimeSlice ? renderRootConcurrent(root, lanes) : renderRootSync(root, lanes);
@@ -226,7 +259,7 @@ function renderRootConcurrent(root, lanes) {
 
 function workLoopConcurrent() {
     while (workInProgress !== null && !shouldYield()) {
-        sleep(1000); // 睡6s
+        sleep(6); // 睡6s
         performUnitOfWork(workInProgress); // 构建fiber
     }
 }
@@ -246,10 +279,16 @@ function commitRoot(root) {
 function commitRootImpl(root) {
     const { finishedWork } = root;
 
+    console.log('commit', finishedWork.child.memoizedState.memoizedState[0]);
+
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 重置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     workInProgress = null;
     workInProgressRootRenderLanes = NoLanes;
     root.callbackNode = null;
     root.callbackPriority = NoLane;
+
+    const remainingLanes = mergeLanes(finishedWork.lanes, finishedWork.childLanes);
+    markRootFinished(root, remainingLanes);
 
     // 判断是否有 effect 副作用
     if ((finishedWork.subtreeFlags & Passive) !== NoFlags || (finishedWork.flags & Passive) !== NoFlags) {
@@ -286,6 +325,8 @@ function commitRootImpl(root) {
         }
     }
     root.current = finishedWork;
+
+    ensureRootIsScheduled(root, now());
 }
 
 // 刷新 PassiveEffect
@@ -490,6 +531,11 @@ export function requestUpdateLane() {
     // 取事件优先级赛道
     const eventLane = getCurrentEventPriority();
     return eventLane;
+}
+
+export function requestEventTime() {
+    currentEventTime = now();
+    return currentEventTime;
 }
 
 function sleep(time) {

@@ -1,6 +1,6 @@
 import { createHostRootFiber } from "./ReactFiber.js"
 import { initializeUpdateQueue } from "./ReactFiberClassUpdateQueue.js";
-import { NoLanes } from 'react-reconciler/src/ReactFiberLane';
+import { NoTimestamp, createLaneMap, NoLanes } from 'react-reconciler/src/ReactFiberLane';
 
 /**
  * 。
@@ -8,9 +8,13 @@ import { NoLanes } from 'react-reconciler/src/ReactFiberLane';
  */
 function FiberRootNode(containerInfo) {
     this.containerInfo = containerInfo;
+    
     this.pendingLanes = NoLanes; // 更上有哪些车道待处理
     this.callbackNode = null;
     this.callbackPriority = NoLanes;
+
+    this.expirationTimes = createLaneMap(NoTimestamp);
+    this.expiredLanes = NoLanes;
 }
 
 export function createFiberRoot(containerInfo) {

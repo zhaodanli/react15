@@ -354,7 +354,6 @@ import { createRoot } from "react-dom/client";
 
 //     // useEffect 里的 setState 是“异步批量”调度 performConcurrentWorkOnRoot
 //     React.useEffect(() => {
-//         debugger
 //         setNumber(number => number + 1)
 //     }, [])
 
@@ -364,17 +363,39 @@ import { createRoot } from "react-dom/client";
 // }
 
 // >>>>>>>>>>>>>>>>>>>>>> 批量更新 <<<<<<<<<<<<<<<<<<<<<<<<<
+// function FunctionComponent() {
+//     console.log('FunctionComponent');
+//     const [number, setNumber] = React.useState(0);
+//     React.useEffect(() => {
+//         setNumber(number => number + 1)
+//         setNumber(number => number + 1)
+//     }, []);
+//     return (<button onClick={() => {
+//         setNumber(number => number + 1)
+//         setNumber(number => number + 1)
+//     }}>{number}</button>)
+// }
+
+// >>>>>>>>>>>>>>>>>>>>>> 高优先级打断低优先级更新 <<<<<<<<<<<<<<<<<<<<<<<<<
+
 function FunctionComponent() {
-    console.log('FunctionComponent');
-    const [number, setNumber] = React.useState(0);
+    const [numbers, setNumbers] = React.useState(new Array(20).fill('A'));
+    // const divRef = React.useRef();
     React.useEffect(() => {
-        setNumber(number => number + 1)
-        setNumber(number => number + 1)
+        setTimeout(() => {
+            // divRef.current.click();
+        }, 50);
+        setNumbers(numbers => numbers.map(item => item + 'B'))
     }, []);
-    return (<button onClick={() => {
-        setNumber(number => number + 1)
-        setNumber(number => number + 1)
-    }}>{number}</button>)
+    return (
+        <button 
+            // ref={divRef} 
+            onClick={() => {
+                setNumbers(numbers => numbers.map(item => item + 'C'))
+            }}>
+            {numbers.map((number, index) => <span key={index}>{number}</span>)}
+        </button>
+    )
 }
 
 let element = <FunctionComponent />;

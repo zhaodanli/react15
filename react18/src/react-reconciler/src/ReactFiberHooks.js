@@ -343,7 +343,7 @@ function updateReducer(reducer) {
     }
     hook.memoizedState = queue.lastRenderedState = newState; // 更新 Hook 的状态和 lastRenderedState
 
-    console.log("updateReducer>>>>>>>>>>>>>>", newState, queue.lastRenderedState, queue.lastRenderedReducer)
+    // console.log("updateReducer>>>>>>>>>>>>>>", newState, queue.lastRenderedState, queue.lastRenderedReducer)
     // 返回新的状态和 dispatch 函数
     return [newState, queue.dispatch];
 }

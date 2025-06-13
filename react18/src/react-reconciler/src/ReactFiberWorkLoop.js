@@ -78,7 +78,6 @@ function ensureRootIsScheduled(root) {
     }
     // 从 nextLanes 这个集合中，选出“优先级最高的那个 lane”。这是“当前最紧急需要处理的优先级”。
     const newCallbackPriority = getHighestPriorityLane(nextLanes);
-
     // 处理批量更新逻辑
     // 这两个关键代码片段分别解决了 React 18 并发批量更新中的「重复调度」和「无效更新」问题
     // 防止重复调度同一优先级的任务，实现批量合并。
@@ -87,6 +86,12 @@ function ensureRootIsScheduled(root) {
     const existingCallbackPriority = root.callbackPriority;
     if (existingCallbackPriority === newCallbackPriority) {
         return;
+    }
+
+    // 有值， 则取下任务
+    if (existingCallbackNode !== null) {
+        console.log('Scheduler_cancelCallback>>>>>>>>>>>>>>>>>>>>')
+        Scheduler_cancelCallback(existingCallbackNode);
     }
 
     // 获取下一个回调
@@ -124,7 +129,6 @@ function ensureRootIsScheduled(root) {
         newCallbackNode = Scheduler_scheduleCallback(schedulerPriorityLevel, performConcurrentWorkOnRoot.bind(null, root))
     }
 
-    root.callbackNode = newCallbackNode;
     // if (workInProgressRoot) return;
     // workInProgressRoot = root;
     // scheduleCallback(performConcurrentWorkOnRoot.bind(null, root));
@@ -157,7 +161,7 @@ function performSyncWorkOnRoot(root) {
  * @param {*} root 
  */
 function performConcurrentWorkOnRoot(root, didTimeout) {
-    console.log('performConcurrentWorkOnRoot>>>>>>>>>>>>>>>>>')
+    // console.log('performConcurrentWorkOnRoot>>>>>>>>>>>>>>>>>')
     const originalCallbackNode = root.callbackNode;
     const lanes = getNextLanes(root, NoLanes);
     if (lanes === NoLanes) {
@@ -167,7 +171,7 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
     // 判断是否需要时间分片：不包含阻塞车道 并且没有超时
     // 默认是同步的， allowConcurrentByDefault 默认情况下允许并发
     const shouldTimeSlice = !includesBlockingLane(root, lanes) && (!didTimeout);
-    console.log('判断是否需要时间分片', shouldTimeSlice)
+    // console.log('判断是否需要时间分片', shouldTimeSlice)
     // >>>>>>>>> 并发渲染 <<<<<<<<<<<<<<
     const exitStatus = shouldTimeSlice ? renderRootConcurrent(root, lanes) : renderRootSync(root, lanes);
     // >>>>>>>>>> 更新渲染 <<<<<<<<<<<<<<
@@ -215,14 +219,14 @@ function renderRootConcurrent(root, lanes) {
         return RootInProgress;
     }
 
-    workInProgressRoot = null;
-    workInProgressRootRenderLanes = NoLanes;
+    // workInProgressRoot = null;
+    // workInProgressRootRenderLanes = NoLanes;
     return workInProgressRootExitStatus;
 }
 
 function workLoopConcurrent() {
     while (workInProgress !== null && !shouldYield()) {
-        sleep(300); // 睡6s
+        sleep(1000); // 睡6s
         performUnitOfWork(workInProgress); // 构建fiber
     }
 }
@@ -243,8 +247,7 @@ function commitRootImpl(root) {
     const { finishedWork } = root;
 
     workInProgress = null;
-    workInProgressRootRenderLanes = null;
-
+    workInProgressRootRenderLanes = NoLanes;
     root.callbackNode = null;
     root.callbackPriority = NoLane;
 

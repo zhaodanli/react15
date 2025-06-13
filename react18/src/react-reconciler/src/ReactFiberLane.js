@@ -18,7 +18,13 @@ export function markRootUpdated(root, updateLane) {
 }
 
 // 获取最高优先级
-export function getNextLanes(root) {
+/**
+ * 
+ * @param {*} root 
+ * @param {当前渲染中车道} wipLanes 
+ * @returns 
+ */
+export function getNextLanes(root, wipLanes) {
     // 获取所有车道
     const pendingLanes = root.pendingLanes;
     if (pendingLanes === NoLanes) {
@@ -26,6 +32,15 @@ export function getNextLanes(root) {
     }
     // 最高优先级车道
     const nextLanes = getHighestPriorityLanes(pendingLanes);
+
+    // >>>>>>>>>>>>>>>>>>> 高优先级打断低优先级 <<<<<<<<<<<<<<<
+
+    // 判断新车道 > 比渲染中大，优先级低，则返回 wipLanes「最高级车道」
+    if (wipLanes !== NoLanes && wipLanes !== nextLanes) {
+        if (nextLanes >= wipLanes) {
+            return wipLanes;
+        }
+    }
     return nextLanes;
 }
 

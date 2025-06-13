@@ -6,7 +6,7 @@ import {
     prepareUpdate,
 } from "react-dom-bindings/src/client/ReactDOMHostConfig.js";
 import { HostComponent, HostRoot, HostText, FunctionComponent } from "./ReactWorkTags.js";
-import { NoFlags, Update } from "./ReactFiberFlags.js";
+import { NoFlags, Update, Ref } from "./ReactFiberFlags.js";
 import logger, { indent } from "shared/logger.js";
 
 /**
@@ -116,6 +116,9 @@ export function completeWork(current, workInProgress) {
             if (current !== null && workInProgress.stateNode != null) {
                 updateHostComponent(current, workInProgress, type, newProps);
                 // console.log("updatePayload", workInProgress.updateQueue);
+                if (current.ref !== workInProgress.ref) {
+                    markRef(workInProgress);
+                }
             } else {
                 // 创建 DOM 实例：创建 DOM/文本实例并挂载。
                 const instance = createInstance(type, newProps, workInProgress);
@@ -125,6 +128,9 @@ export function completeWork(current, workInProgress) {
                 workInProgress.stateNode = instance;
                 // 初始化属性
                 finalizeInitialChildren(instance, type, newProps);
+                if (workInProgress.ref !== null) {
+                    markRef(workInProgress);
+                }
             }
             // 冒泡副作用标记。
             bubbleProperties(workInProgress);
@@ -154,15 +160,19 @@ export function completeWork(current, workInProgress) {
 function updateHostComponent(current, workInProgress, type, newProps) {
     const oldProps = current.memoizedProps;
     const instance = workInProgress.stateNode;
-     const updatePayload = prepareUpdate(instance, type, oldProps, newProps);
-     workInProgress.updateQueue = updatePayload;
-     if (updatePayload) {
+    const updatePayload = prepareUpdate(instance, type, oldProps, newProps);
+    workInProgress.updateQueue = updatePayload;
+    if (updatePayload) {
         markUpdate(workInProgress);
-     }
+    }
 }
 
 function markUpdate(workInProgress) {
     workInProgress.flags |= Update;
 }
 
+
+function markRef(workInProgress) {
+    workInProgress.flags |= Ref;
+}
 

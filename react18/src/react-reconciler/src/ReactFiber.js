@@ -50,6 +50,7 @@ export function FiberNode(tag, pendingProps, key) {
     this.alternate = null; // 双缓存机制中的另一个 Fiber 节点
 
     this.index = 0;
+    this.ref = null;
 }
 
 // 创建一个新的 Fiber 节点。
@@ -111,6 +112,7 @@ export function createWorkInProgress(current, pendingProps) {
     workInProgress.updateQueue = current.updateQueue;
     workInProgress.sibling = current.sibling;
     workInProgress.index = current.index;
+    workInProgress.ref = current.ref;
     return workInProgress;
 }
 

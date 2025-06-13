@@ -1,5 +1,5 @@
 import { HostRoot, HostComponent, HostText, FunctionComponent } from "./ReactWorkTags";
-import { MutationMask, Placement, Update, Passive, LayoutMask } from "./ReactFiberFlags";
+import { MutationMask, Placement, Update, Passive, LayoutMask, Ref } from "./ReactFiberFlags";
 import {
     insertBefore,
     appendChild,
@@ -42,6 +42,9 @@ export function commitMutationEffectsOnFiber(finishedWork, root) {
         case HostComponent:
             recursivelyTraverseMutationEffects(root, finishedWork);
             commitReconciliationEffects(finishedWork);
+            if (flags & Ref) {
+                commitAttachRef(finishedWork);
+            }
             if (flags & Update) {
                 const instance = finishedWork.stateNode;
                 if (instance != null) {
@@ -459,4 +462,17 @@ function recursivelyTraverseLayoutEffects(root, parentFiber) {
 }
 function commitHookLayoutEffects(finishedWork, hookFlags) {
     commitHookEffectListMount(hookFlags, finishedWork);
+}
+
+/** >>>>>>>>>>>>>>>>>> Ref <<<<<<<<<<<<<<<<<<<< */
+function commitAttachRef(finishedWork) {
+    const ref = finishedWork.ref;
+    if (ref !== null) {
+        const instance = finishedWork.stateNode;
+        if (typeof ref === "function") {
+            ref(instance)
+        } else {
+            ref.current = instance;
+        }
+    }
 }

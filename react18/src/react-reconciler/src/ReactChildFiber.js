@@ -114,6 +114,7 @@ function createChildReconciler(shouldTrackSideEffects) {
                     deleteRemainingChildren(returnFiber, child.sibling);
                     // 复用节点
                     const existing = useFiber(child, element.props);
+                    existing.ref = element.ref;
                     existing.return = returnFiber;
                     return existing;
                 } else {
@@ -130,6 +131,7 @@ function createChildReconciler(shouldTrackSideEffects) {
             child = child.sibling;
         }
         const created = createFiberFromElement(element);
+        created.ref = element.ref;
         created.return = returnFiber;
         return created;
     }
@@ -270,6 +272,7 @@ function createChildReconciler(shouldTrackSideEffects) {
         // 如果 newChild 是字符串或数字，调用 createFiberFromText 创建文本节点。
         if ((typeof newChild === "string" && newChild !== "") || typeof newChild === "number") {
             const created = createFiberFromText(`${newChild}`);
+            created.ref = newChild.ref;
             created.return = returnFiber;
             return created;
         }
@@ -401,6 +404,7 @@ function createChildReconciler(shouldTrackSideEffects) {
             // 复用 oldFiber，更新其 props。
             if (current.type === elementType) {
                 const existing = useFiber(current, element.props);
+                existing.ref = element.ref;
                 existing.return = returnFiber;
                 return existing;
             }
@@ -408,6 +412,7 @@ function createChildReconciler(shouldTrackSideEffects) {
 
         // 如果 oldFiber 是 null，说明没有老节点，直接创建新节点
         const created = createFiberFromElement(element);
+        created.ref = element.ref;
         created.return = returnFiber;
         return created;
     }

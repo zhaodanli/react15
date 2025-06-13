@@ -15,10 +15,10 @@ let currentHook = null;
 
 /**
  * Effects {
-	{type: useEffect1, creat: useEffect1fn， destory: useEffect1returnFn},
-	{type: useLayoutEffect1, creat: useLayoutEffect1fn， destory: useLayoutEffect1returnFn},
-	{type: useEffect2, creat: useEffect2fn， destory: useEffect2returnFn},
-	{type: useLayoutEffect2, creat: useLayoutEffect2fn， destory: useLayoutEffect2returnFn},
+    {type: useEffect1, creat: useEffect1fn， destory: useEffect1returnFn},
+    {type: useLayoutEffect1, creat: useLayoutEffect1fn， destory: useLayoutEffect1returnFn},
+    {type: useEffect2, creat: useEffect2fn， destory: useEffect2returnFn},
+    {type: useLayoutEffect2, creat: useLayoutEffect2fn， destory: useLayoutEffect2returnFn},
 }
 commit 提供阶段 
     commitBeforeMutationEffects 更新前
@@ -26,12 +26,12 @@ commit 提供阶段
     commitHookLayOutEffects 更新后
 commit 完成后初次挂载
 
-	更新前 执行commitHookLayOutEffects的时候执行  
+    更新前 执行commitHookLayOutEffects的时候执行  
         useLayoutEffect1fn， useLayoutEffect2fn	
         在下一个宏任务中  执行 useEffect1fn，useEffect2fn更新
-	更新后 在commitMutationEffects 的时候执行 
+    更新后 在commitMutationEffects 的时候执行 
         同步执行 useLayoutEffect1returnFn， useLayoutEffect2returnFn
-	    在下一个宏任务异步执行 useEffect1returnFn，useEffect2returnFn	
+        在下一个宏任务异步执行 useEffect1returnFn，useEffect2returnFn	
         在下一个宏任务异步执行 useEffect1fn，useEffect2fn
 */
 const HooksDispatcherOnMountInDEV = {
@@ -39,6 +39,7 @@ const HooksDispatcherOnMountInDEV = {
     useState: mountState,
     useEffect: mountEffect, // 绘制之后执行
     useLayoutEffect: mountLayoutEffect, // 绘制之前执行
+    useRef: mountRef,
 }
 
 const HooksDispatcherOnUpdateInDEV = {
@@ -46,6 +47,7 @@ const HooksDispatcherOnUpdateInDEV = {
     useState: updateState,
     useEffect: updateEffect,
     useLayoutEffect: updateLayoutEffect,
+    useRef: updateRef
 }
 
 
@@ -76,7 +78,7 @@ export function renderWithHooks(current, workInProgress, Component, props) {
     // 存储当前 Fiber 上的hook 链表的头节点。每个 hook（如 useState/useEffect）会形成一个链表，挂在该字段上。
     // 用于保存每个 hook 的状态（如 useState 的 state、useEffect 的 effect 信息等）。
     // 保存 hook 链表（每个 hook 的状态）。
-    workInProgress.memoizedState = null; 
+    workInProgress.memoizedState = null;
 
     if (current !== null && current.memoizedState !== null) {
         ReactCurrentDispatcher.current = HooksDispatcherOnUpdateInDEV;
@@ -184,7 +186,7 @@ function pushEffect(tag, create, destroy, deps) {
         componentUpdateQueue = createFunctionComponentUpdateQueue();
         currentlyRenderingFiber.updateQueue = componentUpdateQueue;
         componentUpdateQueue.lastEffect = effect.next = effect;
-    }else {
+    } else {
         // 如果已有队列，把 effect 加到链表尾部，维护循环结构
         const lastEffect = componentUpdateQueue.lastEffect;
         if (lastEffect === null) {
@@ -209,6 +211,15 @@ function createFunctionComponentUpdateQueue() {
 function mountLayoutEffect(create, deps) {
     const fiberFlags = UpdateEffect;
     return mountEffectImpl(fiberFlags, HookLayout, create, deps);
+}
+
+function mountRef(initialValue) {
+    const hook = mountWorkInProgressHook();
+    const ref = {
+        current: initialValue,
+    };
+    hook.memoizedState = ref;
+    return ref;
 }
 
 // 挂载工作中的 Hook
@@ -255,7 +266,7 @@ function dispatchReducerAction(fiber, queue, action) {
     const root = enqueueConcurrentHookUpdate(fiber, queue, update);
     // 调度，执行根上的更新
     scheduleUpdateOnFiber(root, fiber);
-    console.log("dispatchReducerAction scheduleUpdateOnFiber",fiber, queue, action);
+    console.log("dispatchReducerAction scheduleUpdateOnFiber", fiber, queue, action);
 }
 
 function dispatchSetState(fiber, queue, action) {
@@ -269,7 +280,7 @@ function dispatchSetState(fiber, queue, action) {
         eagerState: null, // 急切状态
     };
 
-    
+
     // 什么时候应该做急切判断
     // 批量更新逻辑，
     /**
@@ -280,7 +291,7 @@ function dispatchSetState(fiber, queue, action) {
     // 这两个关键代码片段分别解决了 React 18 并发批量更新中的「重复调度」和「无效更新」问题
     // 提前计算新状态（eager state），如果新旧状态相同，直接跳过，不入队、不调度、不触发渲染。
     const alternate = fiber.alternate;
-    if(fiber.lanes === NoLane && (alternate === null || alternate.lanes === NoLanes)){
+    if (fiber.lanes === NoLane && (alternate === null || alternate.lanes === NoLanes)) {
         // 获取上次渲染用的 reducer 和 state
         const lastRenderedReducer = queue.lastRenderedReducer;
         const currentState = queue.lastRenderedState;
@@ -295,7 +306,7 @@ function dispatchSetState(fiber, queue, action) {
         }
 
     }
-    
+
     // 入队 并 调度
     const root = enqueueConcurrentHookUpdate(fiber, queue, update, lane);
     scheduleUpdateOnFiber(root, fiber, lane);
@@ -347,6 +358,11 @@ function updateEffect(create, deps) {
 
 function updateLayoutEffect(create, deps) {
     return updateEffectImpl(UpdateEffect, HookLayout, create, deps);
+}
+
+function updateRef() {
+    const hook = updateWorkInProgressHook();
+    return hook.memoizedState;
 }
 
 function basicStateReducer(state, action) {

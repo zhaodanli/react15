@@ -1,7 +1,12 @@
 {
   "dependencies": {
+    "@babel/preset-react": "^7.14.5",
+    "bootstrap": "^3.4.1",
+    "cors": "^2.8.5",
     "create-react-app": "^5.1.0",
     "cross-env": "^7.0.3",
-    "@babel/preset-react": "^7.14.5"
+    "express": "^5.1.0",
+    "morgan": "^1.10.0",
+    "react-router-dom": "^7.6.2"
   }
 }

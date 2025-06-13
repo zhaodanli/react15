@@ -1,0 +1,9 @@
+.circle {
+    width : 200px;
+    height : 200px;
+    background-color : gray;
+    transition: all 2s;
+}
+.circle.active {
+    background-color : green;
+}

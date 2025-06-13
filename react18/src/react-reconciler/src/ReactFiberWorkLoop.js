@@ -73,6 +73,15 @@ function ensureRootIsScheduled(root) {
     // 从 nextLanes 这个集合中，选出“优先级最高的那个 lane”。这是“当前最紧急需要处理的优先级”。
     const newCallbackPriority = getHighestPriorityLane(nextLanes);
 
+    // 处理批量更新逻辑
+    // 这两个关键代码片段分别解决了 React 18 并发批量更新中的「重复调度」和「无效更新」问题
+    // 防止重复调度同一优先级的任务，实现批量合并。
+    // 如果当前根节点（root）已经有一个相同优先级的调度任务在排队，就不需要再重复调度一次。
+    const existingCallbackPriority = root.callbackPriority;
+    if (existingCallbackPriority === newCallbackPriority) {
+        return;
+    }
+
     // const existingCallbackPriority = root.callbackPriority;
     // if (existingCallbackPriority === newCallbackPriority) {
     //     return;

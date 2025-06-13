@@ -270,12 +270,15 @@ function dispatchSetState(fiber, queue, action) {
     };
 
     
-    // 什么时候应该做急切判断，
+    // 什么时候应该做急切判断
+    // 批量更新逻辑，
     /**
      * 1. 这里的 if 判断用于**“急切计算”优化**（eager state optimization）。
         * 当 fiber.lanes === NoLane 并且 alternate.lanes === NoLanes，说明当前 fiber 及其备份 fiber 上都没有未处理的更新
         * 这时可以安全地用上一次渲染用的 reducer 和 state，直接计算本次 action 的新状态（eagerState）。
      */
+    // 这两个关键代码片段分别解决了 React 18 并发批量更新中的「重复调度」和「无效更新」问题
+    // 提前计算新状态（eager state），如果新旧状态相同，直接跳过，不入队、不调度、不触发渲染。
     const alternate = fiber.alternate;
     if(fiber.lanes === NoLane && (alternate === null || alternate.lanes === NoLanes)){
         // 获取上次渲染用的 reducer 和 state

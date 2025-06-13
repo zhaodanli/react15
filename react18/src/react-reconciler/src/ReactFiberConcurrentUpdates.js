@@ -87,7 +87,7 @@ export function finishQueueingConcurrentUpdates() {
       queue.pending = update;
     }
 
-    console.log('update >>>>>>>>>>>>', update)
+    // console.log('update >>>>>>>>>>>>', update)
   }
 }
 

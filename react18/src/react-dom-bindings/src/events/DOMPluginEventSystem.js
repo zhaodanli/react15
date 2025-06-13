@@ -24,7 +24,7 @@ const listeningMarker = "_reactListening" + Math.random().toString(36).slice(2);
  * @param {*} rootContainerElement 
  */
 export function listenToAllSupportedEvents(rootContainerElement) {
-    console.log("listenToAllSupportedEvents >>>>>>>>>>>>>>>", allNativeEvents)
+    // console.log("listenToAllSupportedEvents >>>>>>>>>>>>>>>", allNativeEvents)
     if (!rootContainerElement[listeningMarker]) {
         // 如果没有标记，说明还没有注册过事件监听
         rootContainerElement[listeningMarker] = true;

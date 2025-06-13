@@ -340,12 +340,42 @@ import { createRoot } from "react-dom/client";
 // let element = <h1>hello</h1>;
 
 // >>>>>>>>>>>>>>>>>>>>>> 更新渲染 <<<<<<<<<<<<<<<<<<<<<<<<<
+// function FunctionComponent() {
+//     const [number, setNumber] = React.useState(0);
+//     return <button onClick={() => {
+//         setNumber(number + 1)
+//     }}>{number}</button>
+// }
+
+// >>>>>>>>>>>>>>>>>>>>>> 并发渲染 <<<<<<<<<<<<<<<<<<<<<<<<<
 function FunctionComponent() {
+    console.log('FunctionComponent');
     const [number, setNumber] = React.useState(0);
-    return <button onClick={() => {
-        setNumber(number + 1)
-    }}>{number}</button>
+
+    // useEffect 里的 setState 是“异步批量”调度 performConcurrentWorkOnRoot
+    React.useEffect(() => {
+        debugger
+        setNumber(number => number + 1)
+    }, [])
+
+    // 点击（click）事件属于 DiscreteEventPriority（离散事件优先级）。
+    // 在 ReactFiberLane.js 里，DiscreteEventPriority 会被映射为 SyncLane（同步车道）。
+    return (<button onClick={() => setNumber(number + 1)}>{number}</button>)
 }
+
+// >>>>>>>>>>>>>>>>>>>>>> 批量更新 <<<<<<<<<<<<<<<<<<<<<<<<<
+// function FunctionComponent() {
+//     console.log('FunctionComponent');
+//     const [number, setNumber] = React.useState(0);
+//     React.useEffect(() => {
+//         setNumber(number => number + 1)
+//         setNumber(number => number + 1)
+//     }, []);
+//     return (<button onClick={() => {
+//         setNumber(number => number + 1)
+//         setNumber(number => number + 1)
+//     }}>{number}</button>)
+// }
 
 let element = <FunctionComponent />;
 

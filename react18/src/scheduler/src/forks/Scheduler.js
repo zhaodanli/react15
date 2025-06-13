@@ -205,7 +205,11 @@ function shouldYieldToHost() {
     return true;
 }
 
-export { NormalPriority as unstable_NormalPriority, unstable_scheduleCallback };
+export { 
+    NormalPriority as unstable_NormalPriority, 
+    unstable_scheduleCallback,
+    shouldYieldToHost as unstable_shouldYield
+};
 
 // 此处有优先队列执行调度
 // export function scheduleCallback(callback) {

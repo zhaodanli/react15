@@ -1,5 +1,6 @@
 import { HostRoot, IndeterminateComponent, HostComponent, HostText } from "./ReactWorkTags";
 import { NoFlags } from "./ReactFiberFlags";
+import { NoLane } from "./ReactFiberLane";
 
 /**
  * 代码功能概述
@@ -42,6 +43,8 @@ export function FiberNode(tag, pendingProps, key) {
     this.subtreeFlags = NoFlags; // 子树的副作用标记 （做这个）为了提高性能， 可以少递归调用
 
     this.deletions = null; // 存储需要删除的子节点列表
+
+    this.lanes = NoLane;
 
     // 双缓存机制 双缓存机制允许 React 在内存中构建新的 Fiber 树，同时保留当前屏幕上显示的 Fiber 树。
     this.alternate = null; // 双缓存机制中的另一个 Fiber 节点

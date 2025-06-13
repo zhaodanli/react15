@@ -6,7 +6,7 @@ import is from "shared/objectIs";
 import { Passive as PassiveEffect, Update as UpdateEffect } from "./ReactFiberFlags";
 import { HasEffect as HookHasEffect, Passive as HookPassive, Layout as HookLayout } from "./ReactHookEffectTags";
 
-import { NoLane } from './ReactFiberLane';
+import { NoLanes, NoLane } from './ReactFiberLane';
 
 const { ReactCurrentDispatcher } = ReactSharedInternals;
 let currentlyRenderingFiber = null;

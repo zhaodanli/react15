@@ -98,7 +98,7 @@ function ensureRootIsScheduled(root, currentTime) {
         return;
     }
 
-    debugger
+    // debugger
 
     // 从 nextLanes 这个集合中，选出“优先级最高的那个 lane”。这是“当前最紧急需要处理的优先级”。
     const newCallbackPriority = getHighestPriorityLane(nextLanes);

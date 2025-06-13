@@ -99,7 +99,7 @@ function performWorkUntilDeadline() {
     * schedulePerformWorkUntilDeadline
  * 4. 返回 newTask
  * 时间流转 记录任务入队时的时间 ->>> 计算任务的过期时间 ->> 触发调度
- *  */ 
+ *  */
 function unstable_scheduleCallback(priorityLevel, callback) {
     // 获取当前时间
     const currentTime = getCurrentTime(); // 记录任务入队时的时间
@@ -144,7 +144,7 @@ function unstable_scheduleCallback(priorityLevel, callback) {
 }
 
 /** 任务执行 直接调用 workLoop(initialTime)，循环执行任务。
- *  */ 
+ *  */
 function flushWork(initialTime) {
     return workLoop(initialTime);
 }
@@ -171,7 +171,7 @@ function workLoop(initialTime) {
             const didUserCallbackTimeout = currentTask.expirationTime <= currentTime;
             const continuationCallback = callback(didUserCallbackTimeout);
             currentTime = getCurrentTime(); // 每次执行后更新时间
-            
+
             // 如果执行完返回新函数，还需要继续执行回调
             if (typeof continuationCallback === "function") {
                 // 更新 回调 到 回调
@@ -205,10 +205,16 @@ function shouldYieldToHost() {
     return true;
 }
 
-export { 
-    NormalPriority as unstable_NormalPriority, 
+function unstable_cancelCallback(task) {
+    task.callback = null;
+}
+
+export {
+    NormalPriority as unstable_NormalPriority,
     unstable_scheduleCallback,
-    shouldYieldToHost as unstable_shouldYield
+    shouldYieldToHost as unstable_shouldYield,
+    unstable_cancelCallback,
+    getCurrentTime as unstable_now
 };
 
 // 此处有优先队列执行调度

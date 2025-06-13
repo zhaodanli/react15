@@ -5,7 +5,7 @@ import { commitMutationEffectsOnFiber, commitMutationEffects, commitPassiveUnmou
 import { MutationMask, NoFlags, Placement, Update, ChildDeletion, Passive } from "./ReactFiberFlags.js";
 import { HostRoot, HostComponent, HostText, FunctionComponent } from "./ReactWorkTags.js";
 import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
-import { NormalPriority as NormalSchedulerPriority, scheduleCallback as Scheduler_scheduleCallback, shouldYield } from "./Scheduler";
+import { NormalPriority as NormalSchedulerPriority, scheduleCallback as Scheduler_scheduleCallback, shouldYield, cancelCallback as Scheduler_cancelCallback, now } from "./Scheduler";
 import {
     NoLane,
     markRootUpdated,
@@ -61,8 +61,14 @@ export function scheduleUpdateOnFiber(root, fiber, lane) {
  * 这样，当调度器执行任务时，可以将 root 作为参数传递给 performConcurrentWorkOnRoot。
  */
 function ensureRootIsScheduled(root) {
+    // >>>>>>>>>>> 高优先级打断低优先级 <<<<<<<<<<<<<<<<<<<
+    // 获取当前跟上任务
+    const existingCallbackNode = root.callbackNode;
+
+    // 将当前正在渲染车道
+    const nextLanes = getNextLanes(root, root === workInProgressRoot ? workInProgressRootRenderLanes : NoLanes);
     // 从整个 Fiber 树（root）上，计算出“当前所有待处理的 lane（车道）”的合集（即还有哪些优先级的更新没有被处理）。 可能包含多个 lane
-    const nextLanes = getNextLanes(root, NoLanes);
+    // const nextLanes = getNextLanes(root, NoLanes);
 
     // 如果没有下一个任务，则返回
     if (nextLanes === NoLanes) {
@@ -77,15 +83,11 @@ function ensureRootIsScheduled(root) {
     // 这两个关键代码片段分别解决了 React 18 并发批量更新中的「重复调度」和「无效更新」问题
     // 防止重复调度同一优先级的任务，实现批量合并。
     // 如果当前根节点（root）已经有一个相同优先级的调度任务在排队，就不需要再重复调度一次。
+    // callbackPriority 是 现在根上正在运行的优先级
     const existingCallbackPriority = root.callbackPriority;
     if (existingCallbackPriority === newCallbackPriority) {
         return;
     }
-
-    // const existingCallbackPriority = root.callbackPriority;
-    // if (existingCallbackPriority === newCallbackPriority) {
-    //     return;
-    // }
 
     // 获取下一个回调
     let newCallbackNode;
@@ -129,7 +131,7 @@ function ensureRootIsScheduled(root) {
 
     // NormalSchedulerPriority 优先级 在根上执行并发渲染
 
-    root.callbackPriority = newCallbackPriority;
+    root.callbackPriority = newCallbackPriority; // 第一次渲染 赋值优先级
     root.callbackNode = newCallbackNode;
 }
 
@@ -220,7 +222,7 @@ function renderRootConcurrent(root, lanes) {
 
 function workLoopConcurrent() {
     while (workInProgress !== null && !shouldYield()) {
-        sleep(6); // 睡6s
+        sleep(300); // 睡6s
         performUnitOfWork(workInProgress); // 构建fiber
     }
 }

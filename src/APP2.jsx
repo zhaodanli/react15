@@ -9,7 +9,10 @@ import StartTransition from './Page/StartTransition';
 import UseDeferredValue from './Page/UseDeferredValue';
 import BatchState from './Page/BatchState';
 
-
+/** 测试react 18 新特性
+ * 
+ * @returns 
+ */
 function APP() {
     return (
         <div className="container">

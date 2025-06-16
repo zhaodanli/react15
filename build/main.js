@@ -27351,10 +27351,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _APP__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./APP */ "./src/APP.js");
 
 
-const root = document.getElementById('root');
 
-const element = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_APP__WEBPACK_IMPORTED_MODULE_2__["default"], null);
-(0,react_dom_client__WEBPACK_IMPORTED_MODULE_1__.createRoot)(root).render(element);
+const root = document.getElementById('root');
+// createRoot(root).render(<APP />);
+(0,react_dom_client__WEBPACK_IMPORTED_MODULE_1__.hydrateRoot)(root, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(App, null));
 })();
 
 /******/ })()

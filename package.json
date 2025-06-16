@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "vite",
+    "start": "cross-env NODE_ENV=development nodemon -- server.js",
     "build": "webpack"
   },
   "dependencies": {

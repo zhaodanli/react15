@@ -27265,7 +27265,7 @@ function fetchUser(id) {
       resolve({
         id
       });
-    }, 2000);
+    }, 10000);
   });
 }
 function wrapPromise(promise) {

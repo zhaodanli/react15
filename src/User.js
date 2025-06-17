@@ -12,7 +12,7 @@ function fetchUser(id) {
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve({ id });
-        }, 2000);
+        }, 10000);
     });
 }
 function wrapPromise(promise) {

@@ -54,7 +54,7 @@ import { renderToString, renderToPipeableStream } from "react-dom/server";
     // pipe APP内容 返回值中的 pipe 方法可以把 HTML 内容流式写入响应（res）。
  */
 function render(req, res, assets) {
-    const { pipe } = renderToPipeableStream(
+    const { pipe, abort } = renderToPipeableStream(
         <App />,
         {
             bootstrapScripts: [assets['main.js']],
@@ -72,11 +72,14 @@ function render(req, res, assets) {
                         </head>
                         <body>
                             <div id="root">`);
-                            pipe(res);
-                res.write(`
-                            </div>
+                pipe(res);
+                res.write(`</div>
                         </body>
                     </html>`)
+            },
+            onError(error) {
+                console.error('渲染错误:', error);
+                abort();
             }
         }
     );

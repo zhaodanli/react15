@@ -27211,7 +27211,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 
 function Footer() {
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Footer");
+  // Footer 组件使用了 Math.random() 生成 id SSR 和 CSR 渲染时生成的 id 不同，导致 <label htmlFor=...> 和 <input id=...> 不一致。
+  // 用 React 18 的 useId() 替代 Math.random()，它能保证 SSR/CSR 一致。
+  // const id = Math.random();
+  const id = (0,react__WEBPACK_IMPORTED_MODULE_0__.useId)();
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", {
+    htmlFor: id
+  }, "are you ok?"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+    type: "checkbox",
+    id: id
+  }));
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Footer);
 
@@ -27260,17 +27269,22 @@ const isServer = typeof window === 'undefined';
  * SSR 首屏输出的是 <Suspense fallback>（loading User...），而客户端一进来就会立刻挂起，等待 10 秒后才渲染 <div>ID:1</div>。
  * 这样 SSR 首屏 HTML 是 loading，CSR 首屏是挂起（没有 loading），等数据好后才渲染 ID:1，导致 hydration mismatch。
  */
+// 最佳实践是：不要在 User 组件里用 typeof window 判断分支渲染 fallback，而是让 Suspense 机制统一处理。
 let userResource;
-if (!isServer) {
-  // 只在客户端挂起
-  const userPromise = fetchUser(1);
-  userResource = wrapPromise(userPromise);
-}
+// if (!isServer) {
+//     // 只在客户端挂起
+//     const userPromise = fetchUser(1);
+//     userResource = wrapPromise(userPromise);
+// }
+
+const userPromise = fetchUser(1);
+userResource = wrapPromise(userPromise);
 function User() {
   // SSR 阶段直接渲染 fallback 结构，保证 SSR/CSR 一致
-  if (isServer) {
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "loading User...");
-  }
+  // if (isServer) {
+  //     return <div>loading User...</div>;
+  // }
+
   const user = userResource.read();
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "ID:", user.id);
 }

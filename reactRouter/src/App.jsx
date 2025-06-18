@@ -1,4 +1,4 @@
-import { HashRouter, BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, BrowserRouter, Routes, Route } from "./react-router-dom";
 // 引入react-router-dom中的HashRouter, BrowserRouter, Routes, Route组件
 import Home from "./components/Home";
 import User from "./components/User";
@@ -27,6 +27,10 @@ export default function App() {
     // )
 
     // 测试 http://localhost:5180/user
+    // BrowserRouter -> 获取 history.location、children、action，navigator -> Router -> NavigationContext.Provider -> LocationContext.Provider -> Routes
+    // 获取 history.location、children、action，navigator 关系
+    // useState{action: history.action,location: history.location, navigator: history }
+    // navigator(history): {action, location}
     return (
         <BrowserRouter>
             {/* // 定义路由规则 */}

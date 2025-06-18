@@ -48,6 +48,12 @@ export function createRoutesFromChildren(children) {
             path: element.props.path,
             element: element.props.element,
         };
+        // 检查当前处理的元素（element）是否有子元素（element.props.children）。
+        // 如果有子元素，递归地调用 createRoutesFromChildren 函数，将这些子元素转换为路由配置。
+        // 将得到的子路由配置数组赋值给当前路由对象的 children 属性。
+        if (element.props.children) {
+            route.children = createRoutesFromChildren(element.props.children);
+        }
         routes.push(route);
     });
     return routes;

@@ -3,6 +3,7 @@ import { HashRouter, BrowserRouter, Routes, Route } from "./react-router-dom";
 import Home from "./components/Home";
 import User from "./components/User";
 import Profile from "./components/Profile";
+import Post from './components/Post';
 
 /** HashRouter, BrowserRouter 差异被抹平， 只是路径方式不同
  * 
@@ -26,6 +27,7 @@ export default function App() {
                 <Route path="/user" element={<User />} />
                 {/* // 定义个人资料页面路由，当URL为'/profile'时渲染Profile组件 */}
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/post/:id" element={<Post />} />
             </Routes>
         </HashRouter>
     )

@@ -82,18 +82,45 @@ export function useSearchParams() {
 
 // 匹配路径和当前路径名
 export function matchPath(path, pathname) {
-    let matcher = compilePath(path);
+    // let matcher = compilePath(path);
+    let [matcher, paramNames] = compilePath(path);
     let match = pathname.match(matcher);
+    // match 结果为 ['/user/123', '123']
+    // match: 0:  "/post/2" 1: "2" groups: undefined index: 0 input: "/post/2" length: 2
     if (!match) return null;
-    return match;
+    // return match;
+
+    // 如果匹配成功，提取参数值，组装成对象。
+    // 如 { values: [ "2"], matchedPathname: '/post/2' }
+    let [matchedPathname, ...values] = match;
+    // [ 'id' ]
+    let params = paramNames.reduce(
+        (memo, paramName, index) => {
+            memo[paramName] = values[index];
+            return memo;
+        },
+        {}
+    );
+    return { params, matchedPathname };
 }
 
-// route中的属性变异成正则表达式
+// route 中的属性变成正则表达式
+// 将带有参数的路由路径（如 /user/:id）转换为能提取参数的正则表达式，并记录参数名
 function compilePath(path) {
-    let regexpSource = "^" + path;
+    let paramNames = [];
+    // 只是把 path 直接拼成正则，不支持参数提取。例如 /user/:id 会变成 /^/user/:id$/，
+    // 只能匹配字符串完全等于 /user/:id，不能匹配 /user/123。
+    // let regexpSource = "^" + path;
+    // 把 :id 这样的参数占位符替换成正则分组 ([^\/]+)，并把参数名 id 存到 paramNames 数组。
+    let regexpSource = "^" + path
+        .replace(/:(\w+)/g, (_, key) => {
+            paramNames.push(key);
+            return "([^\\/]+)";
+        });
     regexpSource += "$";
     let matcher = new RegExp(regexpSource);
-    return matcher;
+    // return matcher;
+    return [matcher, paramNames];
 }
 
 

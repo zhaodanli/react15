@@ -15,20 +15,20 @@ export default function App() {
      * 注意 Route 组件的新用法，将要渲染的组件作为 element 属性传递进去。当 URL 的路径与 Route 的 path 属性匹配时，就会渲染对应的 element。
      * 测试： http://localhost:5178/#/
      */
-    // return (
-    //     // 使用HashRouter包裹整个应用，实现哈希路由功能
-    //     <HashRouter>
-    //         {/* // 定义路由规则 */}
-    //         <Routes>
-    //             {/* // 定义主页路由，当URL为'/'时渲染Home组件 */}
-    //             <Route path="/" element={<Home />} />
-    //             {/* // 定义用户页面路由，当URL为'/user'时渲染User组件 */}
-    //             <Route path="/user" element={<User />} />
-    //             {/* // 定义个人资料页面路由，当URL为'/profile'时渲染Profile组件 */}
-    //             <Route path="/profile" element={<Profile />} />
-    //         </Routes>
-    //     </HashRouter>
-    // )
+    return (
+        // 使用HashRouter包裹整个应用，实现哈希路由功能
+        <HashRouter>
+            {/* // 定义路由规则 */}
+            <Routes>
+                {/* // 定义主页路由，当URL为'/'时渲染Home组件 */}
+                <Route path="/" element={<Home />} />
+                {/* // 定义用户页面路由，当URL为'/user'时渲染User组件 */}
+                <Route path="/user" element={<User />} />
+                {/* // 定义个人资料页面路由，当URL为'/profile'时渲染Profile组件 */}
+                <Route path="/profile" element={<Profile />} />
+            </Routes>
+        </HashRouter>
+    )
 
     // 测试 http://localhost:5180/user
     // BrowserRouter 函数组件 -> 获取 history.location、children、action，navigator -> Router -> NavigationContext.Provider -> LocationContext.Provider -> Routes -> 找到匹配路径， 渲染elemnt

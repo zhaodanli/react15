@@ -3,7 +3,7 @@ import React from "react";
 // 从react-router中导入Router组件
 import { Router } from "../react-router";
 // 从history库中导入createHashHistory和createBrowserHistory函数, 结果一样， 但是原理不一样
-import { createHashHistory, createBrowserHistory } from "history";
+import { createHashHistory, createBrowserHistory } from "../history";
 // 导出react-router中的所有内容
 
 /** 这段代码定义了两个 React 组件：HashRouter和BrowserRouter。
@@ -75,6 +75,7 @@ export function BrowserRouter({ children }) {
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 对象操作 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     // 使用useLayoutEffect在历史对象发生变化时更新状态
+    // setState的参数是新的location(非window.loacation)({ action, location })
     React.useLayoutEffect(() => history.listen(setState), [history]);
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 渲染 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

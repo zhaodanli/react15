@@ -38,6 +38,7 @@ export function HashRouter({ children }) {
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 对象操作 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     //使用useLayoutEffect在历史对象发生变化时更新状态  
+    // 监听路径改变，路径改变会执行setState，进行二次渲染
     React.useLayoutEffect(() => history.listen(setState), [history]);
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 渲染 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

@@ -4,6 +4,10 @@ import Home from "./components/Home";
 import User from "./components/User";
 import Profile from "./components/Profile";
 
+/** HashRouter, BrowserRouter 差异被抹平， 只是路径方式不同
+ * 
+ * @returns 
+ */
 export default function App() {
     /**
      * 使用 HashRouter 包裹我们的应用程序
@@ -27,7 +31,7 @@ export default function App() {
     // )
 
     // 测试 http://localhost:5180/user
-    // BrowserRouter -> 获取 history.location、children、action，navigator -> Router -> NavigationContext.Provider -> LocationContext.Provider -> Routes
+    // BrowserRouter 函数组件 -> 获取 history.location、children、action，navigator -> Router -> NavigationContext.Provider -> LocationContext.Provider -> Routes -> 找到匹配路径， 渲染elemnt
     // 获取 history.location、children、action，navigator 关系
     // useState{action: history.action,location: history.location, navigator: history }
     // navigator(history): {action, location}

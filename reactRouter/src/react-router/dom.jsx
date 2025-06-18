@@ -8,11 +8,16 @@ const LocationContext = React.createContext({});
 export { NavigationContext, LocationContext };
 
 /**
- * 这段代码是一个React路由管理工具的实现，包括创建上下文（NavigationContext和LocationContext），定义路由器（Router）和路由（Routes，Route），以及一些自定义钩子（useLocation, useSearchParams, useRoutes）用于管理路由状态和解析URL参数。核心功能是根据React的子组件定义动态路由，以及提供路径匹配功能。代码风格注重模块化和可复用性，适合用于构建复杂的单页应用程序。
+ * 这段代码是一个React路由管理工具的实现，包括创建上下文（NavigationContext和LocationContext），
+ * 定义路由器（Router）和路由（Routes，Route），
+ * 以及一些自定义钩子（useLocation, useSearchParams, useRoutes）用于管理路由状态和解析URL参数。
+ * 核心功能是根据React的子组件定义动态路由，以及提供路径匹配功能。
+ * 代码风格注重模块化和可复用性，适合用于构建复杂的单页应用程序。
  * @param {*} param0 
  * @returns 
  */
 // 定义Router函数组件
+// 这里的 history 就是 createBrowserHistory/createHashHistory 返回的对象，包含 push/replace/go 等方法。
 export function Router({ children, location, navigator }) {
     // 使用useMemo钩子创建导航上下文对象 navigator ->> navigationContext
     const navigationContext = React.useMemo(() => ({ navigator }), [navigator]);
@@ -129,6 +134,12 @@ export function Route(props) { }
 // 编译路径为正则表达式
 
 
+/**
+ * NavigationContext 是通过 React.createContext 创建的，通常在路由库（如 react-router）内部。
+ * 在 <NavigationContext.Provider value={...}> 时，value 里会包含一个 navigator 对象。
+ * 这个 navigator 对象通常就是自定义的 history 对象（如 browserHistory/hashHistory）
+ * 它实现了 push、replace、go 等方法。
+ */
 export function useNavigate(to) {
     // 获取 navigator， 执行push
     let { navigator } = React.useContext(NavigationContext);

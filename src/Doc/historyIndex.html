@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+        #root {
+            border: 1px solid red;
+            height: 20px;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script>
+        var historyObj = window.history;
+        var root = document.getElementById("root");
+          function updateContent(pathname) {
+            root.innerHTML = pathname;
+          }
+
+        // 路径切换时；时触发 popstate 事件只会在浏览器历史记录发生“跳转”时触发，即后退/前进/history.back()/history.go()。
+        // 直接调用 pushState 不会触发 popstate，这是浏览器的标准行为。
+        window.addEventListener("popstate", (event) => {
+            updateContent(window.location.pathname);
+        });
+
+        // 重写 pushState 并手动调用 updateContent
+          (function (historyObj) {
+            let oldPushState = history.pushState;
+            historyObj.pushState = function (state, title, pathname) {
+              let result = oldPushState.apply(history, arguments);
+              updateContent(pathname);
+              return result;
+            };
+          })(historyObj);
+          setTimeout(
+            () => historyObj.pushState({ page: 1 }, "page1", "/page1"),
+            1000
+          );
+          setTimeout(
+            () => historyObj.pushState({ page: 2 }, "page2", "/page2"),
+            2000
+          );
+          setTimeout(
+            () => historyObj.pushState({ page: 3 }, "page3", "/page3"),
+            3000
+          );
+          setTimeout(() => {
+            historyObj.back()
+          }, 4000);
+            //   pushState 切换不会被 popstate 监听，所以路径变但是内容没变
+          setTimeout(
+            () => historyObj.pushState({ page: 4 }, "page4", "/page4"),
+            5000
+          );
+          setTimeout(() => {
+            historyObj.go(1)
+          }, 6000);
+    </script>
+</body>
+
+</html>

@@ -1,7 +1,7 @@
 // 导入React
 import React from "react";
 // 从react-router中导入Router组件
-import { Router } from "../react-router";
+import { Router, useNavigate } from "../react-router";
 // 从history库中导入createHashHistory和createBrowserHistory函数, 结果一样， 但是原理不一样
 import { createHashHistory, createBrowserHistory } from "../history";
 // 导出react-router中的所有内容
@@ -88,4 +88,14 @@ export function BrowserRouter({ children }) {
             navigator={history}
         />
     );
+}
+
+export function Link({ to, children }) {
+    const navigate = useNavigate();
+    return (
+        <a href={to} onClick={(event) => {
+            event.preventDefault();
+            navigate(to);
+        }} >{children}</a>
+    )
 }

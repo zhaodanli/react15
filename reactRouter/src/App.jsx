@@ -1,4 +1,4 @@
-import { HashRouter, BrowserRouter, Routes, Route } from "./react-router-dom";
+import { HashRouter, BrowserRouter, Routes, Route, Link } from "./react-router-dom";
 // 引入react-router-dom中的HashRouter, BrowserRouter, Routes, Route组件
 import Home from "./components/Home";
 import User from "./components/User";
@@ -19,6 +19,12 @@ export default function App() {
     return (
         // 使用HashRouter包裹整个应用，实现哈希路由功能
         <HashRouter>
+            {/* 添加link导航 */}
+            <ul>
+                <li><Link to="/">首页</Link></li>
+                <li><Link to="/user" >用户管理</Link></li>
+                <li><Link to="/profile" >个人中心</Link></li>
+            </ul>
             {/* // 定义路由规则 */}
             <Routes>
                 {/* // 定义主页路由，当URL为'/'时渲染Home组件 */}

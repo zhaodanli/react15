@@ -127,3 +127,13 @@ function compilePath(path) {
 // 定义Route函数组件（空实现）
 export function Route(props) { }
 // 编译路径为正则表达式
+
+
+export function useNavigate(to) {
+    // 获取 navigator， 执行push
+    let { navigator } = React.useContext(NavigationContext);
+    let navigate = React.useCallback((to) => {
+        navigator.push(to);
+    }, [navigator])
+    return navigate;
+}

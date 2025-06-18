@@ -5,6 +5,10 @@ import User from "./components/User";
 import Profile from "./components/Profile";
 import Post from './components/Post';
 
+import UserAdd from './components/UserAdd';
+import UserList from './components/UserList';
+import UserDetail from './components/UserDetail';
+
 /** HashRouter, BrowserRouter 差异被抹平， 只是路径方式不同
  * 
  * @returns 
@@ -30,7 +34,11 @@ export default function App() {
                 {/* // 定义主页路由，当URL为'/'时渲染Home组件 */}
                 <Route path="/" element={<Home />} />
                 {/* // 定义用户页面路由，当URL为'/user'时渲染User组件 */}
-                <Route path="/user" element={<User />} />
+                <Route path="/user" element={<User />} >
+                    <Route path="add" element={<UserAdd />} />
+                    <Route path="list" element={<UserList />} />
+                    <Route path="detail/:id" element={<UserDetail />} />
+                </Route>
                 {/* // 定义个人资料页面路由，当URL为'/profile'时渲染Profile组件 */}
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/post/:id" element={<Post />} />

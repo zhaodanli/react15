@@ -2,6 +2,8 @@ import React from 'react';
 import App from "./src/App";
 
 import { renderToString, renderToPipeableStream } from "react-dom/server";
+
+// SSR 入口
 // renderToString 是 React 官方提供的服务端渲染（SSR）API，来自 react-dom/server。
 
 /** 这个文件是一个服务端渲染（SSR）中间件，用于 Express 服务端响应首页请求时，动态生成 HTML 内容。

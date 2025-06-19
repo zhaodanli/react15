@@ -46,7 +46,7 @@ export function Router({ children, location, navigator }) {
 }
 
 // 定义Routes函数组件 根据子元素创建路由配置数组
-// Routes -> useRoutes -> matchRoutes
+// Routes -> useRoutes -> matchRoutes -> 排序
 export function Routes({ children }) {
     // 使用useRoutes钩子创建路由,获取路由规则获取到的数组
     return useRoutes(createRoutesFromChildren(children));
@@ -144,6 +144,10 @@ function _renderMatches(matches) {
 function matchRoutes(routes, pathname) {
     // 打平路径
     const branches = flattenRoutes(routes);
+    console.log(branches)
+    // 给分支排序
+    rankRouteBranches(branches);
+    // console.log(branches)
     // 一次进行分支匹配
     // branches: { routeMetas: {}, routePath}
     let matches = null;
@@ -242,11 +246,12 @@ function flattenRoutes(routes, branches = [], parentMetas = [], parentPath = '')
     //         return element;
     //     }
     // }
-    routes.forEach((route) => {
+    routes.forEach((route, index) => {
         // 一个 route 对应一个 routeMeta 路由匹配元数据
         let routeMeta = {
             route,
-            relativePath: route.path
+            // 每个路由在其父节点 children 数组中的下标（即声明顺序）。当多个分支的精确度（score）一样时，优先匹配在路由树中声明靠前的分支，保证路由匹配的可预期性。
+            childrenIndex: index, 
         }
         const routePath = joinPaths([parentPath, routeMeta.route.path])
         const routeMetas = [...parentMetas, routeMeta];
@@ -255,7 +260,8 @@ function flattenRoutes(routes, branches = [], parentMetas = [], parentPath = '')
         }
         branches.push({
             routePath,
-            routeMetas
+            routeMetas,
+            score: computeScore(routePath, index), // 为排序做准备
         })
     })
     return branches;
@@ -327,7 +333,7 @@ function compilePath(path, end) {
         .replace(/^\/*/, '/'); // 把开头的0+个/转成/
     // regexpSource += "$";
     if (end) {
-        regexpSource += "\\/*$";
+        regexpSource += "\\/*$"; // 结尾可以是多个/
     }
     let matcher = new RegExp(regexpSource);
     // return matcher;
@@ -366,4 +372,82 @@ export function useOutlet() {
 export function useParams() {
     const { matches } = React.useContext(RouteContext);
     return matches[matches.length - 1].params;
+}
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 排序逻辑 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+// 这些改进使得路由系统能够更好地处理复杂的路由情况，特别是在大型应用程序中，其中可能有许多不同级别的嵌套路由，以及需要精确匹配和排序的动态路由。通过引入这种分数和排序机制，可以确保应用程序总是按照预期的方式响应 URL 更改。
+
+// 检查字符串是否是一个通配符 (*)。
+const isSplat = s => s === '*';
+
+// 这些常量用于在计算路由分数时使用，以帮助确定路由的匹配优先级。
+const splatPenalty = -2;
+const indexRouteValue = 2;
+
+// 通配符，路径参数的正则表达式 :/d+
+const paramRe = /^:\w+$/;
+// 动态值
+const dynamicSegmentValue = 3;
+// 空值
+const emptySegmentValue = 1;
+// 静态值
+const staticSegmentValue = 10;
+// >>>>>>>>>>>>>>>> 打平前做准备 <<<<<<<<<<<<<<<<<
+/** 计算路由的分数，用于确定匹配的优先级。
+ * 它考虑了路由路径的不同部分（如静态片段、动态片段、空片段等）以及是否是索引路由或包含通配符。
+ * score 越高，路由越精确/优先
+ * 如果 score 相同，则用 compareIndexes 比较 childrenIndex，保证同级路由的顺序和声明顺序一致。
+ * [
+  { path: "/user/list" },      // 静态路径 （score最高，最精确）
+  { path: "/user/:id" },       // 动态参数
+  { path: "/user/*" },         // 通配符
+  { path: "/:any" }            // 根级动态参数 （score最低，最宽泛）
+]
+ */
+function computeScore(path, index) {
+    // 分片
+    let segments = path.split('/'); // ['', user, add]
+    // 分片长度作为初始值
+    let initialScore = segments.length; [3]
+    // 分片是*罚-2分
+    if (segments.some(isSplat)) {
+        initialScore += splatPenalty;
+    }
+
+    // index有值就+2
+    if (index) {
+        initialScore += indexRouteValue;
+    }
+
+    // 过滤掉*
+    return segments.filter(s => !isSplat(s)).reduce((score, segment) => {
+        // score + 片段判断（路径参数+3 空+1 + 非空+10）
+        return score + (paramRe.test(segment) ? dynamicSegmentValue : segment === '' ? emptySegmentValue : staticSegmentValue);
+    },initialScore)
+}
+
+// >>>>>>>>>>>>>>>> 排序 <<<<<<<<<<<<<<<<<
+/** 对路由分支进行排序，基于 computeScore 函数计算的分数。
+ * 这个函数现在在匹配路由之前会调用 rankRouteBranches 函数，以确保路由是根据优先级排序的。
+ * @param {*} branches 
+ */
+function rankRouteBranches(branches) {
+    branches.sort((a, b) => {
+        /**
+         * user/add = [2,0]
+         * user/list = [2,0]
+         */
+        return a.score !== b.score ? b.score - a.score : compareIndexes(
+            a.routeMetas.map(meta => meta.childrenIndex),
+            b.routeMetas.map(meta => meta.childrenIndex)
+        )
+    })
+}
+
+// 用于比较两个分支的 childrenIndex 数组（每一级的下标），如果它们除了最后一级都一样（即同父节点下的兄弟节点），就比较最后一级的下标，谁小谁优先。
+function compareIndexes(a, b) {
+    // 长度相同，并且除最后一个索引外的其他索引全相等，说明他们是兄弟
+    let sibling = a.length === b.length && a.slice(0, -1).every((n, i) => n === b[i])
+    // 兄弟看索引，索引越小，优先级越高，不是兄弟则认为他们是相等的
+    return sibling ? a[a.length - 1] - b[b.length - 1] : 0;
 }

@@ -251,7 +251,7 @@ function flattenRoutes(routes, branches = [], parentMetas = [], parentPath = '')
         let routeMeta = {
             route,
             // 每个路由在其父节点 children 数组中的下标（即声明顺序）。当多个分支的精确度（score）一样时，优先匹配在路由树中声明靠前的分支，保证路由匹配的可预期性。
-            childrenIndex: index, 
+            childrenIndex: index,
         }
         const routePath = joinPaths([parentPath, routeMeta.route.path])
         const routeMetas = [...parentMetas, routeMeta];
@@ -335,6 +335,10 @@ function compilePath(path, end) {
     if (end) {
         regexpSource += "\\/*$"; // 结尾可以是多个/
     }
+
+    if (path === '*') {
+        regexpSource = '.*';
+    }
     let matcher = new RegExp(regexpSource);
     // return matcher;
     return [matcher, paramNames];
@@ -355,7 +359,7 @@ export function Route(props) { }
 export function useNavigate() {
     // 获取 navigator， 执行push
     let { navigator } = React.useContext(NavigationContext);
-    let navigate = React.useCallback((to, options={}) => {
+    let navigate = React.useCallback((to, options = {}) => {
         navigator.push(to, options.state);
     }, [navigator])
     return navigate;
@@ -423,7 +427,7 @@ function computeScore(path, index) {
     return segments.filter(s => !isSplat(s)).reduce((score, segment) => {
         // score + 片段判断（路径参数+3 空+1 + 非空+10）
         return score + (paramRe.test(segment) ? dynamicSegmentValue : segment === '' ? emptySegmentValue : staticSegmentValue);
-    },initialScore)
+    }, initialScore)
 }
 
 // >>>>>>>>>>>>>>>> 排序 <<<<<<<<<<<<<<<<<
@@ -452,4 +456,12 @@ function compareIndexes(a, b) {
     // 如果比较函数返回 0，表示这两个元素的顺序不变（保持原数组中的相对顺序）。
     // 也就是说，最终这两个分支的优先级是一样的，谁先声明谁先匹配（稳定排序）。
     return sibling ? a[a.length - 1] - b[b.length - 1] : 0;
+}
+
+export function Navigate({ to }) {
+    let navigate = useNavigate();
+    React.useLayoutEffect(() => {
+        navigate(to)
+    });
+    return null;
 }

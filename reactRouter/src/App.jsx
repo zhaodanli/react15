@@ -1,4 +1,4 @@
-import { HashRouter, BrowserRouter, Routes, Route, Link, NavLink } from "./react-router-dom";
+import { HashRouter, BrowserRouter, Routes, Route, Link, NavLink, Navigate } from "./react-router-dom";
 // 引入react-router-dom中的HashRouter, BrowserRouter, Routes, Route组件
 import Home from "./components/Home";
 import User from "./components/User";
@@ -71,7 +71,7 @@ export default function App() {
             </ul>
             {/* // 定义路由规则 */}
             <Routes>
-                <Route path="*" element={<NotFound />} />
+                {/* <Route path="*" element={<NotFound />} /> */}
                 {/* // 定义主页路由，当URL为'/'时渲染Home组件 */}
                 <Route path="/" element={<Home />} />
                 {/* // 定义用户页面路由，当URL为'/user'时渲染User组件 */}
@@ -82,6 +82,8 @@ export default function App() {
                 </Route>
                 {/* // 定义个人资料页面路由，当URL为'/profile'时渲染Profile组件 */}
                 <Route path="/profile" element={<Profile />} />
+                {/* * 可以匹配到所有路径 */}
+                <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </BrowserRouter>
     )

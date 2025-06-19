@@ -408,14 +408,14 @@ function computeScore(path, index) {
     // 分片
     let segments = path.split('/'); // ['', user, add]
     // 分片长度作为初始值
-    let initialScore = segments.length; [3]
+    let initialScore = segments.length;
     // 分片是*罚-2分
     if (segments.some(isSplat)) {
         initialScore += splatPenalty;
     }
 
     // index有值就+2
-    if (index) {
+    if (index !== undefined) {
         initialScore += indexRouteValue;
     }
 
@@ -433,10 +433,6 @@ function computeScore(path, index) {
  */
 function rankRouteBranches(branches) {
     branches.sort((a, b) => {
-        /**
-         * user/add = [2,0]
-         * user/list = [2,0]
-         */
         return a.score !== b.score ? b.score - a.score : compareIndexes(
             a.routeMetas.map(meta => meta.childrenIndex),
             b.routeMetas.map(meta => meta.childrenIndex)
@@ -445,9 +441,15 @@ function rankRouteBranches(branches) {
 }
 
 // 用于比较两个分支的 childrenIndex 数组（每一级的下标），如果它们除了最后一级都一样（即同父节点下的兄弟节点），就比较最后一级的下标，谁小谁优先。
+/**
+ * user/add = [2,0]
+ * user/list = [2,1]
+ */
 function compareIndexes(a, b) {
     // 长度相同，并且除最后一个索引外的其他索引全相等，说明他们是兄弟
     let sibling = a.length === b.length && a.slice(0, -1).every((n, i) => n === b[i])
     // 兄弟看索引，索引越小，优先级越高，不是兄弟则认为他们是相等的
+    // 如果比较函数返回 0，表示这两个元素的顺序不变（保持原数组中的相对顺序）。
+    // 也就是说，最终这两个分支的优先级是一样的，谁先声明谁先匹配（稳定排序）。
     return sibling ? a[a.length - 1] - b[b.length - 1] : 0;
 }

@@ -146,11 +146,11 @@ export function Route(props) { }
  * 这个 navigator 对象通常就是自定义的 history 对象（如 browserHistory/hashHistory）
  * 它实现了 push、replace、go 等方法。
  */
-export function useNavigate(to) {
+export function useNavigate() {
     // 获取 navigator， 执行push
     let { navigator } = React.useContext(NavigationContext);
-    let navigate = React.useCallback((to) => {
-        navigator.push(to);
+    let navigate = React.useCallback((to, options={}) => {
+        navigator.push(to, options.state);
     }, [navigator])
     return navigate;
 }

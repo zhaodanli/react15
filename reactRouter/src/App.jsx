@@ -8,6 +8,7 @@ import Post from './components/Post';
 import UserAdd from './components/UserAdd';
 import UserList from './components/UserList';
 import UserDetail from './components/UserDetail';
+import NotFound from './components/NotFound';
 
 /** HashRouter, BrowserRouter 差异被抹平， 只是路径方式不同
  * 
@@ -60,6 +61,7 @@ export default function App() {
             </ul>
             {/* // 定义路由规则 */}
             <Routes>
+                <Route path="*" element={<NotFound />} />
                 {/* // 定义主页路由，当URL为'/'时渲染Home组件 */}
                 <Route path="/" element={<Home />} />
                 {/* // 定义用户页面路由，当URL为'/user'时渲染User组件 */}

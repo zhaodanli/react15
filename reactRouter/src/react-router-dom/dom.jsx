@@ -90,12 +90,12 @@ export function BrowserRouter({ children }) {
     );
 }
 
-export function Link({ to, children }) {
+export function Link({ to, children, ...options }) {
     const navigate = useNavigate();
     return (
         <a href={to} onClick={(event) => {
             event.preventDefault();
-            navigate(to);
+            navigate(to, options);
         }} >{children}</a>
     )
 }

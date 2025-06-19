@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "../react-router-dom";
 import { UserAPI } from "../utils";
 
-export default function User() {
+export default function UserList() {
     const [users, setUsers] = React.useState([]);
     React.useEffect(() => {
         let users = UserAPI.list();

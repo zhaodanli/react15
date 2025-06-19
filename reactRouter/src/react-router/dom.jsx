@@ -144,7 +144,7 @@ function _renderMatches(matches) {
 function matchRoutes(routes, pathname) {
     // 打平路径
     const branches = flattenRoutes(routes);
-    console.log(branches)
+    // console.log(branches)
     // 给分支排序
     rankRouteBranches(branches);
     // console.log(branches)

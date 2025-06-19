@@ -1,7 +1,7 @@
 // 导入React
 import React from "react";
 // 从react-router中导入Router组件
-import { Router, useNavigate } from "../react-router";
+import { Router, useNavigate, useLocation } from "../react-router";
 // 从history库中导入createHashHistory和createBrowserHistory函数, 结果一样， 但是原理不一样
 import { createHashHistory, createBrowserHistory } from "../history";
 // 导出react-router中的所有内容
@@ -93,9 +93,54 @@ export function BrowserRouter({ children }) {
 export function Link({ to, children, ...options }) {
     const navigate = useNavigate();
     return (
-        <a href={to} onClick={(event) => {
+        <a {...options} href={to} onClick={(event) => {
             event.preventDefault();
             navigate(to, options);
         }} >{children}</a>
+    )
+}
+
+
+/** NavLink 可以配置额外样式
+ * end end = true 不匹配前缀之匹配路径
+ * 接收 isActive，传递 className 和 style
+ */
+export function NavLink({ 
+    className: classNameProp = '', 
+    end = false, 
+    style: styleProp = {}, 
+    to, 
+    children, 
+    ...rest 
+}) {
+    // 获取路径名
+    let location = useLocation();
+    let locationPathname = location.pathname;
+
+    // 获取跳转路径
+    let path = { pathname: to };
+    let toPathname = path.pathname;
+
+    // 判断匹配度 当前路径和此导航要去的链接
+    // 1. 完全相等 2. end = false（不需要完整的匹配，只需要匹配前缀） 并且以 AAA开头 /user 和 /user/list  = ture
+    // 只有当 /user 后面紧跟 / /user/list.charAt(5) → /（因为 /user 长度是 5，第 6 个字符是 /）
+    let isActive = locationPathname === toPathname
+        || (!end && locationPathname.startsWith(toPathname) && locationPathname.charAt(toPathname.length) === '/')
+
+    // 属性处理
+    let className;
+    if (typeof classNameProp === 'function') {
+        className = classNameProp({
+            isActive
+        });
+    }
+    let style;
+    if (typeof styleProp === 'function') {
+        style = styleProp({
+            isActive
+        });
+    }
+    return (
+        <Link {...rest} to={to} className={className} style={style}>{children}</Link>
     )
 }

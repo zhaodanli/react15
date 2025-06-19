@@ -1,4 +1,4 @@
-import { HashRouter, BrowserRouter, Routes, Route, Link } from "./react-router-dom";
+import { HashRouter, BrowserRouter, Routes, Route, Link, NavLink } from "./react-router-dom";
 // 引入react-router-dom中的HashRouter, BrowserRouter, Routes, Route组件
 import Home from "./components/Home";
 import User from "./components/User";
@@ -15,6 +15,13 @@ import NotFound from './components/NotFound';
  * @returns 
  */
 export default function App() {
+
+    const activeStyle = { backgroundColor: 'green' };
+    const activeClassName = 'active';
+    const activeNavProps = {
+        style: ({ isActive }) => isActive ? activeStyle : {},
+        className: ({ isActive }) => isActive ? activeClassName : ''
+    }
     /**
      * 使用 HashRouter 包裹我们的应用程序
      * 定义了 Routes 组件，所有的 Route 组件都被包含在其中。
@@ -55,9 +62,12 @@ export default function App() {
     return (
         <BrowserRouter>
             <ul>
-                <li><Link to="/">首页</Link></li>
+                {/* <li><Link to="/">首页</Link></li>
                 <li><Link to="/user" >用户管理</Link></li>
-                <li><Link to="/profile" >个人中心</Link></li>
+                <li><Link to="/profile" >个人中心</Link></li> */}
+                <li><NavLink end={true} to="/" {...activeNavProps}>首页</NavLink></li>
+                <li><NavLink to="/user/list" {...activeNavProps}>用户管理</NavLink></li>
+                <li><NavLink to="/profile" {...activeNavProps}>个人中心</NavLink></li>
             </ul>
             {/* // 定义路由规则 */}
             <Routes>
@@ -71,7 +81,7 @@ export default function App() {
                     <Route path="detail/:id" element={<UserDetail />} />
                 </Route>
                 {/* // 定义个人资料页面路由，当URL为'/profile'时渲染Profile组件 */}
-                {/* <Route path="/profile" element={<Profile />} /> */}
+                <Route path="/profile" element={<Profile />} />
             </Routes>
         </BrowserRouter>
     )

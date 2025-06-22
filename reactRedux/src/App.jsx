@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { Component } from 'react';
+import { createStore } from './redux';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+const ADD = 'ADD';
+const MINUS = 'MINUS';
+const reducer = (state = initState, action) => {
+  switch (action.type) {
+    case ADD:
+      return { number: state.number + 1 };
+    case MINUS:
+      return { number: state.number - 1 };
+    default:
+      return state;
+  }
 }
+let initState = { number: 0 };
+const store = createStore(reducer, initState);
 
-export default App
+export default class App extends Component {
+
+  // unsubscribe;
+
+  constructor(props) {
+    super(props);
+    this.state = { number: 0 };
+  }
+
+  componentDidMount() {
+    this.unsubscribe = store.subscribe(() => {
+      let state = store.getState()
+      this.setState({ number: state.number })
+    });
+  }
+
+  componentWillUnmount() {
+    console.log('componentWillUnmount')
+    this.unsubscribe();
+  }
+
+  render() {
+    return (
+      <div>
+        <p>{this.state.number}</p>
+        <button onClick={() => store.dispatch({ type: 'ADD' })}>+</button>
+        {/* <button onClick={() => store.dispatch({ type: 'MINUS' })}>-</button> */}
+        {/* <button onClick={
+          () => {
+            setTimeout(() => {
+              store.dispatch({ type: 'ADD' });
+            }, 1000);
+          }
+        }>1秒后加1</button> */}
+      </div>
+    )
+  }
+}

@@ -36,6 +36,11 @@ export default function runSaga(env, saga) {
                         dispatch(effect.action);
                         next();
                         break;
+                    case effectTypes.FORK:
+                        // 并发执行：让当前 saga 可以“分叉”出一个新的 saga（子任务），主 saga 不会等待子任务结束，而是继续往下执行。
+                        runSaga(env, effect.saga); // 启动子 saga
+                        next(); // 主 saga 继续往下走
+                        break;
                     default:
                         break;
                 }

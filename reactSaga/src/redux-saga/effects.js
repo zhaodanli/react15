@@ -7,3 +7,7 @@ export function take(actionType) {
 export function put(action) {
     return { type: effectTypes.PUT, action }
 }
+
+export function fork(saga) {
+    return { type: effectTypes.FORK, saga };
+}

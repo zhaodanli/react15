@@ -63,33 +63,45 @@ function connect(mapStateToProps, mapDispatchToProps) {
     }
 }
 
+/** hooks 函数组件的 connect
+ * 
+ * @param {*} mapStateToProps 
+ * @param {*} mapDispatchToProps 
+ * @returns 
+ */
+function connect2(mapStateToProps, mapDispatchToProps) {
+
+    return function (OldComponent) {
+
+        return function (props) {
+
+            const { store } = useContext(ReactReduxContext);
+            const { getState, dispatch, subscribe } = store;
+
+            const prevState = getState();
+            const stateProps = useMemo(() => mapStateToProps(prevState), [prevState]);
+            
+            let dispatchProps = useMemo(() => {
+                console.log('dispatchProps render');
+                let dispatchProps;
+                if (typeof mapDispatchToProps === 'function') {
+                    dispatchProps = mapDispatchToProps(dispatch);
+                } else if (typeof mapDispatchToProps === 'object') {
+                    dispatchProps = bindActionCreators(mapDispatchToProps, dispatch);
+                } else {
+                    dispatchProps = { dispatch };
+                }
+                return dispatchProps;
+            }, [dispatch]);
+
+            const [, forceUpdate] = useReducer(x => x + 1, 0);
+            useLayoutEffect(() => {
+                return subscribe(forceUpdate);
+            }, [subscribe]);
+
+            return <OldComponent {...props} {...stateProps} {...dispatchProps} />
+        }
+    }
+}
 
 export default connect;
-
-// function connect(mapStateToProps, mapDispatchToProps) {
-//     return function (OldComponent) {
-//         return function (props) {
-//             const { store } = useContext(ReactReduxContext);
-//             const { getState, dispatch, subscribe } = store;
-//             const prevState = getState();
-//             const stateProps = useMemo(() => mapStateToProps(prevState), [prevState]);
-//             let dispatchProps = useMemo(() => {
-//                 console.log('dispatchProps render');
-//                 let dispatchProps;
-//                 if (typeof mapDispatchToProps === 'function') {
-//                     dispatchProps = mapDispatchToProps(dispatch);
-//                 } else if (typeof mapDispatchToProps === 'object') {
-//                     dispatchProps = bindActionCreators(mapDispatchToProps, dispatch);
-//                 } else {
-//                     dispatchProps = { dispatch };
-//                 }
-//                 return dispatchProps;
-//             }, [dispatch]);
-//             const [, forceUpdate] = useReducer(x => x + 1, 0);
-//             useLayoutEffect(() => {
-//                 return subscribe(forceUpdate);
-//             }, [subscribe]);
-//             return <OldComponent {...props} {...stateProps} {...dispatchProps} />
-//         }
-//     }
-// }

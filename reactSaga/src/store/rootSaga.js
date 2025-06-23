@@ -1,4 +1,4 @@
-import { put, take } from 'redux-saga/effects';
+import { put, take } from '../redux-saga/effects';
 import * as types from './action-types';
 
 function delay(ms) {
@@ -13,9 +13,12 @@ function* workerSaga() {
 }
 
 function* watcherSaga() {
-    // 产出 effect 等待有人嫌仓库派发动作，等到了就会向下执行
-    yield take(actionTypes.ASYNC_ADD);
-    yield workerSaga();
+    while(true) {
+        // 产出 effect 等待有人嫌仓库派发动作，等到了就会向下执行
+        yield take(actionTypes.ASYNC_ADD);
+        yield workerSaga();
+    }
+    console.log(221323) // while(true) 这行代码用于啊不会执行
 }
 
 export default function* rootSaga() {

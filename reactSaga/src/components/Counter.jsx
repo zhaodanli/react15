@@ -9,7 +9,7 @@ function Counter() {
         <div>
             <p>{number}</p>
             <button onClick={() => dispatch({ type: actionTypes.ADD })}>+</button>
-            <button onClick={() => dispatch({ type: actionTypes.ASYNC_ADD })}>+</button>
+            <button onClick={() => dispatch({ type: actionTypes.ASYNC_ADD })}>ASYNC_ADD</button>
         </div>
     )
 }

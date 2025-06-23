@@ -4,7 +4,7 @@ import actions from '../store/actions/counter1'
 import store from '../store';
 const boundActions = bindActionCreators(actions, store.dispatch);
 
-export default class App extends Component {
+export default class Counter1 extends Component {
 
   // unsubscribe;
 
@@ -28,7 +28,7 @@ export default class App extends Component {
   render() {
     return (
       <div>
-        <p>{this.state.number}</p>
+        <p>Counter1: {this.state.number}</p>
         {/* <button onClick={() => store.dispatch({ type: 'ADD' })}>+</button>
         <button onClick={() => store.dispatch({ type: 'MINUS' })}>-</button> */}
         <button onClick={boundActions.add1}>+</button>

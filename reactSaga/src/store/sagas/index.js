@@ -1,4 +1,4 @@
-import { put, take, fork } from 'redux-saga/effects';
+import { put, take, fork, takeEvery } from 'redux-saga/effects';
 import * as types from '../action-types';
 
 function delay(ms) {
@@ -28,5 +28,11 @@ function* watcherSaga() {
 }
 
 export default function* rootSaga() {
-    yield watcherSaga();
+    // yield watcherSaga();
+    // 一个 task 就像是一个在后台运行的进程，在基于redux-saga的应用程序中，可以同时运行多个task
+    // 通过 fork 函数来创建 task
+    // 监听每一次指定 action 的触发，每次触发时都自动启动一个 worker saga（任务生成器），并发执行，不会阻塞主流程。
+    // 让 sagaMiddleware 自动帮你“全局监听”某类 action，每次 action 触发都自动并发执行 worker 任务。
+    // 每次 dispatch({type: 'ADD_ASYNC'})，都会自动并发执行一个 addAsync，不会漏掉任何一次 action，也不会阻塞 rootSaga
+    yield takeEvery(types.ASYNC_ADD, workerSaga);
 }

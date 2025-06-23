@@ -4,7 +4,8 @@ import * as effectTypes from './effectTypes'
  * @param {*} env  env：包含 channel（事件通道）、dispatch（派发 action 的方法）。
  * @param {*} saga 可以是生成器函数或生成器对象
  */
-export default function runSaga(env, saga) {
+export default function runSaga(env, saga, callback) {
+    let task = { cancel: () => next(TASK_CANCEL) };
 
     let { channel, dispatch } = env;
 
@@ -18,10 +19,12 @@ export default function runSaga(env, saga) {
         let result;
         if (isErr) {
             result = it.throw(value);
-        }else {
+        } else if (value === TASK_CANCEL) {
+            result = it.return(value);
+        } else {
             result = it.next(value);
         }
-        
+
         let { value: effect, done } = it.next(value);
         if (!done) {
             if (typeof effect[Symbol.iterator] === 'function') {
@@ -45,8 +48,8 @@ export default function runSaga(env, saga) {
                         break;
                     case effectTypes.FORK:
                         // 并发执行：让当前 saga 可以“分叉”出一个新的 saga（子任务），主 saga 不会等待子任务结束，而是继续往下执行。
-                        runSaga(env, effect.saga); // 启动子 saga
-                        next(); // 主 saga 继续往下走
+                        let forkTask = runSaga(env, effect.saga); // 启动子 saga
+                        next(forkTask); // 主 saga 继续往下走
                         break;
                     case effectTypes.CALL:
                         // effect.fn(...effect.args) 实际上就是调用你要执行的异步函数，比如 fetchData(1, 2)。
@@ -63,14 +66,34 @@ export default function runSaga(env, saga) {
                             }
                         });
                         break;
+                    case effectTypes.ALL:
+                        const { iterators } = effect;
+                        let result = [];
+                        let count = 0;
+                        iterators.forEach((iterator, index) => {
+                            runSaga(env, iterator, (data) => {
+                                result[index] = data;
+                                if (++count === iterators.length) {
+                                    next(result);
+                                }
+                            });
+                        });
+                        break;
+                    case effectTypes.CANCEL:
+                        effect.task.cancel();
+                        next();
+                        break;
                     default:
                         break;
                 }
             }
 
+        } else {
+            callback && callback(effect);
         }
     }
 
     // 启动
     next();
+    return task;
 }

@@ -5,5 +5,5 @@ import combineReducers from './combineReducers'
 export {
     createStore, 
     bindActionCreators,
-    combineReducers
+    combineReducers,
 }

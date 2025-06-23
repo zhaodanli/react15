@@ -1,38 +1,41 @@
 import React, { Component } from 'react';
-import { bindActionCreators } from '../redux';
-import actions from '../store/actions/counter1'
-import store from '../store';
-const boundActions = bindActionCreators(actions, store.dispatch);
+import actions from '../store/actions/counter1';
+import { connect } from '../react-redux';
 
-export default class Counter1 extends Component {
+class Counter1 extends Component {
 
   // unsubscribe;
 
-  constructor(props) {
-    super(props);
-    this.state = { number: 0 };
-  }
+  // constructor(props) {
+  //   super(props);
+  //   this.state = { number: 0 };
+  // }
 
-  componentDidMount() {
-    this.unsubscribe = store.subscribe(() => {
-      let state = store.getState().counter1
-      this.setState({ number: state.number })
-    });
-  }
+  // componentDidMount() {
+  //   this.unsubscribe = store.subscribe(() => {
+  //     let state = store.getState().counter1
+  //     this.setState({ number: state.number })
+  //   });
+  // }
 
-  componentWillUnmount() {
-    console.log('componentWillUnmount')
-    this.unsubscribe();
-  }
+  // componentWillUnmount() {
+  //   console.log('componentWillUnmount')
+  //   this.unsubscribe();
+  // }
 
   render() {
+    let { number, add1, minus1 } = this.props;
     return (
       <div>
-        <p>Counter1: {this.state.number}</p>
+        <p>Counter1: {number}</p>
         {/* <button onClick={() => store.dispatch({ type: 'ADD' })}>+</button>
         <button onClick={() => store.dispatch({ type: 'MINUS' })}>-</button> */}
-        <button onClick={boundActions.add1}>+</button>
-        <button onClick={boundActions.minus1}>-</button>
+        {/* bind reducer之后 */}
+        {/* <button onClick={boundActions.add1}>+</button>
+        <button onClick={boundActions.minus1}>-</button> */}
+        {/* 使用 provider之后 */}
+        <button onClick={add1}>+</button>
+        <button onClick={minus1}>-</button>
         {/* <button onClick={
           () => {
             setTimeout(() => {
@@ -44,3 +47,12 @@ export default class Counter1 extends Component {
     )
   }
 }
+
+// let state = store.getState().counter1
+// this.state = mapStateToProps(getState());
+// mapDispatchToProps = dispatch => bindActionCreators(actions, disptch)
+let mapStateToProps = (state) => state.counter1;
+export default connect(
+    mapStateToProps,
+    actions
+)(Counter1)

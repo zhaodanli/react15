@@ -14,7 +14,14 @@ export default function runSaga(env, saga) {
     let it = typeof saga === 'function' ? saga() : saga;
 
     // next 执行器 每次调用 next()，推进 saga 生成器，拿到下一个 effect（副作用指令）。
-    function next(value) {
+    function next(value, isErr) { // isErr true  value =  err, isErr false  value =  err,
+        let result;
+        if (isErr) {
+            result = it.throw(value);
+        }else {
+            result = it.next(value);
+        }
+        
         let { value: effect, done } = it.next(value);
         if (!done) {
             if (typeof effect[Symbol.iterator] === 'function') {
@@ -46,6 +53,15 @@ export default function runSaga(env, saga) {
                         // 这个函数通常返回一个 Promise（比如你用 async/await 或 fetch、axios 等异步请求）。
                         // Promise 实例有 then 方法，所以可以 .then(next)，等异步完成后继续推进 saga。
                         effect.fn(...effect.args).then(next);
+                        break;
+                    case effectTypes.CPS:
+                        effect.fn(...effect.args, (err, data) => {
+                            if (err) {
+                                next(err, true);
+                            } else {
+                                next(data);
+                            }
+                        });
                         break;
                     default:
                         break;

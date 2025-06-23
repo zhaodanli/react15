@@ -15,7 +15,7 @@ export default class Counter1 extends Component {
 
   componentDidMount() {
     this.unsubscribe = store.subscribe(() => {
-      let state = store.getState()
+      let state = store.getState().counter1
       this.setState({ number: state.number })
     });
   }

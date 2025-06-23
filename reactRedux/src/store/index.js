@@ -1,6 +1,5 @@
 import { createStore } from '../redux';
-import reducer from './reducers/counter1.js';
+import reducer from './reducers';
 
-let initState = { number: 0 };
-const store = createStore(reducer, initState);
+const store = createStore(reducer, { counter1: { number: 0 }, counter2: { number: 0 } });
 export default store;

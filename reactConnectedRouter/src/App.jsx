@@ -3,7 +3,7 @@ import Counter from './components/Counter.jsx';
 
 import { Routes, Route, Link, BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { HistoryRouter } from 'redux-first-history/rr6';
+import { HistoryRouter } from './redux-first-history/rr6/index.jsx';
 import { store, reduxHistory } from "./store";
 
 /** 目前 react-router-dom 官方最高稳定版为 6.x，7.x 不是官方正式版，和 redux-first-history 及相关生态完全不兼容，会导致 context 结构不一致、Link 报错等各种问题

@@ -21,7 +21,7 @@ function add3(str) {
 
 // compose2(a, b, c) 变成 (...args) => a(b(c(...args)))
 // 执行顺序：先执行 c('X') 得 'Xc'，再 b('Xc') 得 'Xcb'，最后 a('Xcb') 得 'Xcba'
-function compose(...funcs) {
+export default function compose(...funcs) {
     return funcs.reduce((a, b) => {
         return (...args) => {
             return a(b(...args))

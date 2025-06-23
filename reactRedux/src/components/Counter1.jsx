@@ -24,7 +24,7 @@ class Counter1 extends Component {
   // }
 
   render() {
-    let { number, add1, minus1 } = this.props;
+    let { number, add1, minus1, thunkAdd1, promiseAdd1, promiseAdd2 } = this.props;
     return (
       <div>
         <p>Counter1: {number}</p>
@@ -36,6 +36,9 @@ class Counter1 extends Component {
         {/* 使用 provider之后 */}
         <button onClick={add1}>+</button>
         <button onClick={minus1}>-</button>
+        <button onClick={thunkAdd1}>thunk+1</button>
+        <button onClick={promiseAdd1}>promise+1</button>
+        <button onClick={promiseAdd2}>promise+2</button>
         {/* <button onClick={
           () => {
             setTimeout(() => {
@@ -53,6 +56,6 @@ class Counter1 extends Component {
 // mapDispatchToProps = dispatch => bindActionCreators(actions, disptch)
 let mapStateToProps = (state) => state.counter1;
 export default connect(
-    mapStateToProps,
-    actions
+  mapStateToProps,
+  actions
 )(Counter1)

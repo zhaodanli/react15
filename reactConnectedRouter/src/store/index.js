@@ -2,6 +2,7 @@ import { createStore, applyMiddleware } from 'redux';
 import combinedReducer from './reducers';
 import { routerMiddleware, createReduxHistory } from '../history';
 
+// @reduxjs/toolkit 提供的 configureStore 来创建 store
 // 让所有 dispatch 的 action 都会先经过 routerMiddleware 处理。
 //routerMiddleware 可以拦截到 push('/counter') 这个action,调用history进行路径的跳转
 //  action 会先经过 routerMiddleware。发现 action.type 是 @@router/CALL_HISTORY_METHOD，于是自动调用

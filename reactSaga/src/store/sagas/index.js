@@ -35,4 +35,9 @@ export default function* rootSaga() {
     // 让 sagaMiddleware 自动帮你“全局监听”某类 action，每次 action 触发都自动并发执行 worker 任务。
     // 每次 dispatch({type: 'ADD_ASYNC'})，都会自动并发执行一个 addAsync，不会漏掉任何一次 action，也不会阻塞 rootSaga
     yield takeEvery(types.ASYNC_ADD, workerSaga);
+
+    // 这句话点击第一次不执行 watcherSaga 内部的第一步是 yield take(types.ASYNC_ADD)，这会让 watcherSaga 再次“等待”下一个 ASYNC_ADD action。
+    // 所以第一次点击时，takeEvery 启动 watcherSaga，watcherSaga 进入 take 等待，没做任何事。
+    // 第二次点击时，watcherSaga 的 take 收到 action，才会继续往下执行（如 fork workerSaga）
+    // yield takeEvery(types.ASYNC_ADD, watcherSaga);
 }

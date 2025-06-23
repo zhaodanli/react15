@@ -1,5 +1,5 @@
 import { put, take } from 'redux-saga/effects';
-import * as types from './action-types';
+import * as types from '../action-types';
 
 function delay(ms) {
     return new Promise((resolve) => {
@@ -9,12 +9,12 @@ function delay(ms) {
 
 function* workerSaga() {
     yield delay(1000);
-    yield put({ type: actionTypes.ADD });
+    yield put({ type: types.ADD });
 }
 
 function* watcherSaga() {
-    // 产出 effect 等待有人嫌仓库派发动作，等到了就会向下执行
-    yield take(actionTypes.ASYNC_ADD);
+    // take 职能监听一次
+    yield take(types.ASYNC_ADD);
     yield workerSaga();
 }
 

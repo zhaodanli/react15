@@ -1,16 +1,15 @@
 import Home from './components/Home.jsx';
 import Counter from './components/Counter.jsx';
 
-
 import { Routes, Route, Link, BrowserRouter } from 'react-router-dom';
-// import { Provider } from 'react-redux';
+import { Provider } from 'react-redux';
 // import { HistoryRouter } from "redux-first-history/rr6";
-// import { store, history } from "./store";
+import { store, history } from "./store";
 
 function App() {
     return (
-        // <Provider store={store}>
-            // <HistoryRouter history={history}>
+        <Provider store={store}>
+            {/* <HistoryRouter history={history}> */}
             <BrowserRouter>
                 <ul>
                     <li><Link to="/">Home</Link></li>
@@ -21,7 +20,8 @@ function App() {
                     <Route path="/counter" element={<Counter />} />
                 </Routes>
             </BrowserRouter>
-        // </Provider>
+            {/* </HistoryRouter> */}
+        </Provider>
     )
 }
 

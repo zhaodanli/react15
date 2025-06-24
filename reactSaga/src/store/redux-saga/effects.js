@@ -12,6 +12,7 @@ export function fork(saga) {
     return { type: effectTypes.FORK, saga };
 }
 
+/** 本质是fork包裹while true */
 export function takeEvery(actionType, saga) {
     function* takeEveryHelper() {
         while (true) {

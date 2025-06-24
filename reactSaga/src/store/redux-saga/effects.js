@@ -31,8 +31,8 @@ export function cps(fn, ...args) {
     return { type: effectTypes.CPS, fn, args };
 }
 
-export function all(effects) {
-    return { type: effectTypes.ALL, effects };
+export function all(iterators) {
+    return { type: effectTypes.ALL, iterators };
 }
 
 const delayFn = (ms) => {

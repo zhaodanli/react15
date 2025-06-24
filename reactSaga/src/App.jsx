@@ -1,36 +1,32 @@
 import { useEffect } from 'react';
 // import { createStore } from 'redux';
 // import { configureStore } from '@reduxjs/toolkit';
-import { configureStore } from './toolkit';
+import { configureStore, createAction } from './toolkit';
 
-const ADD = 'ADD'
-const MINUS = 'MINUS'
-
-function add() {
-    return { type: ADD }
-}
-
-function minus() {
-    return { type: MINUS }
-}
+const add = createAction('ADD')
+// (amount) => ({ payload: amount * 20 }) 准备函数
+const minus = createAction('MINUS', (amount) => ({ payload: amount * 20 }))
 
 const reducer = (state = { number: 0 }, action) => {
     switch (action.type) {
-        case ADD:
+        case add.type:
             return { number: state.number + 1 }
-        case MINUS:
-            return { number: state.number - 1 }
+        case minus.type:
+            return { number: state.number - action.payload }
         default:
             return state
     }
 }
 
+console.log(add.toString());
+console.log(minus.toString());
+
 // let store = createStore(reducer);
 const store = configureStore({
     reducer,
-    // preloadedState: {
-
-    // }
+    preloadedState: {
+        number: 0
+    }
 })
 
 function render() {
@@ -51,7 +47,7 @@ export default function App() {
         const asyncAddBtn = document.getElementById('async-add');
 
         const handleAdd = () => store.dispatch(add());
-        const handleMinus = () => store.dispatch(minus());
+        const handleMinus = () => store.dispatch(minus(2));
         const handleAsyncAdd = () => store.dispatch((dispatch) => {
             setTimeout(() => {
                 dispatch(add())

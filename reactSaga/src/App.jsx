@@ -1,22 +1,27 @@
 import { useEffect } from 'react';
 // import { createStore } from 'redux';
 // import { configureStore } from '@reduxjs/toolkit';
-import { configureStore, createAction } from './toolkit';
+import { configureStore, createAction, createReducer } from './toolkit';
 
 const add = createAction('ADD')
 // (amount) => ({ payload: amount * 20 }) 准备函数
 const minus = createAction('MINUS', (amount) => ({ payload: amount * 20 }))
 
-const reducer = (state = { number: 0 }, action) => {
-    switch (action.type) {
-        case add.type:
-            return { number: state.number + 1 }
-        case minus.type:
-            return { number: state.number - action.payload }
-        default:
-            return state
-    }
-}
+// const reducer = (state = { number: 0 }, action) => {
+//     switch (action.type) {
+//         case add.type:
+//             return { number: state.number + 1 }
+//         case minus.type:
+//             return { number: state.number - action.payload }
+//         default:
+//             return state
+//     }
+// }
+
+const reducer = createReducer({ number: 0 }, {
+    [add]: state => ({ number: state.number + 1 }),
+    [minus]: state => ({ number: state.number - 1 })
+})
 
 console.log(add.toString());
 console.log(minus.toString());

@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 // import { createStore } from 'redux';
 // import { configureStore } from '@reduxjs/toolkit';
-import { configureStore, createAction, createReducer } from './toolkit';
+import { configureStore, createAction, createReducer, createSlice } from './toolkit';
 
-const add = createAction('ADD')
+// const add = createAction('ADD')
 // (amount) => ({ payload: amount * 20 }) 准备函数
-const minus = createAction('MINUS', (amount) => ({ payload: amount * 20 }))
+// const minus = createAction('MINUS', (amount) => ({ payload: amount * 20 }))
 
 // const reducer = (state = { number: 0 }, action) => {
 //     switch (action.type) {
@@ -18,13 +18,31 @@ const minus = createAction('MINUS', (amount) => ({ payload: amount * 20 }))
 //     }
 // }
 
-const reducer = createReducer({ number: 0 }, {
-    [add]: state => ({ number: state.number + 1 }),
-    [minus]: state => ({ number: state.number - 1 })
+// const reducer = createReducer({ number: 0 }, {
+//     [add]: state => ({ number: state.number + 1 }),
+//     [minus]: state => ({ number: state.number - 1 })
+// })
+
+// console.log(add.toString());
+// console.log(minus.toString());
+
+const counterSlice = createSlice({
+    name: 'counter',
+    initialState: { number: 0 },
+    reducers: {
+        // add: (state) => ({ number: state.number + 1 }),//派发的时候动作类型是 counter/add
+        // minus: (state, action) => ({ number: state.number - action.payload })
+        add: (state) => state.number += 1,//派发的时候动作类型是 counter/add
+        minus: (state, action) => state.number -= action.payload
+    }
 })
 
-console.log(add.toString());
-console.log(minus.toString());
+
+
+const { actions, reducer } = counterSlice
+console.log(actions);
+const { add, minus } = actions
+console.log(add);
 
 // let store = createStore(reducer);
 const store = configureStore({

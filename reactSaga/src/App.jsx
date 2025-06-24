@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 // import { createStore } from 'redux';
 // import { configureStore } from '@reduxjs/toolkit';
-import { configureStore, createAction, createReducer, createSlice } from './toolkit';
+import { configureStore, createAction, createReducer, createSlice, createSelector } from './toolkit';
 
 // const add = createAction('ADD')
 // (amount) => ({ payload: amount * 20 }) 准备函数
@@ -37,25 +37,43 @@ const counterSlice = createSlice({
     }
 })
 
+const { actions: { add, minus }, reducer } = counterSlice;
 
-
-const { actions, reducer } = counterSlice
-console.log(actions);
-const { add, minus } = actions
-console.log(add);
-
-// let store = createStore(reducer);
-const store = configureStore({
-    reducer,
-    preloadedState: {
-        number: 0
+const counterSlice2 = createSlice({
+    name: 'counter2',
+    initialState: { number: 0 },
+    reducers: {
+        add2: (state) => state.number += 1,//派发的时候动作类型是 counter/add
+        minus2: (state, action) => state.number -= action.payload
     }
 })
 
+const { actions: { add2, minus2 }, reducer: reducer2 } = counterSlice2;
+
+// let store = createStore(reducer);
+const store = configureStore({
+    reducer: { counter: reducer, counter2: reducer2 },
+})
+
+const selectCounter = state => state.counter
+const selectCounter2 = state => state.counter2
+
+const totalSelector = createSelector(
+    [selectCounter, selectCounter2],
+    (counter, counter2) => {
+        return counter.number + counter2.number;
+    }
+)
+
 function render() {
     const valueEl = document.getElementById('value');
+    const valueEl2 = document.getElementById('value2');
+    const sumEl = document.getElementById('sum');
+
     if (valueEl) {
-        valueEl.innerHTML = store.getState().number;
+        valueEl.innerHTML = store.getState().counter.number;
+        valueEl2.innerHTML = store.getState().counter2.number;
+        sumEl.innerHTML = totalSelector(store.getState());
     }
 }
 
@@ -63,11 +81,15 @@ export default function App() {
 
     useEffect(() => {
         render(); // 首次渲染
+
         const unsubscribe = store.subscribe(render);
 
         const addBtn = document.getElementById('add');
         const minusBtn = document.getElementById('minus');
         const asyncAddBtn = document.getElementById('async-add');
+
+        const addBtn2 = document.getElementById('add2');
+        const minusBtn2 = document.getElementById('minus2');
 
         const handleAdd = () => store.dispatch(add());
         const handleMinus = () => store.dispatch(minus(2));
@@ -77,15 +99,25 @@ export default function App() {
             }, 1000)
         });
 
+        const handleAdd2 = () => store.dispatch(add2());
+        const handleMinus2 = () => store.dispatch(minus2(2));
+
         if (addBtn) addBtn.addEventListener('click', handleAdd);
         if (minusBtn) minusBtn.addEventListener('click', handleMinus);
         if (asyncAddBtn) asyncAddBtn.addEventListener('click', handleAsyncAdd)
+
+        if (addBtn2) addBtn2.addEventListener('click', handleAdd2);
+        if (minusBtn2) minusBtn2.addEventListener('click', handleMinus2);
 
         return () => {
             unsubscribe();
             if (addBtn) addBtn.removeEventListener('click', handleAdd);
             if (minusBtn) minusBtn.removeEventListener('click', handleMinus);
             if (asyncAddBtn) asyncAddBtn.removeEventListener('click', handleMinus);
+
+            if (addBtn2) addBtn2.removeEventListener('click', handleAdd);
+            if (minusBtn2) minusBtn2.removeEventListener('click', handleMinus);
+            if (asyncAddBtn2) asyncAddBtn2.removeEventListener('click', handleMinus);
         };
     }, [])
 
@@ -95,6 +127,12 @@ export default function App() {
             <button id="add">+</button>
             <button id="minus">-</button>
             <button id="async-add">async-add</button>
+            <hr />
+            <p id="value2">0</p>
+            <button id="add2">+</button>
+            <button id="minus2">-</button>
+            <hr />
+            <p id="sum">0</p>
         </div>
     )
 }

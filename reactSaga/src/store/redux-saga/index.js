@@ -1,4 +1,5 @@
 import EventEmitter from 'events';
+// import { runSaga } from 'redux-saga';
 import runSaga from './runSaga';
 
 /** 函数执行返回中间件
@@ -22,6 +23,7 @@ export default function createSagaMiddleware() {
                 const result = next(action);
                 // 发射事件，动作类型， type action -> 监听 -> next
                 channel.emit(action.type, action);
+                console.log('emit', action.type, action)
                 return result;
             }
         }

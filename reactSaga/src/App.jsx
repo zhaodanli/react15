@@ -1,138 +1,74 @@
 import { useEffect } from 'react';
 // import { createStore } from 'redux';
-// import { configureStore } from '@reduxjs/toolkit';
-import { configureStore, createAction, createReducer, createSlice, createSelector } from './toolkit';
+// import { configureStore, createAction, createReducer, createSlice, createSelector, createAsyncThunk } from '@reduxjs/toolkit';
+import { configureStore, createAction, createReducer, createSlice, createSelector, createAsyncThunk } from './toolkit';
+import axios from 'axios';
 
-// const add = createAction('ADD')
-// (amount) => ({ payload: amount * 20 }) 准备函数
-// const minus = createAction('MINUS', (amount) => ({ payload: amount * 20 }))
+/** createAsyncThunk 返回 actionCeater, 返回action 给dispatch派发
+ * 1. 请求💰： 派发动作 loading true
+ * 2. 请求成功给todos
+ * 3. 失败报错
+ */
+export const getTodosList = createAsyncThunk(
+    "todos/list", async () => await axios.get(`http://localhost:8080/todos/list`)
+);
 
-// const reducer = (state = { number: 0 }, action) => {
-//     switch (action.type) {
-//         case add.type:
-//             return { number: state.number + 1 }
-//         case minus.type:
-//             return { number: state.number - action.payload }
-//         default:
-//             return state
-//     }
-// }
+// 初始状态
+const initialState = {
+    todos: [],
+    loading: false,
+    error: null,
+};
 
-// const reducer = createReducer({ number: 0 }, {
-//     [add]: state => ({ number: state.number + 1 }),
-//     [minus]: state => ({ number: state.number - 1 })
-// })
-
-// console.log(add.toString());
-// console.log(minus.toString());
-
-const counterSlice = createSlice({
-    name: 'counter',
-    initialState: { number: 0 },
+const todoSlice = createSlice({
+    name: 'todo',
+    initialState,
     reducers: {
-        // add: (state) => ({ number: state.number + 1 }),//派发的时候动作类型是 counter/add
-        // minus: (state, action) => ({ number: state.number - action.payload })
-        add: (state) => state.number += 1,//派发的时候动作类型是 counter/add
-        minus: (state, action) => state.number -= action.payload
+        add() { // 不需要加前缀，自动变为 name+type
+
+        }
+    }, // 内部的
+    extraReducers: { // 外部的
+        [getTodosList.pending]: (state) => {
+            state.loading = true;
+        },
+        [getTodosList.fulfilled]: (state, action) => {
+            state.todos = action.payload.data;
+            state.loading = false;
+        },
+        [getTodosList.rejected]: (state, action) => {
+            state.todos = [];
+            state.error = action.error.message;
+            state.loading = false;
+        }
     }
 })
 
-const { actions: { add, minus }, reducer } = counterSlice;
-
-const counterSlice2 = createSlice({
-    name: 'counter2',
-    initialState: { number: 0 },
-    reducers: {
-        add2: (state) => state.number += 1,//派发的时候动作类型是 counter/add
-        minus2: (state, action) => state.number -= action.payload
-    }
-})
-
-const { actions: { add2, minus2 }, reducer: reducer2 } = counterSlice2;
-
-// let store = createStore(reducer);
-const store = configureStore({
-    reducer: { counter: reducer, counter2: reducer2 },
-})
-
-const selectCounter = state => state.counter
-const selectCounter2 = state => state.counter2
-
-const totalSelector = createSelector(
-    [selectCounter, selectCounter2],
-    (counter, counter2) => {
-        return counter.number + counter2.number;
-    }
-)
-
-function render() {
-    const valueEl = document.getElementById('value');
-    const valueEl2 = document.getElementById('value2');
-    const sumEl = document.getElementById('sum');
-
-    if (valueEl) {
-        valueEl.innerHTML = store.getState().counter.number;
-        valueEl2.innerHTML = store.getState().counter2.number;
-        sumEl.innerHTML = totalSelector(store.getState());
-    }
-}
+const { reducer } = todoSlice;
 
 export default function App() {
+    const store = configureStore({ reducer })
 
     useEffect(() => {
-        render(); // 首次渲染
+        // 返回 promise 为什么
+        let promise = store.dispatch(getTodosList());
 
-        const unsubscribe = store.subscribe(render);
-
-        const addBtn = document.getElementById('add');
-        const minusBtn = document.getElementById('minus');
-        const asyncAddBtn = document.getElementById('async-add');
-
-        const addBtn2 = document.getElementById('add2');
-        const minusBtn2 = document.getElementById('minus2');
-
-        const handleAdd = () => store.dispatch(add());
-        const handleMinus = () => store.dispatch(minus(2));
-        const handleAsyncAdd = () => store.dispatch((dispatch) => {
+        console.log('请求开始', store.getState());
+        promise.then((response) => {
+            console.log('成功', response);
             setTimeout(() => {
-                dispatch(add())
-            }, 1000)
+                console.log('请求结束', store.getState());
+            },);
+        }, error => {
+            console.log('失败', error);
+            setTimeout(() => {
+                console.log('请求结束', store.getState());
+            },);
         });
-
-        const handleAdd2 = () => store.dispatch(add2());
-        const handleMinus2 = () => store.dispatch(minus2(2));
-
-        if (addBtn) addBtn.addEventListener('click', handleAdd);
-        if (minusBtn) minusBtn.addEventListener('click', handleMinus);
-        if (asyncAddBtn) asyncAddBtn.addEventListener('click', handleAsyncAdd)
-
-        if (addBtn2) addBtn2.addEventListener('click', handleAdd2);
-        if (minusBtn2) minusBtn2.addEventListener('click', handleMinus2);
-
-        return () => {
-            unsubscribe();
-            if (addBtn) addBtn.removeEventListener('click', handleAdd);
-            if (minusBtn) minusBtn.removeEventListener('click', handleMinus);
-            if (asyncAddBtn) asyncAddBtn.removeEventListener('click', handleMinus);
-
-            if (addBtn2) addBtn2.removeEventListener('click', handleAdd);
-            if (minusBtn2) minusBtn2.removeEventListener('click', handleMinus);
-            if (asyncAddBtn2) asyncAddBtn2.removeEventListener('click', handleMinus);
-        };
     }, [])
 
     return (
         <div>
-            <p id="value">0</p>
-            <button id="add">+</button>
-            <button id="minus">-</button>
-            <button id="async-add">async-add</button>
-            <hr />
-            <p id="value2">0</p>
-            <button id="add2">+</button>
-            <button id="minus2">-</button>
-            <hr />
-            <p id="sum">0</p>
         </div>
     )
 }

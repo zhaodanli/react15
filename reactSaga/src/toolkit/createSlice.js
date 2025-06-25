@@ -4,7 +4,8 @@ function createSlice(options) {
     let { 
         name, 
         initialState = {}, 
-        reducers = {} 
+        reducers = {},
+        extraReducers={} 
     } = options;
 
     let actions = {};
@@ -19,7 +20,7 @@ function createSlice(options) {
     })
     // reducers[key] 用来处理状态
     // let reducer = createReducer(initialState, reducers);
-    let reducer = createReducer(initialState, prefixReducers);
+    let reducer = createReducer(initialState, prefixReducers, extraReducers);
 
     return {
         name,

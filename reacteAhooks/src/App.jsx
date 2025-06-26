@@ -11,16 +11,23 @@ function getName() {
 }
 
 function App() {
-    const { data, loading, error } = useRequest(getName);
-    if (loading) {
-        return <div>加载中...</div>;
-    }
-
-    if (error) {
-        return <div>加载失败</div>;
-    }
-
-    return <div>用户名: {data}</div>;
+    const { data, loading, error, run, runAsync } = useRequest(getName, {
+        manual: true,
+        /* onError(error) {
+          console.error('onError', error);
+        } */
+    });
+    return (
+        <>
+            <button disabled={loading} onClick={run}>
+                {loading ? '获取中......' : 'run'}
+            </button>
+            <button disabled={loading} onClick={runAsync}>
+                {loading ? '获取中......' : 'runAsync'}
+            </button>
+            {data && <div>用户名: {data}</div>}
+        </>
+    )
 };
 
 export default App;

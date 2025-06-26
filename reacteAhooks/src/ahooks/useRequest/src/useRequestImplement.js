@@ -3,6 +3,7 @@ import useUpdate from '../../useUpdate';
 import useCreation from '../../useCreation';
 import useMount from '../../useMount';
 import Fetch from './Fetch';
+import useUnmount from '../../useUnmount';
 
 // 手动触发 useMemoizedFn是持久化 function 的 Hook，理论上，可以使用 useMemoizedFn 完全代替 useCallback
 import useMemoizedFn from '../../useMemoizedFn';
@@ -31,6 +32,10 @@ function useRequestImplement(service, options = {}) {
             fetchInstance.run(...params);
         }
     });
+
+    useUnmount(() => {
+        fetchInstance.cancel();
+    });
     return {
         loading: fetchInstance.state.loading,
         data: fetchInstance.state.data,
@@ -39,7 +44,8 @@ function useRequestImplement(service, options = {}) {
         runAsync: useMemoizedFn(fetchInstance.runAsync.bind(fetchInstance)),
         refresh: useMemoizedFn(fetchInstance.refresh.bind(fetchInstance)),
         refreshAsync: useMemoizedFn(fetchInstance.refreshAsync.bind(fetchInstance)),
-        mutate: useMemoizedFn(fetchInstance.mutate.bind(fetchInstance))
+        mutate: useMemoizedFn(fetchInstance.mutate.bind(fetchInstance)),
+        cancel: useMemoizedFn(fetchInstance.cancel.bind(fetchInstance))
     };
 }
 

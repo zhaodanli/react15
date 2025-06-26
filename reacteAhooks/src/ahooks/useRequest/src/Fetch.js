@@ -1,6 +1,7 @@
 import { isFunction } from '../../utils';
 
 class Fetch {
+    count = 0;
     constructor(serviceRef, options, subscribe) {
         this.serviceRef = serviceRef;
         this.options = options;
@@ -14,14 +15,22 @@ class Fetch {
     }
 
     runAsync = async (...params) => {
+        this.count += 1;
+        const currentCount = this.count;
         this.setState({ loading: true, params });
         this.options.onBefore?.(params);
         try {
             const res = await this.serviceRef.current(...params);
+            if (currentCount !== this.count) {
+                return new Promise(() => { });
+            }
             this.setState({ loading: false, data: res, params });
             this.options.onSuccess?.(res, params);
             this.options.onFinally?.(params, res, undefined);
         } catch (error) {
+            if (currentCount !== this.count) {
+                return new Promise(() => { });
+            }
             this.setState({ loading: false, error, params });
             this.options.onError?.(error, params);
             this.options.onFinally?.(params, undefined, error);
@@ -54,6 +63,14 @@ class Fetch {
         this.setState({
             data: targetData
         });
+    }
+
+    cancel() {
+        this.count += 1;
+        this.setState({
+            loading: false
+        });
+        this.options.onCancel?.();
     }
 }
 export default Fetch;

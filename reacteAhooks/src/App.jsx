@@ -29,7 +29,7 @@ function updateName(username) {
                 reject(new Error(`修改用户名失败`));
             }
             updateSuccess = !updateSuccess;
-        }, 1000);
+        }, 3000);
     });
 }
 function App() {
@@ -38,7 +38,7 @@ function App() {
 
     // useRequest 提供了mutate, 支持立即修改useRequest返回的data参数
     // // mutate的用法与React.setState一致，支持mutate(newData)和mutate((oldData) => newData)两种写法
-    const { data , loading, error, run, runAsync, refresh, refreshAsync, mutate  } = useRequest(updateName, {
+    const { data, loading, error, run, runAsync, refresh, refreshAsync, mutate, cancel } = useRequest(updateName, {
         manual: false,
         defaultParams: [initialUserId],
         onBefore: (params) => {
@@ -55,6 +55,9 @@ function App() {
         onFinally: (params, result, error) => {
             console.info(`请求完成`);
         },
+        onCancel: () => {
+            mutate(lastRef.current);
+        }
         /* onError(error) {
           console.error('onError', error);
         } */
@@ -84,6 +87,9 @@ function App() {
             </button>
             <button onClick={refreshAsync} >
                 refreshAsync
+            </button>
+            <button type="button" onClick={cancel}>
+                取消
             </button>
             {data && <div>用户名: {data}</div>}
         </>

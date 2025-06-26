@@ -1,3 +1,5 @@
+import { isFunction } from '../../utils';
+
 class Fetch {
     constructor(serviceRef, options, subscribe) {
         this.serviceRef = serviceRef;
@@ -40,6 +42,18 @@ class Fetch {
     }
     refreshAsync() {
         return this.runAsync(...(this.state.params || []));
+    }
+
+    mutate(data) {
+        let targetData;
+        if (isFunction(data)) {
+            targetData = data(this.state.data);
+        } else {
+            targetData = data;
+        }
+        this.setState({
+            data: targetData
+        });
     }
 }
 export default Fetch;

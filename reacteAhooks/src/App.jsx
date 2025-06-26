@@ -18,7 +18,7 @@ function updateName(username) {
                 reject(new Error(`修改用户名失败`));
             }
             updateSuccess = !updateSuccess;
-        }, 3000);
+        }, 5000);
     });
 }
 function App() {
@@ -28,6 +28,7 @@ function App() {
     const { run, loading, cancel } = useRequest(updateName, {
         manual: true,
         name: 'updateName',
+        loadingDelay: 3000, // 通过设置 options.loadingDelay，可以延迟 loading 变成 true 的时间，有效防止闪烁
         onSuccess: (result, params) => {
             setValue("");
             console.log(`用户名成功变更为 "${params[0]}" !`);

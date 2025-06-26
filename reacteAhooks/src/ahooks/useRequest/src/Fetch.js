@@ -20,8 +20,9 @@ class Fetch {
         // if (stopNow) {
         //     return new Promise(() => { });
         // }
-        this.setState({ loading: true, params });
-        // this.setState({ loading: true, params, ...state });
+        // this.setState({ loading: true, params });
+        // 合并插件返回的state
+        this.setState({ loading: true, params, ...state });
         // if (returnNow) {
         //     return Promise.resolve(state.data);
         // }

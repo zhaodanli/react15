@@ -1,5 +1,6 @@
-import useRequest from './useRequest';
+import useRequest,  { clearCache } from './useRequest';
 
 export {
-  useRequest
+  useRequest,
+  clearCache
 }

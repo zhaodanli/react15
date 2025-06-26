@@ -15,17 +15,17 @@ class Fetch {
     runAsync = async (...params) => {
         this.count += 1;
         const currentCount = this.count;
-        const { ...state } = this.runPluginHandler('onBefore', params);
-        // const { stopNow = false, returnNow = false, ...state } = this.runPluginHandler('onBefore', params);
-        // if (stopNow) {
-        //     return new Promise(() => { });
-        // }
+        // const { ...state } = this.runPluginHandler('onBefore', params);
+        const { stopNow = false, returnNow = false, ...state } = this.runPluginHandler('onBefore', params);
+        if (stopNow) { // 未就绪，跳过执行
+            return new Promise(() => { });
+        }
         // this.setState({ loading: true, params });
         // 合并插件返回的state
         this.setState({ loading: true, params, ...state });
-        // if (returnNow) {
-        //     return Promise.resolve(state.data);
-        // }
+        if (returnNow) {
+            return Promise.resolve(state.data);
+        }
         this.options.onBefore?.(params);
         try {
             let { servicePromise } = this.runPluginHandler('onRequest', this.serviceRef.current, params);

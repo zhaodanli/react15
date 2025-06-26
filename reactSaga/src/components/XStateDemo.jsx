@@ -1,6 +1,5 @@
-import { createMachine } from 'xstate';
+import { createMachine, createActor } from 'xstate';
 import { useState } from 'react'
-import { createActor } from 'xstate'; // 导入 createActor
 
 
 

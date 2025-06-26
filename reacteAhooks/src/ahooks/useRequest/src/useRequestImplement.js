@@ -27,7 +27,8 @@ function useRequestImplement(service, options = {}) {
     // useMount是只在组件初始化时执行的 Hook src\ahooks\useMount\index.js
     useMount(() => {
         if (!manual) {
-            fetchInstance.run();
+            const params = fetchInstance.state.params || options.defaultParams || [];
+            fetchInstance.run(...params);
         }
     });
     return {

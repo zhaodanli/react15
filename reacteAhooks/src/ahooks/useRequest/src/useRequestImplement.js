@@ -9,7 +9,7 @@ import useUnmount from '../../useUnmount';
 import useMemoizedFn from '../../useMemoizedFn';
 
 // 请求实现钩子
-function useRequestImplement(service, options = {}) {
+function useRequestImplement(service, options = {}, plugins = []) {
     const { manual = false, ...rest } = options;
     const fetchOptions = { manual, ...rest };
 
@@ -22,8 +22,12 @@ function useRequestImplement(service, options = {}) {
     // 因为 useMemo 不能保证被 memo 的值一定不会被重计算，而 useCreation 可以保证这一点
     const fetchInstance = useCreation(() => {
         // return new Fetch(serviceRef, update);
-        return new Fetch(serviceRef, fetchOptions, update);
+        const initState = plugins.map(p => p?.onInit?.(fetchOptions)).filter(Boolean);
+        return new Fetch(serviceRef, fetchOptions, update, Object.assign({}, ...initState));
     }, []);
+    
+    //fetchInstance.options = fetchOptions;
+    fetchInstance.pluginImpls = plugins.map(p => p(fetchInstance, fetchOptions));
 
     // useMount是只在组件初始化时执行的 Hook src\ahooks\useMount\index.js
     useMount(() => {

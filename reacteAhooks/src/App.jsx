@@ -1,15 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useRequest } from './ahooks';
-
 let success = true;
-
-function getName(userId) {
+function getName() {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
-            // resolve(xing + '三');
-            // reject(new Error('获取用户名失败'));
             if (success) {
-                resolve(`name${userId ? userId : ''}`);
+                resolve(`zhufeng`);
             } else {
                 reject(new Error('获取用户名失败'));
             }
@@ -17,8 +13,6 @@ function getName(userId) {
         }, 1000);
     });
 }
-
-const initialUserId = '1';
 let updateSuccess = true;
 function updateName(username) {
     return new Promise((resolve, reject) => {
@@ -29,69 +23,46 @@ function updateName(username) {
                 reject(new Error(`修改用户名失败`));
             }
             updateSuccess = !updateSuccess;
-        }, 3000);
+        }, 300);
     });
 }
 function App() {
     const lastRef = useRef();
-    const [userId, setUserId] = useState(initialUserId);
-
-    // useRequest 提供了mutate, 支持立即修改useRequest返回的data参数
-    // // mutate的用法与React.setState一致，支持mutate(newData)和mutate((oldData) => newData)两种写法
-    const { data, loading, error, run, runAsync, refresh, refreshAsync, mutate, cancel } = useRequest(updateName, {
-        manual: false,
-        defaultParams: [initialUserId],
-        onBefore: (params) => {
-            console.info(`开始请求: ${params[0]}`);
-        },
+    const [value, setValue] = useState("");
+    const { data: name, mutate } = useRequest(getName, { name: 'getName' });
+    const { run, loading, cancel } = useRequest(updateName, {
+        manual: true,
+        name: 'updateName',
         onSuccess: (result, params) => {
-            setUserId("");
+            setValue("");
             console.log(`用户名成功变更为 "${params[0]}" !`);
         },
         onError: (error, params) => {
             console.error(error.message);
             mutate(lastRef.current);
         },
-        onFinally: (params, result, error) => {
-            console.info(`请求完成`);
-        },
         onCancel: () => {
             mutate(lastRef.current);
         }
-        /* onError(error) {
-          console.error('onError', error);
-        } */
     });
     return (
         <>
+            {name && <div>用户名: {name}</div>}
             <input
-                onChange={(event) => setUserId(event.target.value)}
-                value={userId}
-                placeholder="请输入用户ID"
+                onChange={(event) => setValue(event.target.value)}
+                value={value}
+                placeholder="请输入用户名"
             />
             <button onClick={() => {
-                lastRef.current = userId;
-                mutate(data);
-                run(data);
+                lastRef.current = name;
+                mutate(value);
+                run(value);
             }} type="button">
-                {loading ? "更新中......." : '立即更新'}
-            </button>
-            <button disabled={loading} onClick={() => run(userId)}>
-                {loading ? '获取中......' : 'run'}
-            </button>
-            <button disabled={loading} onClick={() => runAsync('钱')}>
-                {loading ? '获取中......' : 'runAsync'}
-            </button>
-            <button onClick={refresh} >
-                refresh
-            </button>
-            <button onClick={refreshAsync} >
-                refreshAsync
+                {loading ? "更新中......." : '更新'}
             </button>
             <button type="button" onClick={cancel}>
                 取消
             </button>
-            {data && <div>用户名: {data}</div>}
         </>
     )
 };

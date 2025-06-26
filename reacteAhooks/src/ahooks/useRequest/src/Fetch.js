@@ -23,6 +23,7 @@ class Fetch {
         // this.setState({ loading: true, params });
         // 合并插件返回的state
         this.setState({ loading: true, params, ...state });
+        // 保质期内
         if (returnNow) {
             return Promise.resolve(state.data);
         }

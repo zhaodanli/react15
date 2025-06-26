@@ -21,7 +21,7 @@ const initialUserId = '1';
 function App() {
     const [userId, setUserId] = useState(initialUserId);
 
-    const { data, loading, error, run, runAsync } = useRequest(getName, {
+    const { data, loading, error, run, runAsync, refresh, refreshAsync } = useRequest(getName, {
         manual: false,
         defaultParams: [initialUserId],
         onBefore: (params) => {
@@ -52,6 +52,12 @@ function App() {
             </button>
             <button disabled={loading} onClick={() => runAsync('钱')}>
                 {loading ? '获取中......' : 'runAsync'}
+            </button>
+            <button onClick={refresh} >
+                refresh
+            </button>
+            <button onClick={refreshAsync} >
+                refreshAsync
             </button>
             {data && <div>用户名: {data}</div>}
         </>

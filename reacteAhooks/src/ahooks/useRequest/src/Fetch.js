@@ -34,5 +34,12 @@ class Fetch {
             }
         });;
     }
+
+    refresh() {
+        this.run(...(this.state.params || []));
+    }
+    refreshAsync() {
+        return this.runAsync(...(this.state.params || []));
+    }
 }
 export default Fetch;

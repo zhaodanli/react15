@@ -5,6 +5,8 @@ import * as sagaEffects from 'redux-saga/effects';
 import { connect, Provider } from 'react-redux';
 import prefixNamespace from './prefixNamespace';
 import { NAMESPACE_SEP } from './constants';
+import { createBrowserHistory } from 'history';
+let history = createBrowserHistory();
 
 export { connect };
 
@@ -50,11 +52,10 @@ export default function () {
         let store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
         // 启动监听
         sagas.forEach(saga => sagaMiddleware.run(saga));
-        // <Provider store={store} > {app._router()} </Provider>, document.querySelector(root)
         root.render(
             <StrictMode>
                 <Provider store={store} >
-                    {app._router()}
+                    {app._router({ history })}
                 </Provider>
             </StrictMode>,
         )

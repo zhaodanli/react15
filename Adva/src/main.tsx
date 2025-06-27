@@ -1,14 +1,14 @@
 import dva, { connect } from './dva/index.tsx';
 
 import Counter1 from './components/Counter1'
-import type{ Counter1State } from './components/Counter1'
+import type { Counter1State } from './components/Counter1'
 import counter1Model from './components/counter1.model.ts'
 import counter2Model from './components/counter2.model.ts'
 // import Counter2 from './components/Counter2'
 // import type { Counter2State } from './components/Counter2'
 // // import keymaster from 'keymaster';
 // // import { RouterAPI } from './dva';
-// // import { Router, Route } from './dva/router';
+import { Router, Routes, Route } from './dva/router';
 
 interface CombinedState {
     counter1: Counter1State;
@@ -34,23 +34,26 @@ const ConnectedCounter = connect(
 // )(Counter2);
 
 // 注册路由表 app.router(({ history, app }) => RouterConfig)
-app.router(() => <ConnectedCounter />);
+// app.router(() => <ConnectedCounter />);
 
-// app.router(
-//     (api?: RouterAPI) => {
-//         let { history } = api!;
-//         return (
-//             (
-//                 <Router history={history}>
-//                     <>
-//                         <Route path="/counter1" component={ConnectedCounter} />
-//                         <Route path="/counter2" component={ConnectedCounter2} />
-//                     </>
-//                 </Router>
-//             )
-//         )
-//     }
-// );
-
+app.router(
+    ({ history }) => {
+        return (
+            <Router
+                location={history.location}
+                action={history.action}
+                navigator={history}
+                navigationType={history.action}
+            >
+                <Routes>
+                    <Route path="/" element={<ConnectedCounter />} />
+                    <Route path="/counter" element={<ConnectedCounter />} />
+                    {/* <Route path="/counter2" component={ConnectedCounter2} /> */}
+                    <Route path="*" element={<div>404 Not Found</div>} />
+                </Routes>
+            </Router>
+        )
+    }
+);
 // 启动应用
 app.start();

@@ -29,7 +29,7 @@ export default ({
         *asyncAdd(action, { put, call }) { //redux-saga/effects {put,call}
             yield call(delay, 1000);//把100传给delay并调用，yield会等待promise完成
             yield put({ type: 'add' });
-        }
+        },
     },
 
     // subscriptions 以 key/value 格式定义 subscription。subscription 是订阅，用于订阅一个数据源，然后根据需要 dispatch 相应的 action。在 app.start() 时被执行，数据源可以是当前的时间、服务器的 websocket 连接、keyboard 输入、geolocation 变化、history 路由变化等等。
@@ -46,6 +46,6 @@ export default ({
                 });
             }, 1000);
 
-        }
+        },
     }
 });

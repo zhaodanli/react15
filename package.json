@@ -4,12 +4,18 @@
     "build": "webpack"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.0.0",
+    "@ant-design/pro-components": "^2.8.9",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@umijs/max": "^4.4.11",
+    "ahooks": "^3.8.5",
+    "antd": "^4.24.16",
     "bootstrap": "^3.4.1",
     "cors": "^2.8.5",
     "create-react-app": "^5.1.0",
     "history": "^5.3.0",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

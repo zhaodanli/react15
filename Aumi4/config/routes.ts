@@ -14,4 +14,16 @@ export default [
             { name: '用户详情', path: '/user/detail/:id', component: './user/detail/index', hideInMenu: true },
         ],
     },
+    {
+        icon: 'UserOutlined',
+        name: '埋点管理',
+        path: '/trackManage',
+        component: './trackManage/index',
+        routes: [
+            { name: '新增页面', path: '/trackManage/pageList/edit', component: './trackManage/pageList/edit/index' },
+            { name: '页面列表', path: '/trackManage/pageList', component: './trackManage/pageList/index' },
+            { name: '事件列表', path: '/trackManage/eventList', component: './trackManage/eventList/index', hideInMenu: true },
+            { name: '参数列表', path: '/trackManage/paramList', component: './trackManage/paramList/index'},
+        ],
+    },
 ]

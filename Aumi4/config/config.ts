@@ -10,4 +10,14 @@ export default defineConfig({
         title: "埋点操作平台",
         locale: false, // 关掉国际化
     },
+    request: {},
+    model: {},
+    initialState: {},
+    // access: {},
+    // proxy: {
+    //     '/api/': {
+    //         target: 'http://127.0.0.1:7001/',
+    //         changeOrigin: true
+    //     }
+    // }
 });

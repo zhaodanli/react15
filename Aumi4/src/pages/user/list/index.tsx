@@ -1,14 +1,30 @@
 import { List } from 'antd';
-import { Link } from '@umijs/max';
+import { Link, useModel } from '@umijs/max';
+
+import { addUser, queryUserList, deleteUser, modifyUser } from '@/services/UserController';
 
 export default function () {
-    const data = {
-        list: [
-            { id: 1, username: 'root' },
-            { id: 2, username: 'admin' },
-            { id: 3, username: 'member' }
-        ]
+
+    const requestFn = async (params, sorter, filter) => {
+        const { data, success } = await queryUserList({
+            ...params,
+            // FIXME: remove @ts-ignore
+            // @ts-ignore
+            sorter,
+            filter,
+        });
+        console.log(data)
+        return {
+            data: data || [],
+            success,
+        };
     }
+    const userList = requestFn(null, null, null).then((res) => {
+        console.log(res)
+    })
+
+    const { data, loading } = useModel('user.model');
+
     return (
         <List
             header={<div>用户列表</div>}

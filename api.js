@@ -34,11 +34,11 @@ app.use((req, res, next) => {
 });
 
 app.get('/users', (req, res) => {
-   res.json(users.map(user => ({ ...user, name: user.name + '#' + new Date().toLocaleString() })));
+  res.json(users.map(user => ({ ...user, name: user.name + '#' + new Date().toLocaleString() })));
 });
 
 
-app.listen(8080, () => console.log('started on port 8080'));
+app.listen(8080, '127.0.0.1', () => console.log('started on port 8080'));
 
 
 

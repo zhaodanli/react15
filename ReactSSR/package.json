@@ -13,14 +13,22 @@
   "description": "",
   "dependencies": {
     "express": "^5.1.0",
+    "express-http-proxy": "^2.1.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.3"
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^6.4.0",
+    "redux": "^5.0.1",
+    "redux-logger": "^3.0.6",
+    "redux-promise": "^0.6.0",
+    "redux-thunk": "^3.1.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.27.2",
     "@babel/preset-react": "^7.27.1",
+    "axios": "^1.10.0",
     "babel-loader": "^10.0.0",
+    "cors": "^2.8.5",
     "nodemon": "^3.1.10",
     "npm-run-all": "^4.1.5",
     "source-map-loader": "^5.0.0",

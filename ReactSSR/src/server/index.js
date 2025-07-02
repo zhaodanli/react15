@@ -1,6 +1,10 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import Counter from '../routes/Counter';
+
+import routesConfig from '../routesConfig';
+import { StaticRouter } from "react-router-dom/server";
+import { matchRoutes } from 'react-router-dom';
+import App from '../App';
 
 let express = require('express');
 let app = express();
@@ -9,7 +13,7 @@ app.use(express.static('public'));
 
 app.get('/', (req, res) => {
     const html = renderToString(
-        <Counter />
+        <StaticRouter location={req.url}><App /></StaticRouter>
     );
 
     res.send(`

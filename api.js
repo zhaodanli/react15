@@ -29,11 +29,11 @@ app.use(logger('dev'));
 // 数据
 const users = new Array(10).fill(true).map((item, index) => ({ id: String(index + 1), name: `name${index + 1}` }))
 
-app.use((req, res, next) => {
-  setTimeout(next, 1000);
-});
+// app.use((req, res, next) => {
+//   setTimeout(next, 1000);
+// });
 
-app.get('/users', (req, res) => {
+app.get('/api/user', (req, res) => {
   res.json(users.map(user => ({ ...user, name: user.name + '#' + new Date().toLocaleString() })));
 });
 

@@ -14,11 +14,13 @@ const reducers = { counter, user }
 const combinedReducer = combineReducers(reducers);
 
 export function getClientStore() {
+    console.log('============= getClientStore')
     const initialState = window.context.state;
     console.log('initialState', initialState)
     return applyMiddleware(clientThunk, promise, logger)(createStore)(combinedReducer, initialState);
 }
 export function getServerStore() {
+    console.log('============= getServerStore')
     return applyMiddleware(serverThunk, promise, logger)(createStore)(combinedReducer);
 }
 

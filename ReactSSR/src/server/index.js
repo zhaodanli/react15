@@ -12,7 +12,7 @@ app.use(express.static('public'));
 
 app.use('/api', proxy('http://localhost:8080', {
     proxyReqPathResolver(req) {
-        return `${req.url}`;
+        return `/api/${req.url}`;
     }
 }));
 
@@ -25,16 +25,20 @@ app.get(/^\/(.+)$/, (req, res) => {
 
     if (routeMatches) {
         const store = getServerStore();
+
         const promises = routeMatches
             .map(({ route }) => route.element.type.loadData && route.element.type.loadData(store).then(data => data, error => error))
             .concat(App.loadData && App.loadData(store))
             .filter(Boolean)
-        Promise.all(promises).then(() => {
+
+        Promise.all(promises).then((data) => {
             const html = renderToString(
                 <StaticRouter location={req.url}>
                     <App store={store} />
                 </StaticRouter>
             );
+
+            // console.log('html', html)
             res.send(`
                 <html>
                     <head>
@@ -47,7 +51,7 @@ app.get(/^\/(.+)$/, (req, res) => {
                     <div id="root">${html}</div>
                 <script>
                     var context = {
-                    state:${JSON.stringify(store.getState())}
+                        state:${JSON.stringify(store.getState())}
                     }
                 </script>
                     <script src="/client.js"></script>

@@ -4,9 +4,9 @@ import axios from 'axios';
 const actions = {
   getUserList() {
     return function (dispatch, getState, request) {
-      // return axios.get('http://localhost:8080/users').then((response) => {
-      // return axios.get('/api/users').then((response) => {
-      return request.get('/api/users').then((response) => {
+      // return axios.get('http://localhost:8080/user').then((response) => {
+      // return axios.get('/api/user').then((response) => {
+      return request.get('/api/user').then((response) => {
         const data = response.data;
         dispatch({
           type: SET_USER_LIST,

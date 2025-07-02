@@ -13,6 +13,11 @@ export default [
     index: true
   },
   {
+    path: '/home',
+    element: <Home />,
+    index: true
+  },
+  {
     path: '/counter',
     element: <Counter />
   },
@@ -21,12 +26,12 @@ export default [
     element: <User />,
     children: [
       {
-        path: '/user/List',
+        path: 'list',
         element: <UserList />,
         index: true
       },
       {
-        path: '/user/Add',
+        path: 'add',
         element: <UserAdd />
       }
     ]

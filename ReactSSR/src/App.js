@@ -3,10 +3,10 @@ import { useRoutes } from 'react-router-dom';
 import routesConfig from './routesConfig';
 import Header from './components/Header';
 import { Provider } from 'react-redux';
-import { getStore } from './store';
+// import { getStore } from './store';
 
-function App() {
-  const store = getStore();
+function App({ store }) {
+  // const store = getStore();
 
   return (
     <Provider store={store}>

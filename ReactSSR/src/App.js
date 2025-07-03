@@ -7,6 +7,9 @@ import { Provider } from 'react-redux';
 import actionCreators from './store/actionCreators/auth';
 // import { useDispatch } from 'react-redux';
 
+import useStyles from 'isomorphic-style-loader-react18/useStyles'
+import styles from './App.css'
+
 function App({ store }) {
   // const store = getStore();
 
@@ -17,10 +20,14 @@ function App({ store }) {
   //   dispatch(actionCreators.validate())
   // }, [])
 
+  // 自定义 hooks 搜集样式到 css 里去 服务端逻辑
+  useStyles(styles);
+
   return (
     <Provider store={store}>
       <Header />
       {useRoutes(routesConfig)}
+      <div className={styles.color}>red</div>
     </Provider>
   )
 }

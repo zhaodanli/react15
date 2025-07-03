@@ -26,7 +26,7 @@ app.get(/^\/(.+)$/, (req, res) => {
     const routeMatches = matchRoutes(routesConfig, { pathname: req.url });
 
     if (routeMatches) {
-        const store = getServerStore(req);
+        const { store } = getServerStore(req);
 
         const promises = routeMatches
             .map(({ route }) => route.element.type.loadData && route.element.type.loadData(store).then(data => data, error => error))

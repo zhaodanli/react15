@@ -7,7 +7,7 @@ import App from '../App';
 import { getServerStore } from '../store';
 import { matchRoutes } from 'react-router-dom';
 import routesConfig from '../routesConfig';
-// import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet';
 
 const express = require('express');
 const app = express();
@@ -51,7 +51,7 @@ app.get(/^\/(.*)$/, (req, res) => {
             })
 
             // 支持SEO
-            // let helmet = Helmet.renderStatic();
+            let helmet = Helmet.renderStatic();
 
             const html = renderToString(
                 <StaticRouter location={req.url}>
@@ -61,8 +61,7 @@ app.get(/^\/(.*)$/, (req, res) => {
                 </StaticRouter>
             );
 
-                        // ${helmet.title.toString()}
-                        // ${helmet.meta.toString()}
+                        
             let style = null;
 
             console.log('css', css.size)
@@ -77,6 +76,8 @@ app.get(/^\/(.*)$/, (req, res) => {
                         <meta http-equiv="X-UA-Compatible" content="ie=edge">
                         <title>ssr</title>
                         ${style}
+                        ${helmet.title.toString()}
+                        ${helmet.meta.toString()}
                     </head>
                     <body>
                     <div id="root">${html}</div>

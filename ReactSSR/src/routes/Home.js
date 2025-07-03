@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './Home.css';
 import useStyles from 'isomorphic-style-loader-react18/useStyles';
-// import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet';
 
 function Home() {
 
@@ -11,10 +11,10 @@ function Home() {
 
   return (
     <>
-      {/* <Helmet> */}
+      <Helmet>
         <title className={styles.color}>首页标题</title>
         <meta name="description" content="首页描述"></meta>
-      {/* </Helmet> */}
+      </Helmet>
       <div>
         Home
       </div>

@@ -6,8 +6,10 @@ import App from '../App';
 import { getServerStore } from '../store';
 import { matchRoutes } from 'react-router-dom';
 import routesConfig from '../routesConfig';
+
 const express = require('express');
 const app = express();
+
 app.use(express.static('public'));
 
 app.use('/api', proxy('http://localhost:8080', {
@@ -17,14 +19,14 @@ app.use('/api', proxy('http://localhost:8080', {
 }));
 
 app.get(/^\/(.+)$/, (req, res) => {
-    if(req.url === '/.well-known/appspecific/com.chrome.devtools.json') {
+    if (req.url === '/.well-known/appspecific/com.chrome.devtools.json') {
         req.url = '/'
     }
 
     const routeMatches = matchRoutes(routesConfig, { pathname: req.url });
 
     if (routeMatches) {
-        const store = getServerStore();
+        const store = getServerStore(req);
 
         const promises = routeMatches
             .map(({ route }) => route.element.type.loadData && route.element.type.loadData(store).then(data => data, error => error))

@@ -1,4 +1,4 @@
-let express=require('express');
+let express = require('express');
 
 // 跨域中间件
 const cors = require('cors');
@@ -7,11 +7,11 @@ const logger = require('morgan');
 const app = express();
 
 app.use(cors({
-  allowedHeaders: ["Content-Type"], // 允许跨域响应头
-  allowMethods: ["GET", 'POST', "PUT", "DELETE", "OPTIONS"] // 跨域请求方法
+    allowedHeaders: ["Content-Type"], // 允许跨域响应头
+    allowMethods: ["GET", 'POST', "PUT", "DELETE", "OPTIONS"] // 跨域请求方法
 }));
 
-app.get('/',(req,res) => {
+app.get('/', (req, res) => {
     res.send(`
         <html>
           <body>
@@ -26,6 +26,18 @@ app.use(express.json());
 // 打印日志
 app.use(logger('dev'));
 
+// ============== 权限校验部分 ==========
+const session = require('express-session');
+
+app.use(session({
+    saveUninitialized: true,
+    resave: true,
+    secret: 'zhufeng'
+}))
+
+// 支持表单
+app.use(express.urlencoded({ extended: true })); 
+
 // 数据
 const users = new Array(10).fill(true).map((item, index) => ({ id: String(index + 1), name: `name${index + 1}` }))
 
@@ -34,7 +46,36 @@ const users = new Array(10).fill(true).map((item, index) => ({ id: String(index 
 // });
 
 app.get('/api/user', (req, res) => {
-  res.json(users.map(user => ({ ...user, name: user.name + '#' + new Date().toLocaleString() })));
+    res.json(users.map(user => ({ ...user, name: user.name + '#' + new Date().toLocaleString() })));
+});
+
+app.post('/api/login', (req, res) => {
+    const user = req.body;
+    req.session.user = user;
+    res.json({
+        success: true,
+        data: user
+    });
+});
+app.get('/api/logout', (req, res) => {
+    req.session.user = null;
+    res.json({
+        success: true
+    });
+});
+app.get('/api/user', (req, res) => {
+    const user = req.session.user;
+    if (user) {
+        res.json({
+            success: true,
+            data: user
+        });
+    } else {
+        res.json({
+            success: false,
+            error: '用户未登录'
+        });
+    }
 });
 
 

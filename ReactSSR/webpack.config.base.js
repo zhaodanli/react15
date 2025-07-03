@@ -34,6 +34,20 @@ module.exports = {
                 },
                 exclude: /node_modules/,
 
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    {
+                        loader: 'isomorphic-style-loader-react18'
+                    },
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: true
+                        }
+                    }
+                ]
             }
         ]
     }

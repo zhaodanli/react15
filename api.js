@@ -27,6 +27,7 @@ app.use(express.json());
 app.use(logger('dev'));
 
 // ============== 权限校验部分 ==========
+// 处理用户认证或会话
 const session = require('express-session');
 
 app.use(session({
@@ -51,6 +52,8 @@ app.get('/api/user', (req, res) => {
 
 app.post('/api/login', (req, res) => {
     const user = req.body;
+
+    // 用户信息放到会话对象上
     req.session.user = user;
     res.json({
         success: true,
@@ -64,6 +67,21 @@ app.get('/api/logout', (req, res) => {
     });
 });
 app.get('/api/user', (req, res) => {
+    const user = req.session.user;
+    if (user) {
+        res.json({
+            success: true,
+            data: user
+        });
+    } else {
+        res.json({
+            success: false,
+            error: '用户未登录'
+        });
+    }
+});
+
+app.get('/api/validate', (req, res) => {
     const user = req.session.user;
     if (user) {
         res.json({

@@ -16,7 +16,6 @@ import { createReduxHistoryContext } from "redux-first-history";
 
 // 可以将额外参数传递给异步 thunk 操作
 const clientThunk = withExtraArgument(clientRequest);
-const serverThunk = withExtraArgument(serverRequest);
 
 export function getClientStore() {
     const { routerReducer, routerMiddleware, createReduxHistory } = createReduxHistoryContext({ history: createBrowserHistory() });
@@ -41,7 +40,7 @@ export function getServerStore(req) {
     const combinedReducer = combineReducers(reducers);
 
     // return applyMiddleware(serverThunk, promise, logger)(createStore)(combinedReducer);
-    const store = applyMiddleware(serverThunk, promise, routerMiddleware, logger)
+    const store = applyMiddleware( withExtraArgument(serverRequest(req)), promise, routerMiddleware, logger)
         (createStore)
         (combinedReducer);
     const history = createReduxHistory(store);

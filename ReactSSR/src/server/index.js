@@ -14,7 +14,7 @@ app.use(express.static('public'));
 
 app.use('/api', proxy('http://localhost:8080', {
     proxyReqPathResolver(req) {
-        return `/api/${req.url}`;
+        return `/api${req.url}`;
     }
 }));
 

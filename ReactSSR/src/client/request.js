@@ -1,5 +1,5 @@
 import axios from 'axios'
 const request = axios.create({
-  baseURI: '/'
+  baseURL: '/'
 });
 export default request

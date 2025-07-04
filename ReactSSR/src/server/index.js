@@ -30,7 +30,7 @@ app.get(/^\/(.*)$/, (req, res) => {
     if (routeMatches) {
         const { store } = getServerStore(req);
 
-        const promises = [];
+        const promises = []
 
         Promise.all(promises).then((data) => {
 
@@ -66,22 +66,27 @@ app.get(/^\/(.*)$/, (req, res) => {
                         if (css.size > 0) {
                             style = `\n<style>${[...css].join('')}</style>`
                         }
-                        res.write(`<html><meta charset="UTF-8">
-                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                <title>ssr</title>
+
+                        res.write(`
+                            <html>
+                                <head>
+                                    <title>ssr</title>
+                                    ${helmet.title.toString()}
+                                    ${helmet.meta.toString()}
+                                    <style>${[...css].join('')}</style>
+                                </head>
                                 <body>
-                                    <div id="root">`);
-                                    pipe(res);
+                                <div id="root">`);
+                        pipe(res);
                         res.write(`</div>
                                 <script>
                                     var context = {
-                                    state:${JSON.stringify(store.getState())}
+                                        state:${JSON.stringify(store.getState())}
                                     }
                                 </script>
                                 <script async src="/client.js"></script>
                             </body>
-                            </html>`);
+                        </html>`);
                     }
                 }
             )

@@ -26,13 +26,11 @@ function UserList() {
 // 当前路由组件在服务器端获取数据的方法
 // 1. loadData 如何获取或者加载。（渲染谁执行谁）
 // 2. 为什么返回 promise
-// UserList.loadData = (store) => {
-//     // 此 promise 完成后，仓库有谁，仓库数据渲染带真是数据的组件的HTML， 在发给客户端
-//     return store.dispatch(actionCreators.getUserList());
-// }
+UserList.loadData = (store) => {
+    // 此 promise 完成后，仓库有谁，仓库数据渲染带真是数据的组件的HTML， 在发给客户端
+    return store.dispatch(actionCreators.getUserList());
+}
 export default UserList;
-
-
 
 
 function wrapPromise(promise) {
@@ -55,7 +53,7 @@ function wrapPromise(promise) {
             } else if (status === "error") {
                 throw result;
             } else if (status === "success") {
-                return result.data;
+                return result;
             }
         }
     };

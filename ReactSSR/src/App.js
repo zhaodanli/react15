@@ -27,7 +27,7 @@ function App({ store }) {
     <Provider store={store}>
       <Header />
       {useRoutes(routesConfig)}
-      <div className={styles.color}>red</div>
+      {/* <div className={styles.color}>red</div> */}
     </Provider>
   )
 }

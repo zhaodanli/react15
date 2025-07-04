@@ -42,7 +42,7 @@ app.use(session({
 app.use(express.urlencoded({ extended: true }));
 
 // 数据
-const users = new Array(10).fill(true).map((item, index) => ({ id: String(index + 1), name: `name${index + 1}` }))
+const users = new Array(10).fill(true).map((item, index) => ({ id: String(index + 1), name: `name${index + 1}`, createdAt: new Date().toISOString() }))
 
 // app.use((req, res, next) => {
 //   setTimeout(next, 1000);

@@ -9,7 +9,7 @@ class UseList extends React.Component {
         console.log('UseList constructor');
     }
     render() {
-        console.log('UseList render', this.props);
+        console.log('UseList render');
         return (
             <UserLayout>
                 <ul>

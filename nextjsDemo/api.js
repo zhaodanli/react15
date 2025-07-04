@@ -55,7 +55,7 @@ app.get('/api/users', (req, res) => {
     });
 });
 
-app.get('/api/users:id', (req, res) => {
+app.get('/api/users/:id', (req, res) => {
     let user = users.find(user => user.id === req.params.id)
     res.json({
         success: true,

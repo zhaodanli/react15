@@ -48,10 +48,7 @@ const users = new Array(10).fill(true).map((item, index) => ({ id: String(index 
 
 app.get('/api/user', (req, res) => {
     setTimeout(() => {
-        res.json({
-            success: true,
-            data: users
-        });
+        res.json(users);
     }, 2000);
     // res.json(users.map(user => ({ ...user, name: user.name + '#' + new Date().toLocaleString() })));
 });

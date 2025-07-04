@@ -37,7 +37,7 @@ app.use(session({
 }))
 
 // 支持表单
-app.use(express.urlencoded({ extended: true })); 
+app.use(express.urlencoded({ extended: true }));
 
 // 数据
 const users = new Array(10).fill(true).map((item, index) => ({ id: String(index + 1), name: `name${index + 1}` }))
@@ -47,7 +47,13 @@ const users = new Array(10).fill(true).map((item, index) => ({ id: String(index 
 // });
 
 app.get('/api/user', (req, res) => {
-    res.json(users.map(user => ({ ...user, name: user.name + '#' + new Date().toLocaleString() })));
+    setTimeout(() => {
+        res.json({
+            success: true,
+            data: users
+        });
+    }, 2000);
+    // res.json(users.map(user => ({ ...user, name: user.name + '#' + new Date().toLocaleString() })));
 });
 
 app.post('/api/login', (req, res) => {

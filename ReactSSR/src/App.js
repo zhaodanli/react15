@@ -32,7 +32,7 @@ function App({ store }) {
   )
 }
 
-App.loadData = (store) => {
-  return store?.dispatch?.(actionCreators.validate())
-}
+// App.loadData = (store) => {
+//   return store?.dispatch?.(actionCreators.validate())
+// }
 export default App;

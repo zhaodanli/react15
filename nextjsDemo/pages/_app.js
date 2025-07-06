@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import request from '@/utils/request';
 import createStore from '../store';
 import * as types from '../store/action-types';
+import router from 'next/router';
 
 function getStore(initialState) {
     if (typeof window === 'undefined') {
@@ -21,8 +22,28 @@ function getStore(initialState) {
 class LayoutApp extends App {
     constructor(props) {
         super(props)
+        this.state = { loading: false }
         this.store = getStore(props.initialState);
         console.log('LayoutApp constructor');
+    }
+
+    // loading 状态处理
+    componentDidMount() {
+        this.routeChangeStart = (url) => {
+            this.setState({ loading: true });
+        };
+        router.events.on('routeChangeStart', this.routeChangeStart);
+        this.routeChangeComplete = (url) => {
+            setTimeout(() => {
+                this.setState({ loading: false });
+            }, 2000)
+            
+        };
+        router.events.on('routeChangeComplete', this.routeChangeComplete);
+    }
+    componentWillUnmount() {
+        router.events.off('routeChangeStart', this.routeChangeStart)
+        router.events.off('routeChangeStart', this.routeChangeComplete)
     }
 
     // 二级路由处理逻辑
@@ -75,13 +96,16 @@ class LayoutApp extends App {
                         <li><Link href="/user/list">用户管理</Link></li>
                         <li><Link href="/profile">个人中心</Link></li>
                         <li>
-                        {
-                            state.currentUser ? <span>{state.currentUser.name}</span> : <Link href="/login">登录</Link>
-                        }
+                            {
+                                state.currentUser ? <span>{state.currentUser.name}</span> : <Link href="/login">登录</Link>
+                            }
                         </li>
                     </ul>
                 </header>
-                <Component {...pageProps} />
+                {
+                    this.state.loading ? <div>切换中......</div> : <Component {...pageProps} />
+                }
+                {/* <Component {...pageProps} /> */}
             </Provider>
         );
     }

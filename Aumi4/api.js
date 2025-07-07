@@ -42,15 +42,21 @@ app.use(session({
 app.use(express.urlencoded({ extended: true }));
 
 // 数据
-const id = new Date().getTime() ;
+const id = new Date().getTime();
+const RoleCodes = {
+    root: 'root',
+    admin: 'admin',
+    member: 'member',
+}
+
 const users = [(
-    { 
-        id, 
+    {
+        id,
         password: String(id + 2),
         phone: `135529908 ${String(id + 8)}`,
-        username: `张三`, 
-        role: 1,
-        createdAt: new Date().toISOString() 
+        username: `张三`,
+        role: RoleCodes.root,
+        createdAt: new Date().toISOString()
     }
 )]
 
@@ -61,29 +67,34 @@ app.get('/api/user', (req, res) => {
             list: users,
             total: 10,
         },
-        
+
     });
 });
 
 app.post('/api/user', (req, res) => {
     const user = req.body;
 
-    const { password, phone, username } = user;
-    users.push({ 
-        id: new Date().getTime() , 
+    const { password, phone, username, role } = user;
+
+    console.log(user)
+
+    const user_id = {
+        id: new Date().getTime(),
         password,
         phone,
-        username, 
-        role: 1,
-        createdAt: new Date().toISOString() 
-    })
+        username,
+        role,
+        createdAt: new Date().toISOString()
+    }
+    console.log(user_id)
+    users.push(user_id)
 
     // 用户信息放到会话对象上
-    req.session.user = user;
+    req.session.user = user_id;
     res.json({
         data: {
             success: true,
-            data: user
+            data: user_id
         }
     });
 });
@@ -99,16 +110,23 @@ app.get('/signup', (req, res) => {
 });
 
 app.post('/api/signin', (req, res) => {
-   let user = req.body;
-    if (user) {
+    let user = req.body;
+    const { username, password } = user;
+    const mubiao = users.find(item => item.username === username);
+    if (!mubiao) {
         res.json({
-            success: true,
-            data: user
+            success: false,
+            error: '用户不存在'
+        });
+    } else if (mubiao.password !== password) {
+        res.json({
+            success: false,
+            error: '密码错误'
         });
     } else {
         res.json({
-            success: false,
-            error: '用户未登录'
+            success: true,
+            data: mubiao
         });
     }
 });

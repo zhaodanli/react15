@@ -12,7 +12,7 @@ export default function () {
     const { loading, run } = useRequest(signin, {
         manual: true,
         onSuccess(result) {
-            localStorage.setItem('token', result);
+            localStorage.setItem('token', JSON.stringify(result));
             // const currentUser = decode(result);
             const currentUser = result;
             setInitialState({ currentUser });

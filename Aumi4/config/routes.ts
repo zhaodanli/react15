@@ -1,7 +1,7 @@
 export default [
     { path: '/', redirect: '/home' },
     { icon: 'HomeOutlined', name: '首页', path: '/home', component: './home/index' },
-    { icon: 'ProfileOutlined', name: '个人中心', path: '/profile', component: './profile/index'},
+    { icon: 'ProfileOutlined', name: '个人中心', path: '/profile', component: './profile/index' },
     // { icon: 'ProfileOutlined', name: '产品可看', path: '/profile', component: './profile/index',  },
     { icon: 'ProfileOutlined', name: '长列表', path: '/fixedSizeList', component: './fixedSizeList/index', },
     {
@@ -31,6 +31,13 @@ export default [
         name: '注册',
         path: '/signup',
         component: './signup/index',
+        hideInMenu: true,
+        layout: false
+    },
+    {
+        name: '登录',
+        path: '/signin',
+        component: './signin/index',
         hideInMenu: true,
         layout: false
     }

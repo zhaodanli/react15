@@ -98,6 +98,21 @@ app.get('/signup', (req, res) => {
     });
 });
 
+app.post('/api/signin', (req, res) => {
+   let user = req.body;
+    if (user) {
+        res.json({
+            success: true,
+            data: user
+        });
+    } else {
+        res.json({
+            success: false,
+            error: '用户未登录'
+        });
+    }
+});
+
 
 app.listen(8080, '127.0.0.1', () => console.log('started on port 8080'));
 

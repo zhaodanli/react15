@@ -11,3 +11,15 @@ export async function signup(
     data: body
   });
 }
+
+export async function signin(
+  body?: API.SigninUser
+) {
+  return request('/api/signin', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body
+  });
+}

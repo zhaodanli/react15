@@ -1,9 +1,10 @@
 import { PageContainer } from '@ant-design/pro-components';
+import HeaderMenu from '@/components/HeaderMenu';
 
 export default function Page() {
   return (
-    <PageContainer>
-      <h1 className={`text-lg font-bold text-green-600`}>个人中心</h1>
+    <PageContainer ghost>
+      <HeaderMenu />
     </PageContainer>
   );
 }

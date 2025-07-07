@@ -2,6 +2,7 @@ import { RequestConfig } from '@umijs/max'
 // 错误处理
 
 import { notification, message } from 'antd';
+import { history } from '@umijs/max';
 
 // 后段返回错误级别
 enum ErrorShowType {
@@ -12,6 +13,7 @@ enum ErrorShowType {
 }
 
 const errorHandler = (error: any) => {
+    console.log('error', error)
     if (error.name === 'BizError') {
         const errorInfo = error.info;
         if (errorInfo) {
@@ -46,6 +48,7 @@ const errorHandler = (error: any) => {
 
 // 抛出错误异常 （请求成功，业务上请求错误）
 const errorThrower = (res: any) => {
+    console.log('errorThrower', res)
     // 拿到响应数据
     const { success, data, errorCode, errorMessage } = res;
 
@@ -58,7 +61,7 @@ const errorThrower = (res: any) => {
     }
 }
 
-export const request: RequestConfig  = {
+export const request: RequestConfig = {
     timeout: 3000,
     headers: {
         ['Content-Type']: 'application/json',
@@ -74,18 +77,39 @@ export const request: RequestConfig  = {
 
     // 请求拦截器
     requestInterceptors: [(url, options) => {
+        console.log('requestInterceptors', url, options)
         return { url, options }
     }],
 
     // 响应拦截器
     responseInterceptors: [(response, options) => {
+        console.log('responseInterceptors', response, options)
         return response.data;
     }]
 };
 
-export const layout = () => {
+
+// ========================= 用户注册逻辑 ========================
+interface InitialState {
+    currentUser: API.User | null
+}
+
+export async function getInitialState() {
+    let initialState: InitialState = {
+        currentUser: null
+    }
+    return initialState;
+}
+
+export const layout = ({ initialState }) => {
     return {
         title: 'UMI4',
         logo: 'https://img.alicdn.com/tfs/TB1YHEpwUT1gK0jSZFhXXaAtVXa-28-27.svg',
+        // onPageChange(location) {
+        //     const { currentUser } = initialState;
+        //     if (!currentUser && location.pathname !== '/signin') {
+        //         history.push('/signup');
+        //     }
+        // }
     };
 };

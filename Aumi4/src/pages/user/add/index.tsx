@@ -1,8 +1,28 @@
 import { Form, Input, Button, Row, Col } from 'antd';
+import { useRequest } from 'ahooks';
+import { addUser } from '@/services/user';
+import { useNavigate, useModel } from '@umijs/max';
+import { useEffect } from 'react';
+
 export default function () {
+    const navigate = useNavigate();
+    const { refresh } = useModel('user.model');
+
+    const { data, loading, run } = useRequest(addUser, {
+        manual: true,
+        onSuccess: refresh
+    });
+
     const onFinish = (values: any) => {
-        console.log(values);
+        run(values);
     };
+
+    useEffect(() => {
+        if (data) {
+            navigate('/user/list');
+        }
+    }, [data]);
+
     return (
         <Row >
             <Col offset={8} span={8}>

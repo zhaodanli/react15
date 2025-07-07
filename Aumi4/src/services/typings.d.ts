@@ -36,38 +36,6 @@ declare namespace API {
         total?: number;
     } 
 
-    export interface ListResponse<T> {
-        data?: ListData<T>;
-        errorCode: string;
-        errorMessage: string;
-        errorType: number;
-        success?: boolean;
-    }
-
-    export interface ListData<T> {
-        list?: T[];
-        total?: number;
-    }
-
-
-    export interface User {
-        id?: number;
-        password?: string;
-        phone?: string;
-        username?: string;
-        role?: string;
-    }
-    export interface SigninUser {
-        username?: string;
-        password?: string;
-    }
-    export interface SignupUser {
-        password?: string;
-        phone?: string;
-        username?: string;
-        role_id?: number;
-    }
-
     /* eslint-disable */
     // 该文件由 OneAPI 自动生成，请勿手动修改！
     interface PageInfo {
@@ -133,4 +101,44 @@ declare namespace API {
     }
 
     type definitions_0 = null;
+
+    //  ======================= 用户相关 ======================
+
+    // 响应
+    export interface ListResponse<T> {
+        data?: ListData<T>;
+        errorCode: string;
+        errorMessage: string;
+        errorType: number;
+        success?: boolean;
+    }
+
+    // 响应
+    export interface ListData<T> {
+        list?: T[];
+        total?: number;
+    }
+
+    // 用户
+    export interface User {
+        id?: number;
+        password?: string;
+        phone?: string;
+        username?: string;
+        role?: string;
+    }
+
+    // 注册用户
+    export interface SigninUser {
+        username?: string;
+        password?: string;
+    }
+
+    // 注册用户
+    export interface SignupUser {
+        password?: string;
+        phone?: string;
+        username?: string;
+        role_id?: number;
+    }
 }

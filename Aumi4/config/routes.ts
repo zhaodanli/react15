@@ -3,7 +3,7 @@ export default [
     { icon: 'HomeOutlined', name: '首页', path: '/home', component: './home/index' },
     { icon: 'ProfileOutlined', name: '个人中心', path: '/profile', component: './profile/index'},
     // { icon: 'ProfileOutlined', name: '产品可看', path: '/profile', component: './profile/index',  },
-    { icon: 'ProfileOutlined', name: '长列表', path: '/fixedSizeList', component: './fixedSizeList/index',  },
+    { icon: 'ProfileOutlined', name: '长列表', path: '/fixedSizeList', component: './fixedSizeList/index', },
     {
         icon: 'UserOutlined',
         name: '用户管理',
@@ -24,7 +24,14 @@ export default [
             { name: '新增页面', path: '/trackManage/pageList/edit', component: './trackManage/pageList/edit/index' },
             { name: '页面列表', path: '/trackManage/pageList', component: './trackManage/pageList/index' },
             { name: '事件列表', path: '/trackManage/eventList', component: './trackManage/eventList/index', hideInMenu: true },
-            { name: '参数列表', path: '/trackManage/paramList', component: './trackManage/paramList/index'},
+            { name: '参数列表', path: '/trackManage/paramList', component: './trackManage/paramList/index' },
         ],
     },
+    {
+        name: '注册',
+        path: '/signup',
+        component: './signup/index',
+        hideInMenu: true,
+        layout: false
+    }
 ]

@@ -13,11 +13,11 @@ export default defineConfig({
     request: {},
     model: {},
     initialState: {},
-    // access: {},
-    // proxy: {
-    //     '/api/': {
-    //         target: 'http://127.0.0.1:7001/',
-    //         changeOrigin: true
-    //     }
-    // }
+    access: {},
+    proxy: {
+        '/api/': {
+            target: 'http://127.0.0.1:8080/',
+            changeOrigin: true
+        }
+    }
 });
